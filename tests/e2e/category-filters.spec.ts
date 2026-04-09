@@ -3,6 +3,9 @@ import { test, expect } from '../support/merged-fixtures';
 const API_URL = process.env.API_URL || 'http://localhost:8000';
 
 test.describe('Category Filters on Timeline (ATDD - Story 5.2)', () => {
+  // ALL SKIPPED: Timeline is at /timeline (not /pets/{id}/timeline). Tests use data-testid="category-filter-row"
+  // but actual UI uses data-testid="category-filters". Tests seed events via authenticated API.
+  // Filter pills don't have aria-pressed or data-category attributes.
 
   test.skip('[P0] should display horizontal filter pills row with correct categories', async ({ page, seedPet, request }) => {
     const pet = await seedPet({ name: `FilterCat-${Date.now()}` });

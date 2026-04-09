@@ -3,6 +3,10 @@ import { test, expect } from '../support/merged-fixtures';
 const API_URL = process.env.API_URL || 'http://localhost:8000';
 
 test.describe('Vet Landing Page (ATDD - Story 7.3)', () => {
+  // ALL SKIPPED: Vet dossier page exists at /vet/dossier/{token} but tests seed data via
+  // authenticated vet-shares API. Expected data-testid values (weight-chart, vet-reminders-section,
+  // vet-timeline-section, vet-portal-banner, medical-disclaimer, vet-error-page) don't match
+  // the actual implementation which uses different structure.
 
   test.skip('[P0] should display dossier immediately without authentication', async ({ page, seedPet, request }) => {
     const pet = await seedPet({ name: `DossierCat-${Date.now()}` });

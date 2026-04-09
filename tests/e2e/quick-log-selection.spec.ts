@@ -1,6 +1,9 @@
 import { test, expect } from '../support/merged-fixtures';
 
 test.describe('Quick Log Selection (ATDD - Story 3.4)', () => {
+  // ALL SKIPPED: Tests depend on data-testid="action-garden" which doesn't exist on the dashboard.
+  // Dashboard uses .action-garden CSS class with data-testid="action-{action}" on individual tiles.
+  // Additionally, QuickLogSheet has no data-testid="quick-log-sheet" attribute.
 
   test.skip('[P0] should open bottom sheet with animal picker when tapping action tile', async ({ page, seedPet }) => {
     const ts = Date.now();

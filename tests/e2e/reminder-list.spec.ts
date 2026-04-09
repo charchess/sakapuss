@@ -3,6 +3,10 @@ import { test, expect } from '../support/merged-fixtures';
 const API_URL = process.env.API_URL || 'http://localhost:8000';
 
 test.describe('Reminder List (ATDD - Story 4.2)', () => {
+  // ALL SKIPPED: Tests seed reminders via API using wrong field names (label/due_date vs name/next_due_date)
+  // and missing required fields (frequency_days). The POST /pets/{id}/reminders endpoint also requires
+  // authentication. Many expected data-testid values (overdue-count-badge, reminder-color-bar, etc.)
+  // don't match the actual UI (overdue-badge, .card-bar, etc.).
 
   test.skip('[P0] should display three segments: Today, Overdue, Upcoming', async ({ page, seedPet, request }) => {
     const pet = await seedPet({ name: `ReminderCat-${Date.now()}` });

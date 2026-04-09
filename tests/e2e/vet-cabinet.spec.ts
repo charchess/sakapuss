@@ -3,6 +3,8 @@ import { test, expect } from '../support/merged-fixtures';
 const API_URL = process.env.API_URL || 'http://localhost:8000';
 
 test.describe('Vet Cabinet / Dashboard (ATDD - Stories 7.4, 7.5)', () => {
+  // ALL SKIPPED: Vet dashboard directory exists at /vet/dashboard but is empty (no +page.svelte).
+  // No vet authentication flow implemented. None of the expected UI elements exist.
 
   test.skip('[P0] should display prominent auto-focused search bar on vet dashboard', async ({ page, request }) => {
     // Login as vet

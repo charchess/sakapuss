@@ -3,6 +3,9 @@ import { test, expect } from '../support/merged-fixtures';
 const API_URL = process.env.API_URL || 'http://localhost:8000';
 
 test.describe('Anomaly Banner on Timeline (ATDD - Story 5.4)', () => {
+  // ALL SKIPPED: Timeline page has no anomaly banner UI (no data-testid="anomaly-banner").
+  // Tests seed events via authenticated API. The anomaly detection and banner display are not
+  // implemented in the timeline frontend component.
 
   test.skip('[P0] should display anomaly banner when weight decline is detected', async ({ page, seedPet, request }) => {
     const pet = await seedPet({ name: `DeclineCat-${Date.now()}` });

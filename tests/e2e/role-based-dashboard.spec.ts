@@ -3,6 +3,9 @@ import { test, expect } from '../support/merged-fixtures';
 const API_URL = process.env.API_URL || 'http://localhost:8000';
 
 test.describe('Role-Based Dashboard (ATDD - Story 6.4)', () => {
+  // ALL SKIPPED: No role-based rendering is implemented in the dashboard.
+  // Expected data-testid values (action-grid, bottom-nav, fab-add-button) don't exist.
+  // No Saisie/Consultation role-specific users are seeded.
 
   test.skip('[P0] should show reduced 2x2 action grid for Saisie role', async ({ page, request }) => {
     // Login as user with Saisie role

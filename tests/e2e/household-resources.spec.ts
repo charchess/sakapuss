@@ -3,6 +3,7 @@ import { test, expect } from '../support/merged-fixtures';
 const API_URL = process.env.API_URL || 'http://localhost:8000';
 
 test.describe('Household Resources (ATDD - Story 3.6)', () => {
+  // ALL SKIPPED: No /settings/resources page exists. No resources UI link on the settings page.
 
   test.skip('[P0] should navigate to Household Resources page from Settings', async ({ page }) => {
     await page.goto('/settings');

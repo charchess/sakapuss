@@ -1,6 +1,9 @@
 import { test, expect } from '../support/merged-fixtures';
 
 test.describe('Quick Log Confirmation (ATDD - Story 3.5)', () => {
+  // ALL SKIPPED: Tests depend on data-testid="action-garden" which doesn't exist on the dashboard.
+  // The ConfirmationToast component uses data-testid="confirmation-toast" but the interaction
+  // flow requires clicking through action tiles which use different selectors than expected.
 
   test.skip('[P0] should show confirmation toast with checkmark, message, and timestamp', async ({ page, seedPet }) => {
     await seedPet({ name: `Confirm-${Date.now()}` });

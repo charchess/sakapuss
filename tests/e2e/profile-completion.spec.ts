@@ -3,6 +3,9 @@ import { test, expect } from '../support/merged-fixtures';
 const API_URL = process.env.API_URL || 'http://localhost:8000';
 
 test.describe('Profile Completion (ATDD - Story 5.5)', () => {
+  // ALL SKIPPED: Pet profile page exists at /pets/{id} but doesn't have the expected data-testid values
+  // (weight-summary, weight-trend, active-reminders-section, compact-reminder-card, recent-activity-section,
+  // activity-item). Tests also seed events/reminders via authenticated API with mismatched schemas.
 
   test.skip('[P0] should display Weight Summary section with current weight, trend, and chart link', async ({ page, seedPet, request }) => {
     const pet = await seedPet({ name: `SummaryCat-${Date.now()}` });

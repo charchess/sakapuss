@@ -3,6 +3,7 @@ import { test, expect } from '../support/merged-fixtures';
 const API_URL = process.env.API_URL || 'http://localhost:8000';
 
 test.describe('Vet Sharing (ATDD - Story 7.2)', () => {
+  // ALL SKIPPED: No /settings/vet-sharing page exists in the frontend.
 
   test.skip('[P0] should display animal multi-select, email input, and preview section', async ({ page, seedPet }) => {
     const pet1 = await seedPet({ name: `ShareCat1-${Date.now()}` });

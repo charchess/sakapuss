@@ -3,6 +3,10 @@ import { test, expect } from '../support/merged-fixtures';
 const API_URL = process.env.API_URL || 'http://localhost:8000';
 
 test.describe('Household Management (ATDD - Stories 6.2, 6.3)', () => {
+  // ALL SKIPPED: Household page exists at /settings/household but uses different data-testid values
+  // than expected (no household-member-list, member-card, member-avatar, member-role, member-status,
+  // invite-bottom-sheet). Button labels differ ("+ Inviter un membre" vs "Inviter").
+  // Role names don't match expected radio labels. API endpoints have different paths.
 
   test.skip('[P0] should display member list with avatars, roles, and status', async ({ page }) => {
     await page.goto('/settings/household');

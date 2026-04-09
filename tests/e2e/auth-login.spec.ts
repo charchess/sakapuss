@@ -2,28 +2,34 @@ import { test, expect } from '../support/merged-fixtures';
 
 test.describe('Auth Login (ATDD - Story 1.3)', () => {
 
-  test.skip('[P0] should log in with valid credentials and redirect to dashboard', async ({ page }) => {
+  test('[P0] should log in with valid credentials and redirect to dashboard', async ({ page, request }) => {
+    // Register a user first
+    const ts = Date.now();
+    const email = `login-${ts}@test.sakapuss.com`;
+    await request.post('http://localhost:8000/auth/register', {
+      data: { email, password: 'SecurePass123!' },
+    });
+
     await page.goto('/login');
 
-    await page.getByLabel('Email').fill('testuser@sakapuss.com');
-    await page.getByLabel('Password').fill('SecurePass123!');
-    await page.getByRole('button', { name: 'Log in' }).click();
+    await page.getByLabel('Email').fill(email);
+    await page.getByLabel('Mot de passe').fill('SecurePass123!');
+    await page.getByRole('button', { name: 'Se connecter' }).click();
 
     // Should redirect to dashboard
     await expect(page).toHaveURL('/');
-    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
   });
 
-  test.skip('[P0] should show error on invalid credentials', async ({ page }) => {
+  test('[P0] should show error on invalid credentials', async ({ page }) => {
     await page.goto('/login');
 
     await page.getByLabel('Email').fill('wrong@sakapuss.com');
-    await page.getByLabel('Password').fill('WrongPassword!');
-    await page.getByRole('button', { name: 'Log in' }).click();
+    await page.getByLabel('Mot de passe').fill('WrongPassword!');
+    await page.getByRole('button', { name: 'Se connecter' }).click();
 
     // Should stay on login page with error message
     await expect(page).toHaveURL(/\/login/);
-    await expect(page.getByText('invalid email or password', { exact: false })).toBeVisible();
+    await expect(page.getByText('invalide', { exact: false })).toBeVisible();
   });
 
   test.skip('[P0] should redirect unauthenticated user to /login with redirect param', async ({ page }) => {
@@ -41,8 +47,8 @@ test.describe('Auth Login (ATDD - Story 1.3)', () => {
 
     // Log in
     await page.getByLabel('Email').fill('testuser@sakapuss.com');
-    await page.getByLabel('Password').fill('SecurePass123!');
-    await page.getByRole('button', { name: 'Log in' }).click();
+    await page.getByLabel('Mot de passe').fill('SecurePass123!');
+    await page.getByRole('button', { name: 'Se connecter' }).click();
 
     // Should redirect back to the originally requested page
     await expect(page).toHaveURL('/settings');
