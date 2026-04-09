@@ -23,7 +23,6 @@ ignore = [
   "B008",   # function call in default arg (FastAPI Depends)
   "A002",   # shadowing builtins OK for FastAPI query params (type, id)
   "S105",   # hardcoded password defaults OK (dev defaults, overridden by env)
-  "UP038",  # isinstance union syntax — keep tuple form for readability
 ]
 
 exclude = [

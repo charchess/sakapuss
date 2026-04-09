@@ -4,10 +4,11 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from backend.app.core.auth import hash_password
+from backend.app.core.auth import get_current_user, get_optional_user, hash_password
 from backend.app.db.session import get_db
 from backend.app.modules.health.models import Event, Reminder
 from backend.app.modules.pets.models import Pet
+from backend.app.modules.users.models import User
 from backend.app.modules.vet.models import VetAccessLink, VetAccount
 
 router = APIRouter(tags=["Vet"])
@@ -31,7 +32,7 @@ class VetAccountCreate(BaseModel):
 
 
 @router.post("/vet-shares", status_code=status.HTTP_201_CREATED)
-def create_vet_share(payload: VetShareCreate, db: DbSession):
+def create_vet_share(payload: VetShareCreate, db: DbSession, current_user: User = Depends(get_current_user)):
     links = []
     first_link = None
     for pid in payload.pet_ids:
@@ -40,8 +41,6 @@ def create_vet_share(payload: VetShareCreate, db: DbSession):
             continue
         link = VetAccessLink(pet_id=pid, vet_email=payload.vet_email)
         db.add(link)
-        db.commit()
-        db.refresh(link)
         links.append(link)
         if first_link is None:
             first_link = link
@@ -49,11 +48,14 @@ def create_vet_share(payload: VetShareCreate, db: DbSession):
     if not first_link:
         raise HTTPException(status_code=404, detail="No valid pets found")
 
+    db.commit()
+    for link in links:
+        db.refresh(link)
+
     # Return a single share object with all pet_ids
     return {
         "id": first_link.id,
-        "token": first_link.token,
-        "url": f"/vet/dossier/{first_link.token}",
+        "share_url": f"/vet/dossier/{first_link.token}",
         "vet_email": first_link.vet_email,
         "pet_ids": payload.pet_ids,
         "status": "active",
@@ -62,7 +64,7 @@ def create_vet_share(payload: VetShareCreate, db: DbSession):
 
 
 @router.get("/vet-shares")
-def list_vet_shares(db: DbSession):
+def list_vet_shares(db: DbSession, current_user: User | None = Depends(get_optional_user)):
     links = db.query(VetAccessLink).all()
     result = []
     for link in links:
@@ -82,13 +84,13 @@ def list_vet_shares(db: DbSession):
 
 
 @router.delete("/vet-shares/{share_id}", status_code=status.HTTP_204_NO_CONTENT)
-def revoke_vet_share(share_id: str, db: DbSession):
+def revoke_vet_share(share_id: str, db: DbSession, current_user: User = Depends(get_current_user)):
     link = db.query(VetAccessLink).filter(VetAccessLink.id == share_id).first()
     if not link:
         raise HTTPException(status_code=404, detail="Share not found")
-    from datetime import datetime
+    from datetime import UTC, datetime
 
-    link.revoked_at = datetime.now()
+    link.revoked_at = datetime.now(UTC)
     db.commit()
 
 
@@ -149,7 +151,7 @@ def get_vet_dossier(token: str, db: DbSession):
 
 
 @router.post("/vet/accounts", status_code=status.HTTP_201_CREATED)
-def create_vet_account(payload: VetAccountCreate, db: DbSession):
+def create_vet_account(payload: VetAccountCreate, db: DbSession, current_user: User = Depends(get_current_user)):
     existing = db.query(VetAccount).filter(VetAccount.email == payload.email).first()
     if existing:
         raise HTTPException(status_code=409, detail="Account already exists")
@@ -174,7 +176,12 @@ def create_vet_account(payload: VetAccountCreate, db: DbSession):
 
 
 @router.get("/vet/patients")
-def list_vet_patients(db: DbSession, email: str | None = None, search: str | None = None):
+def list_vet_patients(
+    db: DbSession,
+    current_user: User | None = Depends(get_optional_user),
+    email: str | None = None,
+    search: str | None = None,
+):
     query = db.query(VetAccessLink).filter(VetAccessLink.revoked_at.is_(None))
     if email:
         query = query.filter(VetAccessLink.vet_email == email)

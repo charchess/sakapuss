@@ -1,14 +1,16 @@
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from backend.app.core.auth import get_current_user, get_optional_user
 from backend.app.db.session import SessionLocal
 from backend.app.modules.health import service
 from backend.app.modules.health.models import Reminder
 from backend.app.modules.pets.models import Pet
+from backend.app.modules.users.models import User
 
 router = APIRouter(tags=["Reminders"])
 
@@ -85,25 +87,30 @@ def reminder_to_response(r: Reminder, pet_name: str | None = None) -> dict:
 
 
 @router.get("/reminders/pending")
-def list_pending_reminders(db: DbSession):
+def list_pending_reminders(db: DbSession, current_user: User | None = Depends(get_optional_user)):
     return service.get_pending_reminders(db)
 
 
 @router.get("/reminders/upcoming")
-def list_upcoming_reminders(db: DbSession, days: int = 7):
+def list_upcoming_reminders(db: DbSession, current_user: User | None = Depends(get_optional_user), days: int = 7):
     return service.get_upcoming_reminders(db, days=days)
 
 
 @router.post("/pets/{pet_id}/reminders", status_code=status.HTTP_201_CREATED)
-def create_reminder(pet_id: str, payload: ReminderCreate, db: DbSession):
+def create_reminder(
+    pet_id: str, payload: ReminderCreate, db: DbSession, current_user: User = Depends(get_current_user)
+):
     pet = db.query(Pet).filter(Pet.id == pet_id).first()
     if not pet:
         raise HTTPException(status_code=404, detail="Pet not found")
 
     if payload.next_due_date:
-        due = datetime.fromisoformat(payload.next_due_date)
+        try:
+            due = datetime.fromisoformat(payload.next_due_date)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail="Invalid date format") from exc
     else:
-        due = datetime.now() + timedelta(days=payload.frequency_days)
+        due = datetime.now(UTC) + timedelta(days=payload.frequency_days)
 
     reminder = Reminder(
         pet_id=pet_id,
@@ -120,7 +127,7 @@ def create_reminder(pet_id: str, payload: ReminderCreate, db: DbSession):
 
 
 @router.get("/pets/{pet_id}/reminders")
-def list_pet_reminders(pet_id: str, db: DbSession):
+def list_pet_reminders(pet_id: str, db: DbSession, current_user: User | None = Depends(get_optional_user)):
     pet = db.query(Pet).filter(Pet.id == pet_id).first()
     if not pet:
         raise HTTPException(status_code=404, detail="Pet not found")
@@ -130,7 +137,7 @@ def list_pet_reminders(pet_id: str, db: DbSession):
 
 
 @router.get("/reminders/{reminder_id}")
-def get_reminder(reminder_id: str, db: DbSession):
+def get_reminder(reminder_id: str, db: DbSession, current_user: User | None = Depends(get_optional_user)):
     r = db.query(Reminder).filter(Reminder.id == reminder_id).first()
     if not r:
         raise HTTPException(status_code=404, detail="Reminder not found")
@@ -140,12 +147,12 @@ def get_reminder(reminder_id: str, db: DbSession):
 
 
 @router.post("/reminders/{reminder_id}/complete")
-def complete_reminder(reminder_id: str, db: DbSession):
+def complete_reminder(reminder_id: str, db: DbSession, current_user: User = Depends(get_current_user)):
     r = db.query(Reminder).filter(Reminder.id == reminder_id).first()
     if not r:
         raise HTTPException(status_code=404, detail="Reminder not found")
 
-    today = datetime.now()
+    today = datetime.now(UTC)
     r.last_done_date = today
 
     if r.frequency_days:
@@ -159,7 +166,9 @@ def complete_reminder(reminder_id: str, db: DbSession):
 
 
 @router.post("/reminders/{reminder_id}/postpone")
-def postpone_reminder(reminder_id: str, payload: PostponeRequest, db: DbSession):
+def postpone_reminder(
+    reminder_id: str, payload: PostponeRequest, db: DbSession, current_user: User = Depends(get_current_user)
+):
     r = db.query(Reminder).filter(Reminder.id == reminder_id).first()
     if not r:
         raise HTTPException(status_code=404, detail="Reminder not found")

@@ -1,6 +1,6 @@
 """Anomaly detection service — detects unusual patterns in pet health data."""
 
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy.orm import Session
 
@@ -10,7 +10,7 @@ from backend.app.modules.health.models import Event
 def detect_weight_anomalies(db: Session, pet_id: str) -> list[dict]:
     """Check for weight decline > 5% in recent weight entries (at least 3 entries)."""
     # Look back 30 days to capture broader trends
-    lookback = datetime.now() - timedelta(days=30)
+    lookback = datetime.now(UTC) - timedelta(days=30)
 
     weight_events = (
         db.query(Event)
@@ -56,7 +56,7 @@ def detect_weight_anomalies(db: Session, pet_id: str) -> list[dict]:
                     ),
                     "severity": "warning",
                     "dismissed": False,
-                    "detected_at": datetime.now().isoformat(),
+                    "detected_at": datetime.now(UTC).isoformat(),
                     "details": {
                         "start_weight": start_weight,
                         "end_weight": end_weight,

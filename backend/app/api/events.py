@@ -3,9 +3,11 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
+from backend.app.core.auth import get_current_user, get_optional_user
 from backend.app.db.session import SessionLocal
 from backend.app.modules.health import service
 from backend.app.modules.health.schemas import EventCreate, EventResponse, EventUpdate
+from backend.app.modules.users.models import User
 from backend.app.services.anomaly import detect_weight_anomalies
 
 router = APIRouter(tags=["Events"])
@@ -27,7 +29,7 @@ DbSession = Annotated[Session, Depends(get_db)]
     status_code=status.HTTP_201_CREATED,
     response_model=EventResponse,
 )
-def create_event(pet_id: str, event_data: EventCreate, db: DbSession):
+def create_event(pet_id: str, event_data: EventCreate, db: DbSession, current_user: User = Depends(get_current_user)):
     event = service.create_event(db, pet_id, event_data)
     if event is None:
         raise HTTPException(status_code=404, detail="Pet not found")
@@ -35,12 +37,14 @@ def create_event(pet_id: str, event_data: EventCreate, db: DbSession):
 
 
 @router.get("/pets/{pet_id}/events", response_model=list[EventResponse])
-def list_events(pet_id: str, db: DbSession, type: str | None = None):
+def list_events(
+    pet_id: str, db: DbSession, current_user: User | None = Depends(get_optional_user), type: str | None = None
+):
     return service.get_events_for_pet(db, pet_id, event_type=type)
 
 
 @router.get("/events/{event_id}", response_model=EventResponse)
-def get_event(event_id: str, db: DbSession):
+def get_event(event_id: str, db: DbSession, current_user: User | None = Depends(get_optional_user)):
     event = service.get_event(db, event_id)
     if event is None:
         raise HTTPException(status_code=404, detail="Event not found")
@@ -48,7 +52,7 @@ def get_event(event_id: str, db: DbSession):
 
 
 @router.put("/events/{event_id}", response_model=EventResponse)
-def update_event(event_id: str, event_data: EventUpdate, db: DbSession):
+def update_event(event_id: str, event_data: EventUpdate, db: DbSession, current_user: User = Depends(get_current_user)):
     event = service.update_event(db, event_id, event_data)
     if event is None:
         raise HTTPException(status_code=404, detail="Event not found")
@@ -56,7 +60,7 @@ def update_event(event_id: str, event_data: EventUpdate, db: DbSession):
 
 
 @router.delete("/events/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_event(event_id: str, db: DbSession):
+def delete_event(event_id: str, db: DbSession, current_user: User = Depends(get_current_user)):
     deleted = service.delete_event(db, event_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Event not found")
@@ -64,17 +68,19 @@ def delete_event(event_id: str, db: DbSession):
 
 
 @router.get("/pets/{pet_id}/correlations")
-def get_correlations(pet_id: str, db: DbSession):
+def get_correlations(pet_id: str, db: DbSession, current_user: User | None = Depends(get_optional_user)):
     return service.compute_correlations(db, pet_id)
 
 
 @router.get("/pets/{pet_id}/anomalies")
-def get_anomalies(pet_id: str, db: DbSession):
+def get_anomalies(pet_id: str, db: DbSession, current_user: User | None = Depends(get_optional_user)):
     return detect_weight_anomalies(db, pet_id)
 
 
 @router.get("/pets/{pet_id}/insights")
-def get_insights(pet_id: str, db: DbSession, month: str | None = None):
+def get_insights(
+    pet_id: str, db: DbSession, current_user: User | None = Depends(get_optional_user), month: str | None = None
+):
     """Monthly analytics summary for a pet."""
     from collections import Counter
     from datetime import datetime, timedelta
