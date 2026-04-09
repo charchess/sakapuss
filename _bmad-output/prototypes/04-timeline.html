@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Sakapuss — 04 Timeline / Historique</title>
+<style>
+  :root {
+    --primary: #6C5CE7;
+    --primary-light: #A29BFE;
+    --primary-soft: rgba(108,92,231,0.08);
+    --secondary: #00CEC9;
+    --accent: #FDCB6E;
+    --accent-dark: #E17055;
+
+    --bg: #F8F6FF;
+    --surface: #FFFFFF;
+    --text-primary: #2D3436;
+    --text-secondary: #636E72;
+    --text-muted: #B2BEC3;
+    --border: #EDE9FE;
+
+    --success: #00B894;
+    --warning: #FDCB6E;
+    --error: #E17055;
+
+    --cat-sante: #E17055;
+    --cat-poids: #6C5CE7;
+    --cat-alimentation: #00CEC9;
+    --cat-litiere: #FDCB6E;
+    --cat-comportement: #A29BFE;
+    --cat-evenement: #4a6fa5;
+
+    --font-display: 'Nunito', system-ui, sans-serif;
+    --font-default: 'Inter', system-ui, sans-serif;
+
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-full: 9999px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font-default);
+    background: #1a1a2e;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  /* ==================== PHONE ==================== */
+  .phone {
+    width: 375px;
+    height: 812px;
+    background: var(--bg);
+    border-radius: 44px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.35), inset 0 0 0 2.5px #222;
+  }
+  .phone-screen {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    padding-bottom: 80px;
+  }
+  .phone-screen::-webkit-scrollbar { display: none; }
+  .phone-screen { scrollbar-width: none; }
+
+  /* ==================== VIEWS ==================== */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ==================== HEADER ==================== */
+  .header {
+    padding: 52px 24px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .header-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+  .header-back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .header-back svg {
+    width: 22px;
+    height: 22px;
+    stroke: var(--text-primary);
+  }
+  .header-back:active { opacity: 0.6; }
+
+  /* Animal filter pills */
+  .animal-pills {
+    display: flex;
+    gap: 8px;
+  }
+  .animal-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px 6px 6px;
+    border-radius: var(--radius-full);
+    background: var(--surface);
+    border: 2px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .animal-pill.active {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+  }
+  .animal-pill-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .animal-pill-avatar.pixel { background: linear-gradient(135deg, #a29bfe, #6c5ce7); }
+  .animal-pill-avatar.luna { background: linear-gradient(135deg, #81ecec, #00cec9); }
+  .animal-pill-avatar svg {
+    width: 14px;
+    height: 14px;
+    stroke: white;
+    fill: none;
+  }
+  .animal-pill-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+  .animal-pill.active .animal-pill-name {
+    color: var(--primary);
+  }
+
+  /* ==================== CATEGORY FILTER ==================== */
+  .cat-filters {
+    padding: 14px 0 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .cat-filters::-webkit-scrollbar { display: none; }
+  .cat-filters-inner {
+    display: flex;
+    gap: 8px;
+    padding: 0 24px;
+    width: max-content;
+  }
+  .cat-pill {
+    padding: 7px 16px;
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    border: 1.5px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .cat-pill:active { transform: scale(0.95); }
+  .cat-pill svg { flex-shrink: 0; }
+
+  /* Tout */
+  .cat-pill[data-cat="tout"] {
+    background: rgba(108,92,231,0.08);
+    color: var(--primary);
+  }
+  .cat-pill[data-cat="tout"].active {
+    background: var(--primary);
+    color: white;
+  }
+  /* Sante */
+  .cat-pill[data-cat="sante"] {
+    background: rgba(225,112,85,0.1);
+    color: var(--cat-sante);
+  }
+  .cat-pill[data-cat="sante"].active {
+    background: var(--cat-sante);
+    color: white;
+  }
+  /* Poids */
+  .cat-pill[data-cat="poids"] {
+    background: rgba(108,92,231,0.1);
+    color: var(--cat-poids);
+  }
+  .cat-pill[data-cat="poids"].active {
+    background: var(--cat-poids);
+    color: white;
+  }
+  /* Alimentation */
+  .cat-pill[data-cat="alimentation"] {
+    background: rgba(0,206,201,0.1);
+    color: #0a9e9a;
+  }
+  .cat-pill[data-cat="alimentation"].active {
+    background: var(--cat-alimentation);
+    color: white;
+  }
+  /* Litiere */
+  .cat-pill[data-cat="litiere"] {
+    background: rgba(253,203,110,0.18);
+    color: #b8860b;
+  }
+  .cat-pill[data-cat="litiere"].active {
+    background: var(--cat-litiere);
+    color: #5a4100;
+  }
+  /* Comportement */
+  .cat-pill[data-cat="comportement"] {
+    background: rgba(162,155,254,0.15);
+    color: #7c6fd4;
+  }
+  .cat-pill[data-cat="comportement"].active {
+    background: var(--cat-comportement);
+    color: white;
+  }
+
+  /* ==================== ANOMALY BANNER ==================== */
+  .anomaly-banner {
+    margin: 12px 24px;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, rgba(225,112,85,0.08), rgba(108,92,231,0.06));
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    border: 1px solid rgba(225,112,85,0.12);
+  }
+  .anomaly-banner:active { transform: scale(0.98); }
+  .anomaly-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(225,112,85,0.15), rgba(225,112,85,0.25));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .anomaly-icon svg {
+    width: 20px;
+    height: 20px;
+    stroke: var(--cat-sante);
+    fill: none;
+  }
+  .anomaly-body { flex: 1; }
+  .anomaly-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+  .anomaly-sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+  .anomaly-chevron {
+    color: var(--text-muted);
+  }
+  .anomaly-chevron svg {
+    width: 18px;
+    height: 18px;
+    stroke: var(--text-muted);
+    fill: none;
+  }
+
+  /* ==================== TIMELINE FEED ==================== */
+  .timeline-feed {
+    padding: 8px 24px 16px;
+  }
+  .day-group {
+    margin-bottom: 8px;
+  }
+  .day-header {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    padding: 12px 0 8px;
+  }
+
+  .tl-entry {
+    display: flex;
+    gap: 14px;
+    position: relative;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tl-entry:active .tl-card { transform: scale(0.98); }
+
+  /* Timeline rail */
+  .tl-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 16px;
+    flex-shrink: 0;
+    padding-top: 16px;
+  }
+  .tl-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    z-index: 1;
+    box-shadow: 0 0 0 3px var(--bg);
+  }
+  .tl-line {
+    width: 2px;
+    flex: 1;
+    background: var(--border);
+    margin-top: 4px;
+    min-height: 20px;
+  }
+  .tl-entry:last-child .tl-line { display: none; }
+
+  /* Timeline card */
+  .tl-card {
+    flex: 1;
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 12px rgba(108,92,231,0.05);
+    transition: transform 0.2s;
+  }
+  .tl-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .tl-animal {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: var(--font-display);
+  }
+  .tl-action {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 400;
+    margin-top: 2px;
+    line-height: 1.35;
+  }
+  .tl-note {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-top: 4px;
+    padding: 6px 10px;
+    background: rgba(162,155,254,0.06);
+    border-radius: 8px;
+    border-left: 3px solid var(--primary-light);
+  }
+  .tl-when {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+    white-space: nowrap;
+    padding-top: 2px;
+  }
+  .tl-weight-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    margin-left: 4px;
+  }
+  .tl-weight-stable {
+    background: rgba(0,184,148,0.1);
+    color: var(--success);
+  }
+  .tl-weight-down {
+    background: rgba(225,112,85,0.1);
+    color: var(--error);
+  }
+  .tl-weight-indicator svg {
+    width: 12px;
+    height: 12px;
+    fill: none;
+  }
+  .tl-cat-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    margin-top: 6px;
+  }
+
+  /* ==================== VIEW 2: WEIGHT CHART ==================== */
+  .weight-header {
+    padding: 52px 24px 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .back-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .back-btn:active { transform: scale(0.9); }
+  .back-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke: var(--text-primary);
+    fill: none;
+  }
+  .weight-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+
+  /* Animal selector in weight view */
+  .weight-animal-selector {
+    display: flex;
+    gap: 10px;
+    padding: 12px 24px;
+  }
+  .w-animal-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px 8px 8px;
+    border-radius: var(--radius-full);
+    background: var(--surface);
+    border: 2px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .w-animal-btn.active {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+  }
+  .w-animal-btn:active { transform: scale(0.96); }
+  .w-animal-av {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .w-animal-av.pixel { background: linear-gradient(135deg, #a29bfe, #6c5ce7); }
+  .w-animal-av.luna { background: linear-gradient(135deg, #81ecec, #00cec9); }
+  .w-animal-av svg { width: 14px; height: 14px; stroke: white; fill: none; }
+  .w-animal-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+  .w-animal-btn.active .w-animal-name { color: var(--primary); }
+
+  /* Animal hero mini */
+  .weight-hero {
+    margin: 4px 24px 16px;
+    padding: 18px 20px;
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 4px 20px rgba(108,92,231,0.08);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .weight-hero-face {
+    width: 52px;
+    height: 52px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #ddd6fe, #a29bfe);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .weight-hero-face svg {
+    width: 28px;
+    height: 28px;
+    stroke: white;
+    fill: none;
+  }
+  .weight-hero-info { flex: 1; }
+  .weight-hero-name {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .weight-hero-kg {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary);
+    font-family: var(--font-display);
+    line-height: 1.1;
+  }
+  .weight-hero-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    margin-top: 4px;
+  }
+  .weight-hero-trend svg {
+    width: 14px;
+    height: 14px;
+    fill: none;
+  }
+  .trend-declining {
+    background: rgba(225,112,85,0.1);
+    color: var(--error);
+  }
+  .trend-declining svg { stroke: var(--error); }
+  .trend-stable {
+    background: rgba(0,184,148,0.1);
+    color: var(--success);
+  }
+  .trend-stable svg { stroke: var(--success); }
+
+  /* Period selector */
+  .period-selector {
+    display: flex;
+    gap: 6px;
+    padding: 0 24px;
+    margin-bottom: 16px;
+  }
+  .period-pill {
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .period-pill.active {
+    background: var(--primary);
+    color: white;
+  }
+  .period-pill:not(.active):hover {
+    background: var(--primary-soft);
+    color: var(--primary);
+  }
+  .period-pill:not(.active):active {
+    background: var(--primary-soft);
+    color: var(--primary);
+  }
+
+  /* Chart container */
+  .chart-container {
+    padding: 0 16px;
+    margin-bottom: 20px;
+  }
+  .chart-svg {
+    width: 100%;
+    height: auto;
+  }
+
+  /* Recent weights list */
+  .recent-weights {
+    padding: 0 24px;
+    margin-bottom: 20px;
+  }
+  .rw-title {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+  }
+  .rw-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(237,233,254,0.5);
+  }
+  .rw-item:last-child { border-bottom: none; }
+  .rw-date {
+    flex: 1;
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+  .rw-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-right: 10px;
+  }
+  .rw-delta {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+  }
+  .rw-delta.up { background: rgba(0,184,148,0.1); color: var(--success); }
+  .rw-delta.down { background: rgba(225,112,85,0.1); color: var(--error); }
+  .rw-delta.stable { background: rgba(0,184,148,0.1); color: var(--success); }
+
+  /* Share CTA */
+  .share-cta {
+    margin: 8px 24px 24px;
+    padding: 14px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .share-cta:active {
+    background: var(--primary-soft);
+    border-color: var(--primary-light);
+  }
+  .share-cta svg {
+    width: 18px;
+    height: 18px;
+    stroke: var(--primary);
+    fill: none;
+  }
+  .share-cta-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--primary);
+  }
+
+  /* ==================== BOTTOM NAV ==================== */
+  .bottom-nav {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 76px;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    z-index: 20;
+    box-shadow: 0 -1px 0 var(--border);
+  }
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    cursor: pointer;
+    padding: 4px 10px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-icon {
+    width: 24px;
+    height: 24px;
+  }
+  .nav-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke: var(--text-muted);
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .nav-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .nav-item.active .nav-icon svg { stroke: var(--primary); }
+  .nav-item.active .nav-label { color: var(--primary); font-weight: 600; }
+
+  .nav-add {
+    width: 48px; height: 48px;
+    background: var(--primary);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-top: -12px;
+    box-shadow: 0 4px 16px rgba(108,92,231,0.35);
+    transition: all 0.2s;
+  }
+  .nav-add:active { transform: scale(0.9) rotate(90deg); }
+  .nav-add svg {
+    width: 24px;
+    height: 24px;
+    stroke: white;
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+  }
+
+  /* ==================== PROTO LABEL ==================== */
+  .proto-label {
+    position: fixed;
+    top: 12px; left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-default);
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* ==================== ANIMATIONS ==================== */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .tl-entry {
+    animation: fadeInUp 0.35s ease both;
+  }
+  .tl-entry:nth-child(1) { animation-delay: 0s; }
+  .tl-entry:nth-child(2) { animation-delay: 0.05s; }
+  .tl-entry:nth-child(3) { animation-delay: 0.1s; }
+  .tl-entry:nth-child(4) { animation-delay: 0.15s; }
+  .tl-entry:nth-child(5) { animation-delay: 0.2s; }
+
+  @keyframes bannerPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(225,112,85,0); }
+    50% { box-shadow: 0 0 0 4px rgba(225,112,85,0.08); }
+  }
+  .anomaly-banner {
+    animation: bannerPulse 3s ease-in-out infinite;
+  }
+
+  @keyframes chartDraw {
+    from { stroke-dashoffset: 600; }
+    to { stroke-dashoffset: 0; }
+  }
+  .chart-line-animated {
+    stroke-dasharray: 600;
+    animation: chartDraw 1.2s ease-out forwards;
+  }
+
+  @keyframes dotPop {
+    0% { r: 0; opacity: 0; }
+    60% { r: 4.5; }
+    100% { r: 3.5; opacity: 1; }
+  }
+  .chart-dot-animated {
+    opacity: 0;
+    animation: dotPop 0.3s ease forwards;
+  }
+
+  /* View transition */
+  .view {
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  .view.active {
+    opacity: 1;
+  }
+
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="proto-label">Sakapuss — 04 Timeline / Historique</div>
+
+<div class="phone">
+  <div class="phone-screen">
+
+    <!-- ===================== VIEW 1: TIMELINE ===================== -->
+    <div class="view active" id="viewTimeline">
+
+      <!-- Header -->
+      <div class="header">
+        <div class="header-title">Timeline</div>
+        <div class="animal-pills">
+          <div class="animal-pill active" data-animal="all" onclick="filterAnimal(this)">
+            <div class="animal-pill-avatar pixel">
+              <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5c-3 0-7 3-7 8s2 6 7 6 7-1 7-6-4-8-7-8z"/><circle cx="9.5" cy="11" r="1"/><circle cx="14.5" cy="11" r="1"/><path d="M10 14.5c.5.5 1.5 1 2 1s1.5-.5 2-1"/><path d="M5 4l2 3M19 4l-2 3"/></svg>
+            </div>
+            <div class="animal-pill-avatar luna" style="margin-left:-8px">
+              <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5c-3 0-7 3-7 8s2 6 7 6 7-1 7-6-4-8-7-8z"/><circle cx="9.5" cy="11" r="1"/><circle cx="14.5" cy="11" r="1"/><path d="M10 14.5c.5.5 1.5 1 2 1s1.5-.5 2-1"/><path d="M5 4l2 3M19 4l-2 3"/></svg>
+            </div>
+            <div class="animal-pill-name">Tous</div>
+          </div>
+          <div class="animal-pill" data-animal="pixel" onclick="filterAnimal(this)">
+            <div class="animal-pill-avatar pixel">
+              <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5c-3 0-7 3-7 8s2 6 7 6 7-1 7-6-4-8-7-8z"/><circle cx="9.5" cy="11" r="1"/><circle cx="14.5" cy="11" r="1"/><path d="M10 14.5c.5.5 1.5 1 2 1s1.5-.5 2-1"/><path d="M5 4l2 3M19 4l-2 3"/></svg>
+            </div>
+            <div class="animal-pill-name">Pixel</div>
+          </div>
+          <div class="animal-pill" data-animal="luna" onclick="filterAnimal(this)">
+            <div class="animal-pill-avatar luna">
+              <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5c-3 0-7 3-7 8s2 6 7 6 7-1 7-6-4-8-7-8z"/><circle cx="9.5" cy="11" r="1"/><circle cx="14.5" cy="11" r="1"/><path d="M10 14.5c.5.5 1.5 1 2 1s1.5-.5 2-1"/><path d="M5 4l2 3M19 4l-2 3"/></svg>
+            </div>
+            <div class="animal-pill-name">Luna</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category filter pills -->
+      <div class="cat-filters">
+        <div class="cat-filters-inner">
+          <div class="cat-pill active" data-cat="tout" onclick="filterCat(this)">Tout</div>
+          <div class="cat-pill" data-cat="sante" onclick="filterCat(this)">
+            <svg style="width:12px;height:12px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            Sant&#233;
+          </div>
+          <div class="cat-pill" data-cat="poids" onclick="filterCat(this)">
+            <svg style="width:12px;height:12px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><circle cx="12" cy="14" r="3"/></svg>
+            Poids
+          </div>
+          <div class="cat-pill" data-cat="alimentation" onclick="filterCat(this)">
+            <svg style="width:12px;height:12px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0016 0"/><path d="M3 12h18"/></svg>
+            Alimentation
+          </div>
+          <div class="cat-pill" data-cat="litiere" onclick="filterCat(this)">
+            <svg style="width:12px;height:12px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v5M8 5l1.5 3M16 5l-1.5 3"/><path d="M7 10h10l-1.5 8a2 2 0 01-2 1.5h-3a2 2 0 01-2-1.5L7 10z"/></svg>
+            Liti&#232;re
+          </div>
+          <div class="cat-pill" data-cat="comportement" onclick="filterCat(this)">
+            <svg style="width:12px;height:12px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="3"/></svg>
+            Comportement
+          </div>
+        </div>
+      </div>
+
+      <!-- Anomaly banner -->
+      <div class="anomaly-banner" onclick="showWeightView()">
+        <div class="anomaly-icon">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/>
+            <polyline points="17 18 23 18 23 12"/>
+          </svg>
+        </div>
+        <div class="anomaly-body">
+          <div class="anomaly-text">Pixel a perdu 200g en 2 semaines</div>
+          <div class="anomaly-sub">Voir le graphique de poids</div>
+        </div>
+        <div class="anomaly-chevron">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Timeline feed -->
+      <div class="timeline-feed">
+
+        <!-- TODAY -->
+        <div class="day-group" data-day="today">
+          <div class="day-header">Aujourd'hui</div>
+
+          <div class="tl-entry" data-cat="litiere" data-animal="pixel">
+            <div class="tl-rail">
+              <div class="tl-dot" style="background:var(--cat-litiere)"></div>
+              <div class="tl-line"></div>
+            </div>
+            <div class="tl-card">
+              <div class="tl-card-top">
+                <div>
+                  <div class="tl-animal">Pixel</div>
+                  <div class="tl-action">Caisse nettoy&#233;e</div>
+                </div>
+                <div class="tl-when">il y a 2h</div>
+              </div>
+              <div class="tl-cat-badge" style="background:rgba(253,203,110,0.15);color:#b8860b">Liti&#232;re</div>
+            </div>
+          </div>
+
+          <div class="tl-entry" data-cat="alimentation" data-animal="pixel luna">
+            <div class="tl-rail">
+              <div class="tl-dot" style="background:var(--cat-alimentation)"></div>
+              <div class="tl-line"></div>
+            </div>
+            <div class="tl-card">
+              <div class="tl-card-top">
+                <div>
+                  <div class="tl-animal">Pixel + Luna</div>
+                  <div class="tl-action">Gamelle remplie</div>
+                </div>
+                <div class="tl-when">il y a 5h</div>
+              </div>
+              <div class="tl-cat-badge" style="background:rgba(0,206,201,0.12);color:#0a9e9a">Alimentation</div>
+            </div>
+          </div>
+
+          <div class="tl-entry" data-cat="comportement" data-animal="pixel">
+            <div class="tl-rail">
+              <div class="tl-dot" style="background:var(--cat-comportement)"></div>
+              <div class="tl-line"></div>
+            </div>
+            <div class="tl-card">
+              <div class="tl-card-top">
+                <div>
+                  <div class="tl-animal">Pixel</div>
+                  <div class="tl-action">Observation not&#233;e</div>
+                </div>
+                <div class="tl-when">il y a 6h</div>
+              </div>
+              <div class="tl-note">"diarrh&#233;e l&#233;g&#232;re"</div>
+              <div class="tl-cat-badge" style="background:rgba(162,155,254,0.12);color:#7c6fd4">Comportement</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- YESTERDAY -->
+        <div class="day-group" data-day="yesterday">
+          <div class="day-header">Hier</div>
+
+          <div class="tl-entry" data-cat="poids" data-animal="luna" onclick="showWeightView('luna')">
+            <div class="tl-rail">
+              <div class="tl-dot" style="background:var(--cat-poids)"></div>
+              <div class="tl-line"></div>
+            </div>
+            <div class="tl-card">
+              <div class="tl-card-top">
+                <div>
+                  <div class="tl-animal">Luna</div>
+                  <div class="tl-action">
+                    4.2 kg
+                    <span class="tl-weight-indicator tl-weight-stable">
+                      <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="15 8 19 12 15 16"/></svg>
+                      stable
+                    </span>
+                  </div>
+                </div>
+                <div class="tl-when">18h</div>
+              </div>
+              <div class="tl-cat-badge" style="background:rgba(108,92,231,0.1);color:var(--cat-poids)">Poids</div>
+            </div>
+          </div>
+
+          <div class="tl-entry" data-cat="sante" data-animal="pixel">
+            <div class="tl-rail">
+              <div class="tl-dot" style="background:var(--cat-sante)"></div>
+              <div class="tl-line"></div>
+            </div>
+            <div class="tl-card">
+              <div class="tl-card-top">
+                <div>
+                  <div class="tl-animal">Pixel</div>
+                  <div class="tl-action">M&#233;dicament administr&#233;</div>
+                </div>
+                <div class="tl-when">09h</div>
+              </div>
+              <div class="tl-cat-badge" style="background:rgba(225,112,85,0.1);color:var(--cat-sante)">Sant&#233;</div>
+            </div>
+          </div>
+
+          <div class="tl-entry" data-cat="alimentation" data-animal="luna">
+            <div class="tl-rail">
+              <div class="tl-dot" style="background:var(--cat-alimentation)"></div>
+              <div class="tl-line"></div>
+            </div>
+            <div class="tl-card">
+              <div class="tl-card-top">
+                <div>
+                  <div class="tl-animal">Luna</div>
+                  <div class="tl-action">Gamelle remplie</div>
+                </div>
+                <div class="tl-when">08h</div>
+              </div>
+              <div class="tl-cat-badge" style="background:rgba(0,206,201,0.12);color:#0a9e9a">Alimentation</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MONDAY -->
+        <div class="day-group" data-day="monday">
+          <div class="day-header">Lundi 5 avril</div>
+
+          <div class="tl-entry" data-cat="poids" data-animal="pixel" onclick="showWeightView('pixel')">
+            <div class="tl-rail">
+              <div class="tl-dot" style="background:var(--cat-poids)"></div>
+              <div class="tl-line"></div>
+            </div>
+            <div class="tl-card">
+              <div class="tl-card-top">
+                <div>
+                  <div class="tl-animal">Pixel</div>
+                  <div class="tl-action">
+                    4.8 kg
+                    <span class="tl-weight-indicator tl-weight-down">
+                      <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="6 13 12 19 18 13"/></svg>
+                      -100g
+                    </span>
+                  </div>
+                </div>
+                <div class="tl-when">20h</div>
+              </div>
+              <div class="tl-cat-badge" style="background:rgba(108,92,231,0.1);color:var(--cat-poids)">Poids</div>
+            </div>
+          </div>
+
+          <div class="tl-entry" data-cat="litiere" data-animal="luna">
+            <div class="tl-rail">
+              <div class="tl-dot" style="background:var(--cat-litiere)"></div>
+              <div class="tl-line"></div>
+            </div>
+            <div class="tl-card">
+              <div class="tl-card-top">
+                <div>
+                  <div class="tl-animal">Luna</div>
+                  <div class="tl-action">Caisse nettoy&#233;e</div>
+                </div>
+                <div class="tl-when">14h</div>
+              </div>
+              <div class="tl-cat-badge" style="background:rgba(253,203,110,0.15);color:#b8860b">Liti&#232;re</div>
+            </div>
+          </div>
+
+          <div class="tl-entry" data-cat="sante" data-animal="luna">
+            <div class="tl-rail">
+              <div class="tl-dot" style="background:var(--cat-sante)"></div>
+            </div>
+            <div class="tl-card">
+              <div class="tl-card-top">
+                <div>
+                  <div class="tl-animal">Luna</div>
+                  <div class="tl-action">Visite v&#233;t&#233;rinaire</div>
+                </div>
+                <div class="tl-when">10h</div>
+              </div>
+              <div class="tl-note">"Bilan annuel, tout est OK"</div>
+              <div class="tl-cat-badge" style="background:rgba(225,112,85,0.1);color:var(--cat-sante)">Sant&#233;</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== VIEW 2: WEIGHT CHART ===================== -->
+    <div class="view" id="viewWeight">
+
+      <!-- Header with back -->
+      <div class="weight-header">
+        <div class="back-btn" onclick="showTimelineView()">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+          </svg>
+        </div>
+        <div class="weight-title">Graphique de poids</div>
+      </div>
+
+      <!-- Animal selector -->
+      <div class="weight-animal-selector">
+        <div class="w-animal-btn active" data-w-animal="pixel" onclick="selectWeightAnimal(this)">
+          <div class="w-animal-av pixel">
+            <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5c-3 0-7 3-7 8s2 6 7 6 7-1 7-6-4-8-7-8z"/><circle cx="9.5" cy="11" r="1"/><circle cx="14.5" cy="11" r="1"/><path d="M5 4l2 3M19 4l-2 3"/></svg>
+          </div>
+          <div class="w-animal-name">Pixel</div>
+        </div>
+        <div class="w-animal-btn" data-w-animal="luna" onclick="selectWeightAnimal(this)">
+          <div class="w-animal-av luna">
+            <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5c-3 0-7 3-7 8s2 6 7 6 7-1 7-6-4-8-7-8z"/><circle cx="9.5" cy="11" r="1"/><circle cx="14.5" cy="11" r="1"/><path d="M5 4l2 3M19 4l-2 3"/></svg>
+          </div>
+          <div class="w-animal-name">Luna</div>
+        </div>
+      </div>
+
+      <!-- Hero mini -->
+      <div class="weight-hero" id="weightHero">
+        <div class="weight-hero-face" id="heroFace">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5c-3 0-7 3-7 8s2 6 7 6 7-1 7-6-4-8-7-8z"/><circle cx="9.5" cy="11" r="1"/><circle cx="14.5" cy="11" r="1"/><path d="M10 14.5c.5.5 1.5 1 2 1s1.5-.5 2-1"/><path d="M5 4l2 3M19 4l-2 3"/></svg>
+        </div>
+        <div class="weight-hero-info">
+          <div class="weight-hero-name" id="heroName">Pixel</div>
+          <div class="weight-hero-kg" id="heroKg">4.8 kg</div>
+          <div class="weight-hero-trend trend-declining" id="heroTrend">
+            <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+            <span id="heroTrendText">en baisse</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Period selector -->
+      <div class="period-selector">
+        <div class="period-pill" data-period="1s" onclick="selectPeriod(this)">1S</div>
+        <div class="period-pill" data-period="1m" onclick="selectPeriod(this)">1M</div>
+        <div class="period-pill active" data-period="3m" onclick="selectPeriod(this)">3M</div>
+        <div class="period-pill" data-period="6m" onclick="selectPeriod(this)">6M</div>
+        <div class="period-pill" data-period="1a" onclick="selectPeriod(this)">1A</div>
+      </div>
+
+      <!-- Weight chart (Pixel) -->
+      <div class="chart-container" id="chartPixel">
+        <svg class="chart-svg" viewBox="0 0 340 210" fill="none">
+          <defs>
+            <linearGradient id="lineGrad" x1="0" y1="0" x2="340" y2="0" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#A29BFE"/>
+              <stop offset="100%" stop-color="#6C5CE7"/>
+            </linearGradient>
+            <linearGradient id="areaGrad" x1="0" y1="40" x2="0" y2="170" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#6C5CE7" stop-opacity="0.12"/>
+              <stop offset="100%" stop-color="#6C5CE7" stop-opacity="0.01"/>
+            </linearGradient>
+            <linearGradient id="anomalyGrad" x1="0" y1="40" x2="0" y2="170" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#E17055" stop-opacity="0.10"/>
+              <stop offset="100%" stop-color="#E17055" stop-opacity="0.02"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Y axis labels: 5.0, 4.8, 4.5, 4.2 kg -->
+          <text x="8" y="42" fill="#B2BEC3" font-size="10" font-family="Inter">5.0</text>
+          <text x="8" y="72" fill="#B2BEC3" font-size="10" font-family="Inter">4.8</text>
+          <text x="8" y="112" fill="#B2BEC3" font-size="10" font-family="Inter">4.5</text>
+          <text x="8" y="152" fill="#B2BEC3" font-size="10" font-family="Inter">4.2</text>
+
+          <!-- Grid lines -->
+          <line x1="35" y1="38" x2="325" y2="38" stroke="#EDE9FE" stroke-width="0.5"/>
+          <line x1="35" y1="68" x2="325" y2="68" stroke="#EDE9FE" stroke-width="0.5"/>
+          <line x1="35" y1="108" x2="325" y2="108" stroke="#EDE9FE" stroke-width="0.5"/>
+          <line x1="35" y1="148" x2="325" y2="148" stroke="#EDE9FE" stroke-width="0.5"/>
+
+          <!-- X axis labels: F&#233;v, Mars, Avr -->
+          <text x="80" y="185" fill="#B2BEC3" font-size="11" font-family="Inter" text-anchor="middle">F&#233;v</text>
+          <text x="190" y="185" fill="#B2BEC3" font-size="11" font-family="Inter" text-anchor="middle">Mars</text>
+          <text x="305" y="185" fill="#B2BEC3" font-size="11" font-family="Inter" text-anchor="middle">Avr</text>
+
+          <!-- X axis tick marks -->
+          <line x1="80" y1="170" x2="80" y2="175" stroke="#EDE9FE" stroke-width="1"/>
+          <line x1="190" y1="170" x2="190" y2="175" stroke="#EDE9FE" stroke-width="1"/>
+          <line x1="305" y1="170" x2="305" y2="175" stroke="#EDE9FE" stroke-width="1"/>
+
+          <!-- Bottom axis line -->
+          <line x1="35" y1="170" x2="325" y2="170" stroke="#EDE9FE" stroke-width="0.5"/>
+
+          <!--
+            Y scale: 5.0kg=38, 4.8kg=68, 4.5kg=108, 4.2kg=148
+            Each 0.1kg = ~16.5px. Let's map 10 data points across 3 months:
+
+            1: 7 F&#233;v  x=50   5.05kg y=34
+            2: 14 F&#233;v  x=80   5.02kg y=37
+            3: 21 F&#233;v  x=110  5.0kg  y=38
+            4: 28 F&#233;v  x=140  5.0kg  y=38
+            5: 7 Mars  x=170  4.95kg y=46
+            6: 14 Mars x=200  4.9kg  y=53
+            7: 21 Mars x=230  4.85kg y=60
+            8: 28 Mars x=260  4.82kg y=64
+            9: 2 Avr   x=290  4.8kg  y=68
+            10: 8 Avr  x=318  4.8kg  y=68
+          -->
+
+          <!-- Area fill under line -->
+          <path d="M50,34 L80,37 L110,38 L140,38 L170,46 L200,53 L230,60 L260,64 L290,68 L318,68 L318,170 L50,170 Z" fill="url(#areaGrad)"/>
+
+          <!-- Anomaly shading (declining zone: last 6 data points) -->
+          <path d="M170,46 L200,53 L230,60 L260,64 L290,68 L318,68 L318,170 L170,170 Z" fill="url(#anomalyGrad)"/>
+
+          <!-- Main line -->
+          <polyline class="chart-line-animated" points="50,34 80,37 110,38 140,38 170,46 200,53 230,60 260,64 290,68 318,68"
+            stroke="url(#lineGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+          <!-- Data points -->
+          <circle class="chart-dot-animated" style="animation-delay:0.12s" cx="50" cy="34" r="3.5" fill="white" stroke="#A29BFE" stroke-width="2"/>
+          <circle class="chart-dot-animated" style="animation-delay:0.24s" cx="80" cy="37" r="3.5" fill="white" stroke="#A29BFE" stroke-width="2"/>
+          <circle class="chart-dot-animated" style="animation-delay:0.36s" cx="110" cy="38" r="3.5" fill="white" stroke="#9B93FD" stroke-width="2"/>
+          <circle class="chart-dot-animated" style="animation-delay:0.48s" cx="140" cy="38" r="3.5" fill="white" stroke="#918AF5" stroke-width="2"/>
+          <circle class="chart-dot-animated" style="animation-delay:0.60s" cx="170" cy="46" r="3.5" fill="white" stroke="#8780EE" stroke-width="2"/>
+          <circle class="chart-dot-animated" style="animation-delay:0.72s" cx="200" cy="53" r="3.5" fill="white" stroke="#7D77E8" stroke-width="2"/>
+          <circle class="chart-dot-animated" style="animation-delay:0.84s" cx="230" cy="60" r="3.5" fill="white" stroke="#746DE2" stroke-width="2"/>
+          <circle class="chart-dot-animated" style="animation-delay:0.96s" cx="260" cy="64" r="3.5" fill="white" stroke="#6C5CE7" stroke-width="2"/>
+          <circle class="chart-dot-animated" style="animation-delay:1.08s" cx="290" cy="68" r="3.5" fill="white" stroke="#6C5CE7" stroke-width="2"/>
+
+          <!-- Current weight: larger highlighted point -->
+          <circle class="chart-dot-animated" style="animation-delay:1.2s" cx="318" cy="68" r="6" fill="#6C5CE7" stroke="white" stroke-width="2.5"/>
+          <!-- Label for current -->
+          <rect x="293" y="48" width="50" height="18" rx="6" fill="#6C5CE7" opacity="0.95"/>
+          <text x="318" y="60" fill="white" font-size="10" font-weight="600" font-family="Inter" text-anchor="middle">4.8 kg</text>
+
+          <!-- Subtle anomaly indicator line -->
+          <line x1="170" y1="28" x2="170" y2="170" stroke="#E17055" stroke-width="0.8" stroke-dasharray="4 3" opacity="0.35"/>
+        </svg>
+      </div>
+
+      <!-- Weight chart (Luna) -- hidden by default -->
+      <div class="chart-container" id="chartLuna" style="display:none">
+        <svg class="chart-svg" viewBox="0 0 340 210" fill="none">
+          <defs>
+            <linearGradient id="lineGradL" x1="0" y1="0" x2="340" y2="0" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#81ecec"/>
+              <stop offset="100%" stop-color="#00CEC9"/>
+            </linearGradient>
+            <linearGradient id="areaGradL" x1="0" y1="40" x2="0" y2="170" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#00CEC9" stop-opacity="0.12"/>
+              <stop offset="100%" stop-color="#00CEC9" stop-opacity="0.01"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Y axis labels: 4.6, 4.4, 4.2, 4.0 -->
+          <text x="8" y="42" fill="#B2BEC3" font-size="10" font-family="Inter">4.6</text>
+          <text x="8" y="72" fill="#B2BEC3" font-size="10" font-family="Inter">4.4</text>
+          <text x="8" y="112" fill="#B2BEC3" font-size="10" font-family="Inter">4.2</text>
+          <text x="8" y="152" fill="#B2BEC3" font-size="10" font-family="Inter">4.0</text>
+
+          <!-- Grid lines -->
+          <line x1="35" y1="38" x2="325" y2="38" stroke="#EDE9FE" stroke-width="0.5"/>
+          <line x1="35" y1="68" x2="325" y2="68" stroke="#EDE9FE" stroke-width="0.5"/>
+          <line x1="35" y1="108" x2="325" y2="108" stroke="#EDE9FE" stroke-width="0.5"/>
+          <line x1="35" y1="148" x2="325" y2="148" stroke="#EDE9FE" stroke-width="0.5"/>
+
+          <!-- X axis labels -->
+          <text x="80" y="185" fill="#B2BEC3" font-size="11" font-family="Inter" text-anchor="middle">F&#233;v</text>
+          <text x="190" y="185" fill="#B2BEC3" font-size="11" font-family="Inter" text-anchor="middle">Mars</text>
+          <text x="305" y="185" fill="#B2BEC3" font-size="11" font-family="Inter" text-anchor="middle">Avr</text>
+
+          <line x1="80" y1="170" x2="80" y2="175" stroke="#EDE9FE" stroke-width="1"/>
+          <line x1="190" y1="170" x2="190" y2="175" stroke="#EDE9FE" stroke-width="1"/>
+          <line x1="305" y1="170" x2="305" y2="175" stroke="#EDE9FE" stroke-width="1"/>
+          <line x1="35" y1="170" x2="325" y2="170" stroke="#EDE9FE" stroke-width="0.5"/>
+
+          <!--
+            Luna: stable around 4.2. Scale: 4.6=38, 4.4=68, 4.2=108, 4.0=148
+            0.1kg = ~20px
+
+            1: 7 F&#233;v  x=50   4.20kg y=108
+            2: 14 F&#233;v  x=80   4.25kg y=98
+            3: 21 F&#233;v  x=110  4.30kg y=88
+            4: 28 F&#233;v  x=140  4.22kg y=104
+            5: 7 Mars  x=170  4.20kg y=108
+            6: 14 Mars x=200  4.18kg y=112
+            7: 21 Mars x=230  4.15kg y=118
+            8: 28 Mars x=260  4.20kg y=108
+            9: 2 Avr   x=290  4.20kg y=108
+            10: 8 Avr  x=318  4.20kg y=108
+          -->
+
+          <!-- Area fill -->
+          <path d="M50,108 L80,98 L110,88 L140,104 L170,108 L200,112 L230,118 L260,108 L290,108 L318,108 L318,170 L50,170 Z" fill="url(#areaGradL)"/>
+
+          <!-- Main line -->
+          <polyline class="chart-line-animated" points="50,108 80,98 110,88 140,104 170,108 200,112 230,118 260,108 290,108 318,108"
+            stroke="url(#lineGradL)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+          <!-- Data points -->
+          <circle class="chart-dot-animated" style="animation-delay:0.12s" cx="50" cy="108" r="3.5" fill="white" stroke="#4dd8d3" stroke-width="2"/>
+          <circle class="chart-dot-animated" style="animation-delay:0.24s" cx="80" cy="98" r="3.5" fill="white" stroke="#3ed0cb" stroke-width="2"/>
+          <circle class="chart-dot-animated" style="animation-delay:0.36s" cx="110" cy="88" r="3.5" fill="white" stroke="#30c8c3" stroke-width="2"/>
+          <circle class="chart-dot-animated" style="animation-delay:0.48s" cx="140" cy="104" r="3.5" fill="white" stroke="#22c0bb" stroke-width="2"/>
+          <circle class="chart-dot-animated" style="animation-delay:0.60s" cx="170" cy="108" r="3.5" fill="white" stroke="#18b9b4" stroke-width="2"/>
+          <circle class="chart-dot-animated" style="animation-delay:0.72s" cx="200" cy="112" r="3.5" fill="white" stroke="#10b3ae" stroke-width="2"/>
+          <circle class="chart-dot-animated" style="animation-delay:0.84s" cx="230" cy="118" r="3.5" fill="white" stroke="#08aca7" stroke-width="2"/>
+          <circle class="chart-dot-animated" style="animation-delay:0.96s" cx="260" cy="108" r="3.5" fill="white" stroke="#04a6a1" stroke-width="2"/>
+          <circle class="chart-dot-animated" style="animation-delay:1.08s" cx="290" cy="108" r="3.5" fill="white" stroke="#00CEC9" stroke-width="2"/>
+
+          <!-- Current -->
+          <circle class="chart-dot-animated" style="animation-delay:1.2s" cx="318" cy="108" r="6" fill="#00CEC9" stroke="white" stroke-width="2.5"/>
+          <rect x="293" y="88" width="50" height="18" rx="6" fill="#00CEC9" opacity="0.95"/>
+          <text x="318" y="100" fill="white" font-size="10" font-weight="600" font-family="Inter" text-anchor="middle">4.2 kg</text>
+        </svg>
+      </div>
+
+      <!-- Recent weights (Pixel) -->
+      <div class="recent-weights" id="recentPixel">
+        <div class="rw-title">Derni&#232;res pes&#233;es</div>
+        <div class="rw-item">
+          <div class="rw-date">8 avril</div>
+          <div class="rw-value">4.8 kg</div>
+          <div class="rw-delta down">-20g</div>
+        </div>
+        <div class="rw-item">
+          <div class="rw-date">2 avril</div>
+          <div class="rw-value">4.82 kg</div>
+          <div class="rw-delta down">-30g</div>
+        </div>
+        <div class="rw-item">
+          <div class="rw-date">28 mars</div>
+          <div class="rw-value">4.85 kg</div>
+          <div class="rw-delta down">-50g</div>
+        </div>
+        <div class="rw-item">
+          <div class="rw-date">21 mars</div>
+          <div class="rw-value">4.9 kg</div>
+          <div class="rw-delta down">-50g</div>
+        </div>
+        <div class="rw-item">
+          <div class="rw-date">7 mars</div>
+          <div class="rw-value">4.95 kg</div>
+          <div class="rw-delta stable">stable</div>
+        </div>
+      </div>
+
+      <!-- Recent weights (Luna) -->
+      <div class="recent-weights" id="recentLuna" style="display:none">
+        <div class="rw-title">Derni&#232;res pes&#233;es</div>
+        <div class="rw-item">
+          <div class="rw-date">8 avril</div>
+          <div class="rw-value">4.2 kg</div>
+          <div class="rw-delta stable">stable</div>
+        </div>
+        <div class="rw-item">
+          <div class="rw-date">2 avril</div>
+          <div class="rw-value">4.2 kg</div>
+          <div class="rw-delta stable">stable</div>
+        </div>
+        <div class="rw-item">
+          <div class="rw-date">28 mars</div>
+          <div class="rw-value">4.2 kg</div>
+          <div class="rw-delta up">+50g</div>
+        </div>
+        <div class="rw-item">
+          <div class="rw-date">21 mars</div>
+          <div class="rw-value">4.15 kg</div>
+          <div class="rw-delta down">-30g</div>
+        </div>
+        <div class="rw-item">
+          <div class="rw-date">7 mars</div>
+          <div class="rw-value">4.18 kg</div>
+          <div class="rw-delta stable">stable</div>
+        </div>
+      </div>
+
+      <!-- Share CTA -->
+      <div class="share-cta">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/>
+          <polyline points="16 6 12 2 8 6"/>
+          <line x1="12" y1="2" x2="12" y2="15"/>
+        </svg>
+        <div class="share-cta-text">Partager avec mon v&#233;t&#233;rinaire</div>
+      </div>
+    </div>
+
+    <!-- ==================== BOTTOM NAV ==================== -->
+    <div class="bottom-nav">
+      <div class="nav-item">
+        <div class="nav-icon">
+          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <div class="nav-label">Accueil</div>
+      </div>
+      <div class="nav-item active" id="navTimeline">
+        <div class="nav-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="nav-label">Timeline</div>
+      </div>
+      <div class="nav-add">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">
+          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        </div>
+        <div class="nav-label">Rappels</div>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="nav-label">Profil</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ==================== VIEW SWITCHING ====================
+  function showWeightView(animal) {
+    document.getElementById('viewTimeline').classList.remove('active');
+    document.getElementById('viewWeight').classList.add('active');
+    document.querySelector('.phone-screen').scrollTop = 0;
+    if (animal === 'luna') {
+      const lunaBtn = document.querySelector('[data-w-animal="luna"]');
+      selectWeightAnimal(lunaBtn);
+    } else {
+      const pixelBtn = document.querySelector('[data-w-animal="pixel"]');
+      selectWeightAnimal(pixelBtn);
+    }
+  }
+
+  function showTimelineView() {
+    document.getElementById('viewWeight').classList.remove('active');
+    document.getElementById('viewTimeline').classList.add('active');
+    document.querySelector('.phone-screen').scrollTop = 0;
+  }
+
+  // ==================== WEIGHT ANIMAL SELECTOR ====================
+  function selectWeightAnimal(el) {
+    document.querySelectorAll('.w-animal-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+
+    const animal = el.dataset.wAnimal;
+    const heroFace = document.getElementById('heroFace');
+
+    if (animal === 'pixel') {
+      document.getElementById('heroName').textContent = 'Pixel';
+      document.getElementById('heroKg').textContent = '4.8 kg';
+      document.getElementById('heroTrendText').textContent = 'en baisse';
+      document.getElementById('heroTrend').className = 'weight-hero-trend trend-declining';
+      heroFace.style.background = 'linear-gradient(135deg, #ddd6fe, #a29bfe)';
+      document.getElementById('chartPixel').style.display = '';
+      document.getElementById('chartLuna').style.display = 'none';
+      document.getElementById('recentPixel').style.display = '';
+      document.getElementById('recentLuna').style.display = 'none';
+    } else {
+      document.getElementById('heroName').textContent = 'Luna';
+      document.getElementById('heroKg').textContent = '4.2 kg';
+      document.getElementById('heroTrendText').textContent = 'stable';
+      document.getElementById('heroTrend').className = 'weight-hero-trend trend-stable';
+      heroFace.style.background = 'linear-gradient(135deg, #ccfbf1, #81ecec)';
+      document.getElementById('chartPixel').style.display = 'none';
+      document.getElementById('chartLuna').style.display = '';
+      document.getElementById('recentPixel').style.display = 'none';
+      document.getElementById('recentLuna').style.display = '';
+    }
+  }
+
+  // ==================== PERIOD SELECTOR ====================
+  function selectPeriod(el) {
+    document.querySelectorAll('.period-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // ==================== CATEGORY FILTER ====================
+  let activeCat = 'tout';
+
+  function filterCat(el) {
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    activeCat = el.dataset.cat;
+    applyFilters();
+  }
+
+  // ==================== ANIMAL FILTER ====================
+  let activeAnimal = 'all';
+
+  function filterAnimal(el) {
+    document.querySelectorAll('.animal-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    activeAnimal = el.dataset.animal;
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const entries = document.querySelectorAll('.tl-entry');
+    const dayGroups = document.querySelectorAll('.day-group');
+
+    entries.forEach(entry => {
+      const cat = entry.dataset.cat;
+      const animals = entry.dataset.animal;
+      const catMatch = activeCat === 'tout' || cat === activeCat;
+      const animalMatch = activeAnimal === 'all' || animals.includes(activeAnimal);
+      entry.style.display = (catMatch && animalMatch) ? '' : 'none';
+    });
+
+    // Hide empty day groups
+    dayGroups.forEach(group => {
+      const visible = group.querySelectorAll('.tl-entry:not([style*="display: none"])');
+      group.style.display = visible.length > 0 ? '' : 'none';
+    });
+
+    // Update last visible entry line visibility
+    dayGroups.forEach(group => {
+      const visibleEntries = [...group.querySelectorAll('.tl-entry:not([style*="display: none"])')];
+      visibleEntries.forEach((entry, i) => {
+        const line = entry.querySelector('.tl-line');
+        if (line) {
+          line.style.display = (i === visibleEntries.length - 1) ? 'none' : '';
+        }
+      });
+    });
+  }
+</script>
+</body>
+</html>

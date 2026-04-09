@@ -1,0 +1,40 @@
+# Ruff configuration for Sakapuss backend
+target-version = "py312"
+line-length = 120
+
+[lint]
+select = [
+  "E",    # pycodestyle errors
+  "W",    # pycodestyle warnings
+  "F",    # pyflakes
+  "I",    # isort
+  "N",    # pep8-naming
+  "UP",   # pyupgrade
+  "B",    # flake8-bugbear
+  "S",    # flake8-bandit (security)
+  "A",    # flake8-builtins
+  "C4",   # flake8-comprehensions
+  "T20",  # flake8-print
+  "SIM",  # flake8-simplify
+  "RUF",  # ruff-specific rules
+]
+ignore = [
+  "S101",   # assert usage OK in tests
+  "B008",   # function call in default arg (FastAPI Depends)
+  "A002",   # shadowing builtins OK for FastAPI query params (type, id)
+  "S105",   # hardcoded password defaults OK (dev defaults, overridden by env)
+  "UP038",  # isinstance union syntax — keep tuple form for readability
+]
+
+exclude = [
+  "_bmad/**",
+  ".claude/skills/**",
+]
+
+[lint.per-file-ignores]
+"backend/tests/**" = ["S101", "S106"]
+"backend/app/api/**" = ["B008"]
+
+[format]
+quote-style = "double"
+indent-style = "space"

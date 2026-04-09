@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Sakapuss — Core Loop v2</title>
+<style>
+  :root {
+    --primary: #6C5CE7;
+    --primary-light: #A29BFE;
+    --primary-soft: rgba(108,92,231,0.08);
+    --secondary: #00CEC9;
+    --accent: #FDCB6E;
+    --accent-dark: #E17055;
+
+    --bg: #F8F6FF;
+    --surface: #FFFFFF;
+    --text-primary: #2D3436;
+    --text-secondary: #636E72;
+    --text-muted: #B2BEC3;
+    --border: #EDE9FE;
+
+    --success: #00B894;
+    --warning: #FDCB6E;
+    --error: #E17055;
+
+    --cat-health: #E17055;
+    --cat-weight: #6C5CE7;
+    --cat-food: #00CEC9;
+    --cat-litter: #FDCB6E;
+    --cat-behavior: #A29BFE;
+    --cat-event: #636E72;
+
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 12px;
+    --space-lg: 16px;
+    --space-xl: 24px;
+    --space-2xl: 32px;
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-full: 9999px;
+
+    --font-display: 'Nunito', system-ui, sans-serif;
+    --font-default: 'Inter', system-ui, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-default);
+    background: #1a1a2e;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  /* ==================== PHONE ==================== */
+  .phone {
+    width: 375px;
+    height: 812px;
+    background: var(--bg);
+    border-radius: 44px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.35), inset 0 0 0 2.5px #222;
+  }
+  .phone-screen {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    padding-bottom: 80px;
+    scroll-behavior: smooth;
+  }
+  .phone-screen::-webkit-scrollbar { display: none; }
+  .phone-screen { scrollbar-width: none; }
+
+  /* ==================== HEADER — Minimal ==================== */
+  .header {
+    padding: 52px var(--space-xl) var(--space-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .header-greeting {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.1;
+  }
+  .header-greeting span {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .header-avatar-group {
+    display: flex;
+    gap: 0;
+  }
+  .header-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2.5px solid var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    position: relative;
+  }
+  .header-avatar:nth-child(2) { margin-left: -10px; }
+  .header-avatar.pixel { background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%); }
+  .header-avatar.luna { background: linear-gradient(135deg, #81ecec 0%, #00cec9 100%); }
+  .header-avatar:active { transform: scale(1.15); z-index: 2; }
+  .header-avatar .notification-dot {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 10px;
+    height: 10px;
+    background: var(--error);
+    border-radius: 50%;
+    border: 2px solid var(--bg);
+  }
+
+  /* ==================== ANIMAL HERO — The personality ==================== */
+  .animal-hero {
+    margin: var(--space-sm) var(--space-xl) var(--space-xl);
+    position: relative;
+  }
+  .animal-card {
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    padding: var(--space-lg) var(--space-lg) var(--space-md);
+    display: flex;
+    gap: var(--space-lg);
+    align-items: flex-start;
+    box-shadow: 0 2px 16px rgba(108,92,231,0.08);
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .animal-card:active { transform: scale(0.98); }
+  .animal-face {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #ddd6fe 0%, #a29bfe 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .animal-face::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    width: 16px;
+    height: 16px;
+    background: var(--success);
+    border-radius: 50%;
+    border: 2.5px solid var(--surface);
+  }
+  .animal-speech {
+    flex: 1;
+    padding-top: 2px;
+  }
+  .animal-name {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+  }
+  .animal-bubble {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    font-style: italic;
+  }
+  .animal-bubble em {
+    color: var(--primary);
+    font-style: normal;
+    font-weight: 600;
+  }
+  .animal-meta {
+    display: flex;
+    gap: var(--space-sm);
+    margin-top: var(--space-sm);
+    flex-wrap: wrap;
+  }
+  .animal-meta-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-weight: 500;
+  }
+  .tag-reminder {
+    background: rgba(253,203,110,0.2);
+    color: #c97f0a;
+  }
+  .tag-weight {
+    background: rgba(108,92,231,0.1);
+    color: var(--primary);
+  }
+
+  /* Swipe hint */
+  .swipe-hint {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: var(--space-sm);
+    letter-spacing: 0.3px;
+  }
+  .swipe-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: var(--space-xs);
+  }
+  .swipe-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+  .swipe-dot.active { background: var(--primary); width: 18px; border-radius: 3px; }
+
+  /* ==================== QUICK ACTIONS — Organic flow ==================== */
+  .actions-label {
+    padding: 0 var(--space-xl);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: var(--space-md);
+  }
+
+  .action-flow {
+    display: flex;
+    gap: var(--space-sm);
+    padding: 0 var(--space-xl);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: var(--space-md);
+  }
+  .action-flow::-webkit-scrollbar { display: none; }
+
+  .action-chip {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-lg) var(--space-sm) var(--space-sm);
+    border-radius: var(--radius-full);
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    white-space: nowrap;
+    scroll-snap-align: start;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .action-chip:active {
+    transform: scale(0.95);
+    border-color: var(--primary-light);
+    background: var(--primary-soft);
+  }
+  .action-chip .chip-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .action-chip .chip-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .chip-litter .chip-icon { background: rgba(253,203,110,0.2); }
+  .chip-food .chip-icon { background: rgba(0,206,201,0.2); }
+  .chip-weight .chip-icon { background: rgba(108,92,231,0.15); }
+  .chip-health .chip-icon { background: rgba(225,112,85,0.15); }
+  .chip-behavior .chip-icon { background: rgba(162,155,254,0.2); }
+  .chip-event .chip-icon { background: rgba(99,110,114,0.12); }
+
+  /* Second row */
+  .action-flow-2 {
+    margin-top: var(--space-xs);
+  }
+
+  /* ==================== REMINDER NUDGE ==================== */
+  .reminder-nudge {
+    margin: var(--space-xl) var(--space-xl) 0;
+    padding: var(--space-md) var(--space-lg);
+    background: linear-gradient(135deg, rgba(253,203,110,0.12) 0%, rgba(225,112,85,0.08) 100%);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .reminder-nudge:active { transform: scale(0.98); }
+  .reminder-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .reminder-text {
+    flex: 1;
+  }
+  .reminder-text .main {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .reminder-text .sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 1px;
+  }
+  .reminder-arrow {
+    font-size: 18px;
+    color: var(--text-muted);
+  }
+
+  /* ==================== ACTIVITY STREAM ==================== */
+  .stream-section {
+    padding: var(--space-2xl) var(--space-xl) var(--space-lg);
+  }
+  .stream-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: var(--space-lg);
+  }
+  .stream-title {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .stream-all {
+    font-size: 13px;
+    color: var(--primary);
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .stream-item {
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-md) 0;
+    position: relative;
+  }
+  .stream-item + .stream-item {
+    border-top: 1px solid rgba(237,233,254,0.6);
+  }
+  .stream-dot-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 4px;
+    width: 20px;
+    flex-shrink: 0;
+  }
+  .stream-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .stream-line {
+    width: 1.5px;
+    flex: 1;
+    margin-top: 4px;
+    background: var(--border);
+  }
+  .stream-content { flex: 1; }
+  .stream-text {
+    font-size: 14px;
+    color: var(--text-primary);
+    line-height: 1.4;
+  }
+  .stream-text strong { font-weight: 600; }
+  .stream-when {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* ==================== BOTTOM NAV — Softer ==================== */
+  .bottom-nav {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 76px;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    z-index: 20;
+    box-shadow: 0 -1px 0 var(--border);
+  }
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    cursor: pointer;
+    padding: var(--space-xs) var(--space-sm);
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.2s;
+  }
+  .nav-icon { font-size: 22px; opacity: 0.4; transition: opacity 0.2s; }
+  .nav-label { font-size: 10px; color: var(--text-muted); font-weight: 500; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .nav-item.active .nav-label { color: var(--primary); font-weight: 600; }
+
+  .nav-add {
+    width: 48px;
+    height: 48px;
+    background: var(--primary);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    color: white;
+    cursor: pointer;
+    margin-top: -12px;
+    box-shadow: 0 4px 16px rgba(108,92,231,0.35);
+    transition: all 0.2s;
+    font-weight: 300;
+  }
+  .nav-add:active {
+    transform: scale(0.9) rotate(90deg);
+    border-radius: 14px;
+  }
+
+  /* ==================== BOTTOM SHEET v2 ==================== */
+  .sheet-backdrop {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 30;
+    opacity: 0;
+    transition: opacity 0.3s;
+    backdrop-filter: blur(2px);
+  }
+  .sheet-backdrop.visible { display: block; opacity: 1; }
+
+  .bottom-sheet {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    z-index: 31;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+    padding-bottom: 40px;
+  }
+  .bottom-sheet.open { transform: translateY(0); }
+
+  .sheet-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--border);
+    border-radius: var(--radius-full);
+    margin: var(--space-sm) auto var(--space-lg);
+  }
+  .sheet-content { padding: 0 var(--space-xl) var(--space-lg); }
+
+  .sheet-question {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+  }
+  .sheet-context {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: var(--space-xl);
+  }
+
+  .animal-selector {
+    display: flex;
+    gap: var(--space-xl);
+    justify-content: center;
+    margin-bottom: var(--space-xl);
+  }
+  .animal-pick {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .animal-pick .face {
+    width: 72px;
+    height: 72px;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 38px;
+    border: 3px solid transparent;
+    transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .animal-pick.pixel .face { background: linear-gradient(135deg, #ede9fe 0%, #c4b5fd 100%); }
+  .animal-pick.luna .face { background: linear-gradient(135deg, #ccfbf1 0%, #81ecec 100%); }
+  .animal-pick:active .face,
+  .animal-pick.selected .face {
+    border-color: var(--primary);
+    transform: scale(1.08);
+    box-shadow: 0 4px 20px rgba(108,92,231,0.25);
+  }
+  .animal-pick .pick-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .resource-section { margin-top: var(--space-sm); }
+  .resource-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--space-sm);
+  }
+  .resource-list {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+  }
+  .resource-opt {
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-full);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: var(--bg);
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1.5px solid transparent;
+  }
+  .resource-opt:active,
+  .resource-opt.selected {
+    color: var(--primary);
+    background: var(--primary-soft);
+    border-color: var(--primary-light);
+  }
+
+  /* ==================== TOAST v2 ==================== */
+  .toast-wrap {
+    position: absolute;
+    bottom: 88px;
+    left: var(--space-lg);
+    right: var(--space-lg);
+    z-index: 25;
+    transform: translateY(16px);
+    opacity: 0;
+    transition: all 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    pointer-events: none;
+  }
+  .toast-wrap.visible {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .toast {
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    padding: var(--space-lg);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.06);
+    position: relative;
+    overflow: hidden;
+  }
+  .toast-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+  }
+  .toast-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #d3f9d8 0%, #00b894 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    color: white;
+  }
+  .toast-body { flex: 1; }
+  .toast-msg {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .toast-when {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+
+  .toast-opts {
+    display: flex;
+    gap: var(--space-sm);
+    margin-top: var(--space-md);
+  }
+  .toast-opt {
+    flex: 1;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-lg);
+    background: var(--bg);
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    transition: all 0.15s;
+    font-family: var(--font-default);
+  }
+  .toast-opt:active {
+    background: var(--primary-soft);
+    color: var(--primary);
+  }
+  .toast-opt-undo {
+    flex: 0;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px;
+    padding: var(--space-sm);
+  }
+
+  .toast-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+    border-radius: 0 0 0 var(--radius-xl);
+    width: 100%;
+    transition: width 3s linear;
+  }
+  .toast-bar.running { width: 0%; }
+
+  /* Toast expanded */
+  .toast-expand {
+    display: none;
+    margin-top: var(--space-md);
+  }
+  .toast-expand.visible { display: block; }
+  .toast-field {
+    width: 100%;
+    padding: var(--space-md);
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    font-size: 15px;
+    font-family: var(--font-default);
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .toast-field:focus { border-color: var(--primary-light); }
+  .toast-field::placeholder { color: var(--text-muted); }
+  .toast-submit {
+    width: 100%;
+    margin-top: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-default);
+    transition: transform 0.15s;
+  }
+  .toast-submit:active { transform: scale(0.97); }
+
+  /* ==================== LABEL ==================== */
+  .proto-label {
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-default);
+    font-size: 11px;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .proto-hint {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(45,52,54,0.85);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-family: var(--font-default);
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.5s;
+    pointer-events: none;
+  }
+  .proto-hint.show { opacity: 1; }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="proto-label">Sakapuss — Core Loop v2</div>
+
+<div class="phone">
+  <div class="phone-screen" id="screen">
+
+    <!-- ==================== HEADER ==================== -->
+    <div class="header">
+      <div class="header-greeting">
+        Salut Camille
+        <span>2 chats &middot; tout va bien</span>
+      </div>
+      <div class="header-avatar-group">
+        <div class="header-avatar pixel" onclick="scrollToAnimal()">&#128049;</div>
+        <div class="header-avatar luna">
+          &#128049;
+          <div class="notification-dot"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== ANIMAL HERO ==================== -->
+    <div class="animal-hero">
+      <div class="animal-card" id="animalCard">
+        <div class="animal-face">&#128049;</div>
+        <div class="animal-speech">
+          <div class="animal-name">Pixel</div>
+          <div class="animal-bubble">"Ma caisse est <em>propre depuis 2h</em>, merci !"</div>
+          <div class="animal-meta">
+            <span class="animal-meta-tag tag-reminder">&#128138; Vermifuge dans 3j</span>
+            <span class="animal-meta-tag tag-weight">&#9878;&#65039; 4.8 kg &middot; stable</span>
+          </div>
+        </div>
+      </div>
+      <div class="swipe-dots">
+        <div class="swipe-dot active"></div>
+        <div class="swipe-dot"></div>
+      </div>
+    </div>
+
+    <!-- ==================== QUICK ACTIONS — Horizontal chips ==================== -->
+    <div class="actions-label">Qu'est-ce que tu viens de faire ?</div>
+
+    <div class="action-flow">
+      <div class="action-chip chip-litter" data-action="Caisse nettoyée" data-icon="&#129529;" data-resource="true" onclick="openSheet(this)">
+        <div class="chip-icon">&#129529;</div>
+        <div class="chip-label">Caisse nettoyée</div>
+      </div>
+      <div class="action-chip chip-food" data-action="Gamelle remplie" data-icon="&#127869;" data-resource="true" onclick="openSheet(this)">
+        <div class="chip-icon">&#127869;</div>
+        <div class="chip-label">Gamelle remplie</div>
+      </div>
+      <div class="action-chip chip-weight" data-action="Pesée" data-icon="&#9878;&#65039;" onclick="openSheet(this)">
+        <div class="chip-icon">&#9878;&#65039;</div>
+        <div class="chip-label">Pesée</div>
+      </div>
+    </div>
+
+    <div class="action-flow action-flow-2">
+      <div class="action-chip chip-health" data-action="Médicament" data-icon="&#128138;" onclick="openSheet(this)">
+        <div class="chip-icon">&#128138;</div>
+        <div class="chip-label">Médicament</div>
+      </div>
+      <div class="action-chip chip-behavior" data-action="Observation" data-icon="&#128065;" onclick="openSheet(this)">
+        <div class="chip-icon">&#128065;</div>
+        <div class="chip-label">Observation</div>
+      </div>
+      <div class="action-chip chip-event" data-action="Événement" data-icon="&#128221;" onclick="openSheet(this)">
+        <div class="chip-icon">&#128221;</div>
+        <div class="chip-label">Événement</div>
+      </div>
+    </div>
+
+    <!-- ==================== REMINDER NUDGE ==================== -->
+    <div class="reminder-nudge">
+      <div class="reminder-icon">&#128138;</div>
+      <div class="reminder-text">
+        <div class="main">Vermifuge de Pixel</div>
+        <div class="sub">Dans 3 jours &middot; Penser à commander</div>
+      </div>
+      <div class="reminder-arrow">&#8250;</div>
+    </div>
+
+    <!-- ==================== ACTIVITY STREAM ==================== -->
+    <div class="stream-section">
+      <div class="stream-header">
+        <div class="stream-title">Aujourd'hui</div>
+        <div class="stream-all">Tout voir</div>
+      </div>
+
+      <div class="stream-item">
+        <div class="stream-dot-col">
+          <div class="stream-dot" style="background:var(--cat-litter)"></div>
+          <div class="stream-line"></div>
+        </div>
+        <div class="stream-content">
+          <div class="stream-text"><strong>Pixel</strong> &middot; Caisse nettoyée</div>
+          <div class="stream-when">il y a 2h</div>
+        </div>
+      </div>
+
+      <div class="stream-item">
+        <div class="stream-dot-col">
+          <div class="stream-dot" style="background:var(--cat-food)"></div>
+          <div class="stream-line"></div>
+        </div>
+        <div class="stream-content">
+          <div class="stream-text"><strong>Pixel + Luna</strong> &middot; Gamelle remplie</div>
+          <div class="stream-when">il y a 5h</div>
+        </div>
+      </div>
+
+      <div class="stream-item">
+        <div class="stream-dot-col">
+          <div class="stream-dot" style="background:var(--cat-weight)"></div>
+        </div>
+        <div class="stream-content">
+          <div class="stream-text"><strong>Luna</strong> &middot; 4.2 kg <span style="color:var(--success);font-size:12px">&#9650; stable</span></div>
+          <div class="stream-when">hier</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== BOTTOM SHEET ==================== -->
+    <div class="sheet-backdrop" id="sheetBackdrop" onclick="closeSheet()"></div>
+    <div class="bottom-sheet" id="bottomSheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-content">
+        <div class="sheet-question" id="sheetQuestion">Pour qui ?</div>
+        <div class="sheet-context" id="sheetContext">&#129529; Caisse nettoyée</div>
+
+        <div class="animal-selector">
+          <div class="animal-pick pixel" onclick="pickAnimal(this, 'Pixel')">
+            <div class="face">&#128049;</div>
+            <div class="pick-name">Pixel</div>
+          </div>
+          <div class="animal-pick luna" onclick="pickAnimal(this, 'Luna')">
+            <div class="face">&#128049;</div>
+            <div class="pick-name">Luna</div>
+          </div>
+        </div>
+
+        <div id="resourceArea" style="display:none">
+          <div class="resource-label">Quelle caisse ?</div>
+          <div class="resource-list">
+            <div class="resource-opt" onclick="pickResource(this, 'Caisse cuisine')">Caisse cuisine</div>
+            <div class="resource-opt" onclick="pickResource(this, 'Caisse salon')">Caisse salon</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TOAST ==================== -->
+    <div class="toast-wrap" id="toastWrap">
+      <div class="toast">
+        <div class="toast-row">
+          <div class="toast-icon">&#10003;</div>
+          <div class="toast-body">
+            <div class="toast-msg" id="toastMsg">Noté !</div>
+            <div class="toast-when" id="toastWhen">09h14</div>
+          </div>
+        </div>
+        <div class="toast-opts" id="toastOpts">
+          <div class="toast-opt" onclick="expandNote()">&#128221; Note</div>
+          <div class="toast-opt" onclick="expandWeight()">&#9878;&#65039; Poids</div>
+          <div class="toast-opt toast-opt-undo" onclick="undo()">Annuler</div>
+        </div>
+        <div class="toast-expand" id="toastExpand">
+          <input class="toast-field" id="toastField" placeholder="Ajouter une note...">
+          <button class="toast-submit" onclick="saveNote()">Enregistrer</button>
+        </div>
+        <div class="toast-bar" id="toastBar"></div>
+      </div>
+    </div>
+
+    <!-- ==================== BOTTOM NAV ==================== -->
+    <div class="bottom-nav">
+      <div class="nav-item active">
+        <div class="nav-icon">&#127968;</div>
+        <div class="nav-label">Accueil</div>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">&#128197;</div>
+        <div class="nav-label">Timeline</div>
+      </div>
+      <div class="nav-add" onclick="openSheetNav()">+</div>
+      <div class="nav-item">
+        <div class="nav-icon">&#128276;</div>
+        <div class="nav-label">Rappels</div>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">&#128100;</div>
+        <div class="nav-label">Profil</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="proto-hint" id="hint">Swipe les actions ou tape un chip pour logger</div>
+
+<script>
+  let currentAction = '';
+  let currentIcon = '';
+  let needsResource = false;
+  let selectedAnimal = '';
+  let toastTimer = null;
+
+  // Hint
+  setTimeout(() => {
+    document.getElementById('hint').classList.add('show');
+    setTimeout(() => document.getElementById('hint').classList.remove('show'), 3500);
+  }, 800);
+
+  // ==================== SHEET ====================
+  function openSheet(chip) {
+    currentAction = chip.dataset.action;
+    currentIcon = chip.dataset.icon;
+    needsResource = chip.dataset.resource === 'true';
+    selectedAnimal = '';
+
+    document.getElementById('sheetQuestion').textContent = 'Pour qui ?';
+    document.getElementById('sheetContext').innerHTML = currentIcon + ' ' + currentAction;
+    document.getElementById('resourceArea').style.display = 'none';
+
+    document.querySelectorAll('.animal-pick').forEach(p => p.classList.remove('selected'));
+    document.querySelectorAll('.resource-opt').forEach(r => r.classList.remove('selected'));
+
+    document.getElementById('sheetBackdrop').classList.add('visible');
+    setTimeout(() => document.getElementById('bottomSheet').classList.add('open'), 10);
+  }
+
+  function openSheetNav() {
+    currentAction = '';
+    currentIcon = '+';
+    needsResource = false;
+    document.getElementById('sheetQuestion').textContent = "Qu'est-ce que tu viens de faire ?";
+    document.getElementById('sheetContext').textContent = "Choisis une action en haut d'abord";
+    document.getElementById('resourceArea').style.display = 'none';
+    document.getElementById('sheetBackdrop').classList.add('visible');
+    setTimeout(() => document.getElementById('bottomSheet').classList.add('open'), 10);
+  }
+
+  function closeSheet() {
+    document.getElementById('bottomSheet').classList.remove('open');
+    setTimeout(() => document.getElementById('sheetBackdrop').classList.remove('visible'), 350);
+  }
+
+  function pickAnimal(el, name) {
+    document.querySelectorAll('.animal-pick').forEach(p => p.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedAnimal = name;
+
+    if (needsResource) {
+      document.getElementById('resourceArea').style.display = 'block';
+    } else {
+      setTimeout(() => {
+        closeSheet();
+        setTimeout(() => showToast(name), 400);
+      }, 250);
+    }
+  }
+
+  function pickResource(el, resource) {
+    document.querySelectorAll('.resource-opt').forEach(r => r.classList.remove('selected'));
+    el.classList.add('selected');
+    setTimeout(() => {
+      closeSheet();
+      setTimeout(() => showToast(selectedAnimal, resource), 400);
+    }, 250);
+  }
+
+  // ==================== TOAST ====================
+  function showToast(animal, resource) {
+    const now = new Date();
+    const t = now.getHours().toString().padStart(2,'0') + 'h' + now.getMinutes().toString().padStart(2,'0');
+
+    let msg = resource
+      ? resource + ' nettoyée'
+      : currentAction + ' — ' + animal;
+
+    document.getElementById('toastMsg').textContent = msg;
+    document.getElementById('toastWhen').textContent = t;
+    document.getElementById('toastExpand').classList.remove('visible');
+    document.getElementById('toastOpts').style.display = 'flex';
+
+    const wrap = document.getElementById('toastWrap');
+    const bar = document.getElementById('toastBar');
+
+    wrap.classList.add('visible');
+    bar.classList.remove('running');
+    bar.style.display = '';
+
+    requestAnimationFrame(() => requestAnimationFrame(() => bar.classList.add('running')));
+
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(dismissToast, 3300);
+  }
+
+  function dismissToast() {
+    document.getElementById('toastWrap').classList.remove('visible');
+    clearTimeout(toastTimer);
+  }
+
+  function expandNote() {
+    clearTimeout(toastTimer);
+    const bar = document.getElementById('toastBar');
+    bar.classList.remove('running');
+    bar.style.display = 'none';
+    document.getElementById('toastOpts').style.display = 'none';
+
+    const exp = document.getElementById('toastExpand');
+    exp.classList.add('visible');
+    const field = document.getElementById('toastField');
+    field.placeholder = 'Ajouter une note...';
+    field.type = 'text';
+    field.value = '';
+    setTimeout(() => field.focus(), 100);
+  }
+
+  function expandWeight() {
+    clearTimeout(toastTimer);
+    const bar = document.getElementById('toastBar');
+    bar.classList.remove('running');
+    bar.style.display = 'none';
+    document.getElementById('toastOpts').style.display = 'none';
+
+    const exp = document.getElementById('toastExpand');
+    exp.classList.add('visible');
+    const field = document.getElementById('toastField');
+    field.placeholder = '0,0 kg';
+    field.type = 'number';
+    field.step = '0.1';
+    field.value = '';
+    setTimeout(() => field.focus(), 100);
+  }
+
+  function saveNote() {
+    dismissToast();
+    document.getElementById('toastBar').style.display = '';
+  }
+
+  function undo() {
+    dismissToast();
+    document.getElementById('toastBar').style.display = '';
+  }
+</script>
+</body>
+</html>

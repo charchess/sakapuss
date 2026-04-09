@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sakapuss - Design Directions</title>
+    <style>
+        :root {
+            --primary: #1A56DB;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --bg: #F9FAFB;
+            --card: #FFFFFF;
+            --text: #111827;
+            --radius: 16px;
+        }
+
+        body { font-family: 'Inter', sans-serif; background: #eee; margin: 0; padding: 20px; color: var(--text); }
+        .showcase { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
+        .device { background: #333; border-radius: 40px; padding: 15px; width: 300px; height: 600px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); margin: auto; position: relative; overflow: hidden; border: 8px solid #444; }
+        .screen { background: var(--bg); width: 100%; height: 100%; border-radius: 25px; overflow-y: auto; position: relative; }
+
+        /* Direction 1: Dashboard First */
+        .dir1 .card { background: var(--card); border-radius: 12px; padding: 15px; margin: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; align-items: center; }
+        .dir1 .icon-box { width: 40px; height: 40px; border-radius: 50%; background: #EBF5FF; color: var(--primary); display: flex; align-items: center; justify-content: center; margin-right: 12px; font-weight: bold; }
+
+        /* Direction 2: Timeline Stream */
+        .dir2 .event { border-left: 2px solid var(--primary); margin-left: 20px; padding: 15px; position: relative; }
+        .dir2 .event::before { content: ''; width: 12px; height: 12px; background: var(--primary); border-radius: 50%; position: absolute; left: -7px; top: 20px; }
+
+        /* Direction 3: 1-Tap Pro */
+        .dir3 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
+        .dir3 .tap-btn { background: var(--card); height: 120px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+        .dir3 .tap-btn:active { transform: scale(0.95); border-color: var(--primary); }
+        .dir3 .icon-large { font-size: 32px; margin-bottom: 8px; }
+
+        /* General UI Elements */
+        .header { padding: 20px 15px; display: flex; justify-content: space-between; align-items: center; }
+        .animal-chip { background: #fff; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid #ddd; }
+        .fab { position: absolute; bottom: 20px; right: 20px; width: 56px; height: 56px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 12px rgba(26,86,219,0.4); }
+
+        h3 { text-align: center; margin-bottom: 10px; font-size: 16px; }
+        .label { background: var(--primary); color: white; padding: 4px 10px; border-radius: 4px; font-size: 10px; position: absolute; top: 10px; right: 10px; }
+    </style>
+</head>
+<body>
+
+    <h1 style="text-align: center; margin-bottom: 40px;">Sakapuss - Exploration du Design</h1>
+
+    <div class="showcase">
+
+        <!-- Variation 1: Dashboard -->
+        <div>
+            <h3>1. Dashboard First</h3>
+            <div class="device dir1">
+                <div class="screen">
+                    <div class="header">
+                        <span style="font-weight: bold;">Sakapuss</span>
+                        <div class="animal-chip">🐱 Vanille</div>
+                    </div>
+                    <div class="card"><div class="icon-box">⚖️</div> <div><small>Poids</small><br>4.2 kg</div></div>
+                    <div class="card"><div class="icon-box">💉</div> <div><small>Vaccin</small><br>Dans 12 jours</div></div>
+                    <div class="card"><div class="icon-box">💩</div> <div><small>Litière</small><br>Nettoyée à 08:30</div></div>
+                    <div class="fab">+</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Variation 2: Timeline -->
+        <div>
+            <h3>2. Timeline Stream</h3>
+            <div class="device dir2">
+                <div class="screen">
+                    <div class="header"><b>Journal</b></div>
+                    <div class="event"><b>Aujourd'hui, 08:30</b><br><small>Litière nettoyée (RAS)</small></div>
+                    <div class="event"><b>Hier, 19:45</b><br><small>Repas servi (Poulet)</small></div>
+                    <div class="event" style="border-left-color: var(--warning);"><b>Hier, 07:15</b><br><small style="color: var(--warning);">Vomissement détecté</small></div>
+                    <div class="fab">+</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Variation 3: 1-Tap Pro -->
+        <div>
+            <h3>3. 1-Tap Mobile</h3>
+            <div class="device dir3">
+                <div class="screen">
+                    <div class="header"><b>Actions Rapides</b></div>
+                    <div class="grid">
+                        <div class="tap-btn"><span class="icon-large">💩</span>Litière</div>
+                        <div class="tap-btn"><span class="icon-large">🍗</span>Repas</div>
+                        <div class="tap-btn"><span class="icon-large">⚖️</span>Pesée</div>
+                        <div class="tap-btn"><span class="icon-large">💊</span>Soin</div>
+                    </div>
+                    <div style="padding: 15px; color: #666; font-size: 12px; text-align: center;">Cliquez sur une icône pour loguer instantanément</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div style="max-width: 800px; margin: 50px auto; background: white; padding: 30px; border-radius: 16px;">
+        <h2>Guide d'évaluation</h2>
+        <p><b>Direction 1 (Dashboard)</b> : Idéal pour voir l'état actuel de la santé en un coup d'œil. Très "Mushroom cards".</p>
+        <p><b>Direction 2 (Timeline)</b> : Excellent pour l'aspect journal de bord et historique vétérinaire.</p>
+        <p><b>Direction 3 (1-Tap)</b> : L'efficacité pure. Conçu pour être ouvert, cliqué, et refermé en 2 secondes.</p>
+        <hr>
+        <p><i>Note : Ces mockups sont interactifs (cliquez sur les boutons dans la Dir 3).</i></p>
+    </div>
+
+</body>
+</html>

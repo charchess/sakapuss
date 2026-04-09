@@ -1,0 +1,151 @@
+# generated: 2026-04-09
+# last_updated: 2026-04-09
+# project: sakapuss
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: _bmad-output/implementation-artifacts
+#
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# SPRINT PLAN:
+# ============
+# Sprint 1 (MVP): Epics 1-5 — Camille can sign up, add animals, quick log, reminders, timeline
+# Sprint 2 (Multi-user): Epics 6-7 — Household + Vet portal
+# Sprint 3 (Resources): Epic 8 — Food, bowls, water tracking
+# Sprint 4 (Intelligence): Epic 9 — Correlations, analytics, behavioral journal
+# Sprint 5 (HA): Epic 10 — MQTT Discovery, voice validation, notifications
+
+generated: 2026-04-09
+last_updated: 2026-04-09
+project: sakapuss
+project_key: NOKEY
+tracking_system: file-system
+story_location: "_bmad-output/implementation-artifacts"
+
+development_status:
+  # ═══════════════════════════════════════════════
+  # SPRINT 1 — MVP (Camille core experience)
+  # ═══════════════════════════════════════════════
+
+  # Epic 1: Foundations & Sign-Up
+  epic-1: in-progress
+  1-1-project-scaffolding-docker: review
+  1-2-user-registration: review
+  1-3-user-login-jwt-auth: review
+  1-4-design-system-css-foundation: review
+  1-5-settings-page: review
+  epic-1-retrospective: optional
+
+  # Epic 2: My Animals
+  epic-2: in-progress
+  2-1-pet-crud-api: review
+  2-2-add-animal-page: review
+  2-3-animal-profile-page: review
+  2-4-edit-delete-animal: review
+  2-5-photo-upload: review
+  2-6-onboarding-flow: review
+  epic-2-retrospective: optional
+
+  # Epic 3: The Core Loop — Quick Log
+  epic-3: backlog
+  3-1-events-polymorphic-system: review
+  3-2-bottom-navigation-component: review
+  3-3-dashboard-page: review
+  3-4-quick-log-selection: review
+  3-5-quick-log-confirmation: review
+  3-6-household-resources-model: review
+  epic-3-retrospective: optional
+
+  # Epic 4: Reminders & Lifecycle
+  epic-4: in-progress
+  4-1-reminders-model-crud-api: review
+  4-2-reminder-list-page: review
+  4-3-reminder-detail-validation: review
+  4-4-reminder-notifications: review
+  epic-4-retrospective: optional
+
+  # Epic 5: Timeline & History
+  epic-5: in-progress
+  5-1-timeline-page: review
+  5-2-category-filter-pills: review
+  5-3-weight-chart-page: review
+  5-4-anomaly-detection-service: review
+  5-5-animal-profile-completion: review
+  epic-5-retrospective: optional
+
+  # ═══════════════════════════════════════════════
+  # SPRINT 2 — Multi-User & Vet Portal
+  # ═══════════════════════════════════════════════
+
+  # Epic 6: Multi-User Household
+  epic-6: in-progress
+  6-1-household-members-model: review
+  6-2-household-management-page: review
+  6-3-thomas-onboarding: review
+  6-4-role-based-dashboard: review
+  epic-6-retrospective: optional
+
+  # Epic 7: Veterinarian Sharing
+  epic-7: in-progress
+  7-1-vet-access-links-api: review
+  7-2-vet-share-page: review
+  7-3-vet-landing-page: review
+  7-4-vet-cabinet-dashboard: review
+  7-5-patient-dossier-page: review
+  epic-7-retrospective: optional
+
+  # ═══════════════════════════════════════════════
+  # SPRINT 3 — Food & Resources
+  # ═══════════════════════════════════════════════
+
+  # Epic 8: Food & Household Resources
+  epic-8: in-progress
+  8-1-food-products-catalog: review
+  8-2-bag-lifecycle-management: review
+  8-3-bowl-management: review
+  8-4-bowl-filling-serving-log: review
+  8-5-consumption-estimation-alert: review
+  8-6-water-tracking: review
+  epic-8-retrospective: optional
+
+  # ═══════════════════════════════════════════════
+  # SPRINT 4 — Intelligence
+  # ═══════════════════════════════════════════════
+
+  # Epic 9: Intelligence & Correlations
+  epic-9: in-progress
+  9-1-free-form-event-entry: review
+  9-2-behavioral-journal-tags: review
+  9-3-photo-gallery: review
+  9-4-correlation-engine: review
+  9-5-analytics-insights-page: review
+  epic-9-retrospective: optional
+
+  # ═══════════════════════════════════════════════
+  # SPRINT 5 — Home Assistant
+  # ═══════════════════════════════════════════════
+
+  # Epic 10: Home Assistant & MQTT
+  epic-10: in-progress
+  10-1-mqtt-bridge-setup: review
+  10-2-ha-discovery: review
+  10-3-bidirectional-validation: review
+  10-4-proactive-notifications: review
+  10-5-stock-alerts-mqtt: review
+  epic-10-retrospective: optional

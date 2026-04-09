@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sakapuss — Portail Veterinaire Dr. Martin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F8F6FF;
+  --surface: #FFFFFF;
+  --primary: #6C5CE7;
+  --primary-light: #A29BFE;
+  --secondary: #00CEC9;
+  --success: #00B894;
+  --warning: #FDCB6E;
+  --error: #E17055;
+  --text-primary: #2D3436;
+  --text-secondary: #636E72;
+  --text-muted: #B2BEC3;
+  --border: #EDE9FE;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+  --cat-sante: #E17055;
+  --cat-poids: #6C5CE7;
+  --cat-alimentation: #00CEC9;
+  --cat-litiere: #FDCB6E;
+  --cat-comportement: #A29BFE;
+  --cat-rappels: #E17055;
+  --cat-activite: #74B9FF;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+}
+
+/* ---- Top bar ---- */
+.topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 64px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px 0 24px;
+  z-index: 100;
+}
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.logo {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--primary);
+  letter-spacing: -0.5px;
+}
+.cabinet-name {
+  font-size: 14px;
+  color: var(--text-secondary);
+  border-left: 1px solid var(--border);
+  padding-left: 16px;
+}
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.avatar-circle {
+  width: 40px; height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* ---- Sidebar ---- */
+.sidebar {
+  position: fixed;
+  top: 64px; left: 0;
+  width: 64px;
+  bottom: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 16px;
+  gap: 8px;
+  z-index: 90;
+}
+.sidebar-btn {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.sidebar-btn svg {
+  width: 22px; height: 22px;
+  stroke: var(--text-muted);
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sidebar-btn.active {
+  background: var(--primary);
+}
+.sidebar-btn.active svg {
+  stroke: #fff;
+}
+.sidebar-btn:hover:not(.active) {
+  background: var(--bg);
+}
+
+/* ---- Main layout ---- */
+.main-wrapper {
+  margin-top: 64px;
+  margin-left: 64px;
+  min-height: calc(100vh - 64px);
+}
+.main-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 40px;
+}
+
+/* ---- View toggling ---- */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ---- Dashboard view ---- */
+.search-bar {
+  position: relative;
+  margin-bottom: 32px;
+}
+.search-bar input {
+  width: 100%;
+  height: 56px;
+  border-radius: var(--radius-xl);
+  border: 2px solid var(--primary-light);
+  background: var(--surface);
+  padding: 0 24px 0 52px;
+  font-size: 16px;
+  font-family: 'Inter', sans-serif;
+  color: var(--text-primary);
+  box-shadow: 0 4px 24px rgba(108, 92, 231, 0.08);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-bar input::placeholder { color: var(--text-muted); }
+.search-bar input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 4px 32px rgba(108, 92, 231, 0.14);
+}
+.search-bar .search-icon {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.search-bar .search-icon svg {
+  width: 20px; height: 20px;
+  stroke: var(--primary-light);
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Nunito', sans-serif;
+}
+.section-title .badge {
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  background: rgba(225, 112, 85, 0.12);
+  color: var(--error);
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+}
+
+/* Alert cards */
+.alert-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 36px;
+}
+.alert-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.alert-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+.alert-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+}
+.alert-card.type-weight::before { background: var(--error); }
+.alert-card.type-weight { background: linear-gradient(135deg, rgba(225,112,85,0.06) 0%, var(--surface) 60%); }
+.alert-card.type-reminder::before { background: var(--warning); }
+.alert-card.type-reminder { background: linear-gradient(135deg, rgba(253,203,110,0.1) 0%, var(--surface) 60%); }
+
+.alert-card-icon {
+  width: 42px; height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.alert-card.type-weight .alert-card-icon { background: rgba(225,112,85,0.12); }
+.alert-card.type-reminder .alert-card-icon { background: rgba(253,203,110,0.15); }
+.alert-card-icon svg {
+  width: 20px; height: 20px;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.alert-card.type-weight .alert-card-icon svg { stroke: var(--error); }
+.alert-card.type-reminder .alert-card-icon svg { stroke: var(--warning); }
+
+.alert-card-body { flex: 1; }
+.alert-card-body .animal-name {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+.alert-card-body .owner {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-left: 6px;
+  font-weight: 400;
+}
+.alert-card-body .alert-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* Patient list */
+.patients-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.patient-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.patient-card:hover {
+  border-color: var(--primary-light);
+  box-shadow: 0 4px 16px rgba(108, 92, 231, 0.06);
+}
+.patient-avatar {
+  width: 44px; height: 44px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: #fff;
+  flex-shrink: 0;
+}
+.patient-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+.patient-name-col {
+  min-width: 120px;
+}
+.patient-name-col .name {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+}
+.patient-name-col .species {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.patient-detail {
+  font-size: 14px;
+  color: var(--text-secondary);
+  min-width: 100px;
+}
+.patient-detail .label {
+  font-size: 12px;
+  color: var(--text-muted);
+  display: block;
+}
+.patient-alert-badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  background: rgba(225, 112, 85, 0.1);
+  color: var(--error);
+  white-space: nowrap;
+}
+
+/* ---- Dossier view ---- */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  margin-bottom: 28px;
+}
+.breadcrumb a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+}
+.breadcrumb a:hover { text-decoration: underline; }
+.breadcrumb .sep { color: var(--text-muted); }
+.breadcrumb .current { color: var(--text-secondary); }
+
+.dossier-layout {
+  display: grid;
+  grid-template-columns: 35% 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+/* Left column */
+.left-col { display: flex; flex-direction: column; gap: 20px; }
+
+.identity-card {
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  padding: 28px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+  text-align: center;
+}
+.identity-avatar {
+  width: 80px; height: 80px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.identity-avatar svg {
+  width: 36px; height: 36px;
+  stroke: #fff;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.identity-card .pet-name {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--text-primary);
+}
+.identity-card .pet-meta {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+.identity-card .pet-chip {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 8px;
+  font-family: monospace;
+  letter-spacing: 0.5px;
+}
+.identity-card .pet-owner {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.identity-card .pet-owner strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.stats-card {
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+}
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+}
+.stat-row:not(:last-child) { border-bottom: 1px solid var(--border); }
+.stat-label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.stat-value {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+}
+.stat-value .trend {
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 6px;
+}
+.stat-value .trend.down { color: var(--error); }
+
+.sparkline-card {
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  padding: 20px 24px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+}
+.sparkline-card .sparkline-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.sparkline-card svg {
+  display: block;
+}
+
+.reminders-card {
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+}
+.reminders-card .card-title {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 14px;
+}
+.reminder-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  font-size: 14px;
+}
+.reminder-row:not(:last-child) { border-bottom: 1px solid var(--border); }
+.reminder-dot {
+  width: 10px; height: 10px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+.reminder-row .reminder-name { flex: 1; color: var(--text-primary); font-weight: 500; }
+.reminder-row .reminder-status { color: var(--text-secondary); font-size: 13px; }
+.reminder-row .reminder-status.ok { color: var(--success); font-weight: 600; }
+
+/* Right column */
+.right-col { display: flex; flex-direction: column; gap: 20px; }
+
+.dossier-alert {
+  border-radius: var(--radius-lg);
+  padding: 18px 22px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  border-left: 3px solid;
+}
+.dossier-alert.type-error {
+  background: rgba(225,112,85,0.08);
+  border-left-color: var(--error);
+}
+.dossier-alert.type-warning {
+  background: rgba(253,203,110,0.1);
+  border-left-color: var(--warning);
+}
+.dossier-alert .alert-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.dossier-alert.type-error .alert-icon { background: rgba(225,112,85,0.12); }
+.dossier-alert.type-warning .alert-icon { background: rgba(253,203,110,0.15); }
+.dossier-alert .alert-icon svg {
+  width: 18px; height: 18px;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.dossier-alert.type-error .alert-icon svg { stroke: var(--error); }
+.dossier-alert.type-warning .alert-icon svg { stroke: var(--warning); }
+.dossier-alert .alert-content .alert-title {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+.dossier-alert.type-error .alert-content .alert-title { color: var(--error); }
+.dossier-alert.type-warning .alert-content .alert-title { color: #d4a017; }
+.dossier-alert .alert-content .alert-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* Filter pills */
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.filter-pill {
+  padding: 6px 18px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 2px solid var(--primary);
+  transition: background 0.15s, color 0.15s;
+  font-family: 'Inter', sans-serif;
+  background: none;
+}
+.filter-pill.active {
+  background: var(--primary);
+  color: #fff;
+}
+.filter-pill:not(.active) {
+  background: transparent;
+  color: var(--primary);
+}
+.filter-pill:hover:not(.active) {
+  background: rgba(108,92,231,0.06);
+}
+
+/* Timeline */
+.timeline {
+  padding-top: 12px;
+}
+.timeline-day {
+  margin-bottom: 8px;
+}
+.timeline-day-header {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  padding-left: 28px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.timeline-entry {
+  display: flex;
+  gap: 14px;
+  padding: 10px 0;
+  position: relative;
+  padding-left: 4px;
+}
+.timeline-entry:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 32px;
+  bottom: -2px;
+  width: 2px;
+  background: var(--border);
+}
+.timeline-dot {
+  width: 22px; height: 22px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  background: var(--bg);
+}
+.timeline-dot::before {
+  content: '';
+  width: 10px; height: 10px;
+  border-radius: var(--radius-full);
+  background: currentColor;
+}
+.timeline-body {
+  flex: 1;
+  min-width: 0;
+}
+.timeline-body .tl-header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 2px;
+}
+.timeline-body .tl-category {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.timeline-body .tl-time {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.timeline-body .tl-desc {
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+.timeline-body .tl-value {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+}
+.timeline-body .tl-delta {
+  font-size: 13px;
+  font-weight: 600;
+  margin-left: 4px;
+}
+.timeline-body .tl-note {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-top: 4px;
+  padding-left: 12px;
+  border-left: 2px solid var(--border);
+}
+
+/* hide activity entries by default */
+.timeline-entry.cat-activite { display: none; }
+.timeline-entry.cat-activite.visible { display: flex; }
+</style>
+</head>
+<body>
+
+<!-- ====== Top Bar ====== -->
+<header class="topbar">
+  <div class="topbar-left">
+    <span class="logo">Sakapuss</span>
+    <span class="cabinet-name">Cabinet Dr. Martin</span>
+  </div>
+  <div class="topbar-right">
+    <div class="avatar-circle">DM</div>
+  </div>
+</header>
+
+<!-- ====== Sidebar ====== -->
+<nav class="sidebar">
+  <button class="sidebar-btn active" title="Dashboard" onclick="showView('dashboard')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+  </button>
+  <button class="sidebar-btn" title="Patients">
+    <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>
+  </button>
+  <button class="sidebar-btn" title="Parametres">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+  </button>
+</nav>
+
+<div class="main-wrapper">
+
+<!-- ============================================= -->
+<!--  VIEW 1: DASHBOARD                            -->
+<!-- ============================================= -->
+<div id="view-dashboard" class="view active">
+<div class="main-content">
+
+  <!-- Search -->
+  <div class="search-bar">
+    <span class="search-icon">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </span>
+    <input type="text" placeholder="Rechercher un patient...">
+  </div>
+
+  <!-- Alerts section -->
+  <div class="section-title">
+    <svg style="width:18px;height:18px;stroke:var(--error);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    Patients avec alertes
+    <span class="badge">2</span>
+  </div>
+
+  <div class="alert-grid">
+    <!-- Pixel alert -->
+    <div class="alert-card type-weight" onclick="showView('dossier')">
+      <div class="alert-card-icon">
+        <svg viewBox="0 0 24 24"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+      </div>
+      <div class="alert-card-body">
+        <div><span class="animal-name">Pixel</span><span class="owner">Camille</span></div>
+        <div class="alert-text">Poids en baisse depuis 3 semaines</div>
+      </div>
+    </div>
+    <!-- Luna alert -->
+    <div class="alert-card type-reminder">
+      <div class="alert-card-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div class="alert-card-body">
+        <div><span class="animal-name">Luna</span><span class="owner">Camille</span></div>
+        <div class="alert-text">Vermifuge en retard &mdash; 12 jours</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Patients recents -->
+  <div class="section-title" style="margin-top:8px;">
+    Patients r&eacute;cents
+  </div>
+
+  <div class="patients-list">
+    <!-- Pixel -->
+    <div class="patient-card" onclick="showView('dossier')">
+      <div class="patient-avatar" style="background: var(--primary);">P</div>
+      <div class="patient-info">
+        <div class="patient-name-col">
+          <div class="name">Pixel</div>
+          <div class="species">Chat</div>
+        </div>
+        <div class="patient-detail">
+          <span class="label">Propri&eacute;taire</span>
+          Camille
+        </div>
+        <div class="patient-detail">
+          <span class="label">Derni&egrave;re visite</span>
+          2 avr. 2026
+        </div>
+      </div>
+      <div class="patient-alert-badge">Alerte poids</div>
+    </div>
+    <!-- Luna -->
+    <div class="patient-card">
+      <div class="patient-avatar" style="background: var(--secondary);">L</div>
+      <div class="patient-info">
+        <div class="patient-name-col">
+          <div class="name">Luna</div>
+          <div class="species">Chat</div>
+        </div>
+        <div class="patient-detail">
+          <span class="label">Propri&eacute;taire</span>
+          Camille
+        </div>
+        <div class="patient-detail">
+          <span class="label">Derni&egrave;re visite</span>
+          28 mars 2026
+        </div>
+      </div>
+      <div class="patient-alert-badge">Vermifuge</div>
+    </div>
+    <!-- Rex -->
+    <div class="patient-card">
+      <div class="patient-avatar" style="background: var(--success);">R</div>
+      <div class="patient-info">
+        <div class="patient-name-col">
+          <div class="name">Rex</div>
+          <div class="species">Chien</div>
+        </div>
+        <div class="patient-detail">
+          <span class="label">Propri&eacute;taire</span>
+          Sophie
+        </div>
+        <div class="patient-detail">
+          <span class="label">Derni&egrave;re visite</span>
+          15 mars 2026
+        </div>
+      </div>
+    </div>
+    <!-- Minou -->
+    <div class="patient-card">
+      <div class="patient-avatar" style="background: var(--cat-litiere);">M</div>
+      <div class="patient-info">
+        <div class="patient-name-col">
+          <div class="name">Minou</div>
+          <div class="species">Chat</div>
+        </div>
+        <div class="patient-detail">
+          <span class="label">Propri&eacute;taire</span>
+          Thomas
+        </div>
+        <div class="patient-detail">
+          <span class="label">Derni&egrave;re visite</span>
+          2 mars 2026
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ============================================= -->
+<!--  VIEW 2: DOSSIER PIXEL                        -->
+<!-- ============================================= -->
+<div id="view-dossier" class="view">
+<div class="main-content">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a onclick="showView('dashboard')">Dashboard</a>
+    <span class="sep">
+      <svg style="width:14px;height:14px;stroke:var(--text-muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </span>
+    <span class="current">Pixel</span>
+  </div>
+
+  <div class="dossier-layout">
+
+    <!-- LEFT COLUMN -->
+    <div class="left-col">
+
+      <!-- Identity card -->
+      <div class="identity-card">
+        <div class="identity-avatar">
+          <svg viewBox="0 0 24 24"><path d="M12 22c-4.97 0-9-2.69-9-6v-2c0-.55.12-1.08.34-1.57"/><path d="M3 10V5l3.5 3"/><path d="M20.66 8.43C20.88 8.92 21 9.45 21 10v2c0 3.31-4.03 6-9 6"/><path d="M21 5v5l-3.5-3"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><path d="M8 17s1.5 2 4 2 4-2 4-2"/></svg>
+        </div>
+        <div class="pet-name">Pixel</div>
+        <div class="pet-meta">Chat Europ&eacute;en &middot; M&acirc;le &middot; 3 ans</div>
+        <div class="pet-chip">Puce: 250269800123456</div>
+        <div class="pet-owner">Propri&eacute;taire: <strong>Camille Dupont</strong></div>
+      </div>
+
+      <!-- Quick stats -->
+      <div class="stats-card">
+        <div class="stat-row">
+          <span class="stat-label">Dernier poids</span>
+          <span class="stat-value">
+            4.8 kg
+            <span class="trend down">
+              <svg style="width:14px;height:14px;stroke:var(--error);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;margin-top:-2px" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+              en baisse
+            </span>
+          </span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Derni&egrave;re visite</span>
+          <span class="stat-value">2 avr. 2026</span>
+        </div>
+      </div>
+
+      <!-- Sparkline -->
+      <div class="sparkline-card">
+        <div class="sparkline-label">Poids &mdash; 3 derniers mois</div>
+        <svg width="100%" height="60" viewBox="0 0 280 60" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#6C5CE7" stop-opacity="0.15"/>
+              <stop offset="100%" stop-color="#6C5CE7" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path d="M0,30 L35,28 L70,24 L105,20 L140,18 L175,22 L210,30 L245,36 L280,42 L280,60 L0,60 Z" fill="url(#sparkGrad)"/>
+          <polyline points="0,30 35,28 70,24 105,20 140,18 175,22 210,30 245,36 280,42" fill="none" stroke="#6C5CE7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="280" cy="42" r="4" fill="#E17055" stroke="#fff" stroke-width="2"/>
+          <text x="0" y="56" font-size="9" fill="#B2BEC3" font-family="Inter">jan</text>
+          <text x="90" y="56" font-size="9" fill="#B2BEC3" font-family="Inter">fev</text>
+          <text x="180" y="56" font-size="9" fill="#B2BEC3" font-family="Inter">mars</text>
+          <text x="258" y="56" font-size="9" fill="#B2BEC3" font-family="Inter">avr</text>
+        </svg>
+      </div>
+
+      <!-- Reminders -->
+      <div class="reminders-card">
+        <div class="card-title">Rappels</div>
+        <div class="reminder-row">
+          <div class="reminder-dot" style="background: var(--warning);"></div>
+          <span class="reminder-name">Vermifuge</span>
+          <span class="reminder-status">dans 3 jours</span>
+        </div>
+        <div class="reminder-row">
+          <div class="reminder-dot" style="background: var(--text-muted);"></div>
+          <span class="reminder-name">Vaccin</span>
+          <span class="reminder-status">dans 3 semaines</span>
+        </div>
+        <div class="reminder-row">
+          <div class="reminder-dot" style="background: var(--success);"></div>
+          <span class="reminder-name">Antipuce</span>
+          <span class="reminder-status ok">
+            <svg style="width:14px;height:14px;stroke:var(--success);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;margin-right:2px;margin-top:-1px" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            OK
+          </span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="right-col">
+
+      <!-- Alert cards -->
+      <div class="dossier-alert type-error">
+        <div class="alert-icon">
+          <svg viewBox="0 0 24 24"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+        </div>
+        <div class="alert-content">
+          <div class="alert-title">Poids en baisse</div>
+          <div class="alert-desc">Pixel a perdu 200g en 3 semaines</div>
+        </div>
+      </div>
+
+      <div class="dossier-alert type-warning">
+        <div class="alert-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="alert-content">
+          <div class="alert-title">Traitement en retard</div>
+          <div class="alert-desc">Vermifuge &mdash; 12 jours de retard</div>
+        </div>
+      </div>
+
+      <!-- Filter pills -->
+      <div class="filter-bar">
+        <button class="filter-pill active" onclick="setFilter('medical')">M&eacute;dical</button>
+        <button class="filter-pill" onclick="setFilter('all')">Tout afficher</button>
+      </div>
+
+      <!-- Timeline -->
+      <div class="timeline" id="timeline">
+
+        <!-- 2 avr -->
+        <div class="timeline-day">
+          <div class="timeline-day-header">2 avril 2026</div>
+
+          <div class="timeline-entry" style="color: var(--cat-sante);">
+            <div class="timeline-dot"></div>
+            <div class="timeline-body">
+              <div class="tl-header">
+                <span class="tl-category" style="color:var(--cat-sante);">Sant&eacute;</span>
+                <span class="tl-time">14:30</span>
+              </div>
+              <div class="tl-desc">Consultation v&eacute;t&eacute;rinaire &mdash; Dr. Martin</div>
+              <div class="tl-note">Examen g&eacute;n&eacute;ral. Perte de poids constat&eacute;e, bilan sanguin demand&eacute;.</div>
+            </div>
+          </div>
+
+          <div class="timeline-entry" style="color: var(--cat-poids);">
+            <div class="timeline-dot"></div>
+            <div class="timeline-body">
+              <div class="tl-header">
+                <span class="tl-category" style="color:var(--cat-poids);">Poids</span>
+                <span class="tl-time">14:35</span>
+              </div>
+              <div class="tl-desc">
+                <span class="tl-value">4.8 kg</span>
+                <span class="tl-delta" style="color:var(--error);">-80g</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-entry cat-activite" style="color: var(--cat-activite);">
+            <div class="timeline-dot"></div>
+            <div class="timeline-body">
+              <div class="tl-header">
+                <span class="tl-category" style="color:var(--cat-activite);">Activit&eacute;</span>
+                <span class="tl-time">09:00</span>
+              </div>
+              <div class="tl-desc">Jeu actif 15 min &mdash; plumeau</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 28 mars -->
+        <div class="timeline-day">
+          <div class="timeline-day-header">28 mars 2026</div>
+
+          <div class="timeline-entry" style="color: var(--cat-alimentation);">
+            <div class="timeline-dot"></div>
+            <div class="timeline-body">
+              <div class="tl-header">
+                <span class="tl-category" style="color:var(--cat-alimentation);">Alimentation</span>
+                <span class="tl-time">08:15</span>
+              </div>
+              <div class="tl-desc">Changement vers croquettes Royal Canin Urinary</div>
+              <div class="tl-note">Recommandation v&eacute;to suite probl&egrave;mes urinaires pr&eacute;c&eacute;dents.</div>
+            </div>
+          </div>
+
+          <div class="timeline-entry" style="color: var(--cat-poids);">
+            <div class="timeline-dot"></div>
+            <div class="timeline-body">
+              <div class="tl-header">
+                <span class="tl-category" style="color:var(--cat-poids);">Poids</span>
+                <span class="tl-time">08:00</span>
+              </div>
+              <div class="tl-desc">
+                <span class="tl-value">4.88 kg</span>
+                <span class="tl-delta" style="color:var(--error);">-60g</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 21 mars -->
+        <div class="timeline-day">
+          <div class="timeline-day-header">21 mars 2026</div>
+
+          <div class="timeline-entry" style="color: var(--cat-comportement);">
+            <div class="timeline-dot"></div>
+            <div class="timeline-body">
+              <div class="tl-header">
+                <span class="tl-category" style="color:var(--cat-comportement);">Comportement</span>
+                <span class="tl-time">20:00</span>
+              </div>
+              <div class="tl-desc">Moins joueur que d'habitude, dort plus</div>
+              <div class="tl-note">Camille note une baisse d'&eacute;nergie depuis quelques jours.</div>
+            </div>
+          </div>
+
+          <div class="timeline-entry" style="color: var(--cat-litiere);">
+            <div class="timeline-dot"></div>
+            <div class="timeline-body">
+              <div class="tl-header">
+                <span class="tl-category" style="color:var(--cat-litiere);">Liti&egrave;re</span>
+                <span class="tl-time">18:30</span>
+              </div>
+              <div class="tl-desc">Fr&eacute;quence normale, consistance OK</div>
+            </div>
+          </div>
+
+          <div class="timeline-entry" style="color: var(--cat-poids);">
+            <div class="timeline-dot"></div>
+            <div class="timeline-body">
+              <div class="tl-header">
+                <span class="tl-category" style="color:var(--cat-poids);">Poids</span>
+                <span class="tl-time">08:00</span>
+              </div>
+              <div class="tl-desc">
+                <span class="tl-value">4.94 kg</span>
+                <span class="tl-delta" style="color:var(--error);">-60g</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-entry cat-activite" style="color: var(--cat-activite);">
+            <div class="timeline-dot"></div>
+            <div class="timeline-body">
+              <div class="tl-header">
+                <span class="tl-category" style="color:var(--cat-activite);">Activit&eacute;</span>
+                <span class="tl-time">10:00</span>
+              </div>
+              <div class="tl-desc">Jeu faible 5 min &mdash; laser</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 14 mars -->
+        <div class="timeline-day">
+          <div class="timeline-day-header">14 mars 2026</div>
+
+          <div class="timeline-entry" style="color: var(--cat-sante);">
+            <div class="timeline-dot"></div>
+            <div class="timeline-body">
+              <div class="tl-header">
+                <span class="tl-category" style="color:var(--cat-sante);">Sant&eacute;</span>
+                <span class="tl-time">10:00</span>
+              </div>
+              <div class="tl-desc">Rappel vermifuge &mdash; non administr&eacute;</div>
+              <div class="tl-note">Camille signale oubli, pr&eacute;voit de le faire dans la semaine.</div>
+            </div>
+          </div>
+
+          <div class="timeline-entry" style="color: var(--cat-poids);">
+            <div class="timeline-dot"></div>
+            <div class="timeline-body">
+              <div class="tl-header">
+                <span class="tl-category" style="color:var(--cat-poids);">Poids</span>
+                <span class="tl-time">08:00</span>
+              </div>
+              <div class="tl-desc">
+                <span class="tl-value">5.0 kg</span>
+                <span class="tl-delta" style="color:var(--text-muted);">stable</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+</div>
+
+</div>
+
+<script>
+function showView(view) {
+  document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
+  document.querySelectorAll('.sidebar-btn').forEach(function(b) { b.classList.remove('active'); });
+
+  if (view === 'dashboard') {
+    document.getElementById('view-dashboard').classList.add('active');
+    document.querySelectorAll('.sidebar-btn')[0].classList.add('active');
+  } else if (view === 'dossier') {
+    document.getElementById('view-dossier').classList.add('active');
+    document.querySelectorAll('.sidebar-btn')[0].classList.add('active');
+    window.scrollTo(0, 0);
+  }
+}
+
+function setFilter(mode) {
+  var pills = document.querySelectorAll('.filter-pill');
+  pills.forEach(function(p) { p.classList.remove('active'); });
+
+  if (mode === 'medical') {
+    pills[0].classList.add('active');
+    document.querySelectorAll('.timeline-entry.cat-activite').forEach(function(e) { e.classList.remove('visible'); });
+  } else {
+    pills[1].classList.add('active');
+    document.querySelectorAll('.timeline-entry.cat-activite').forEach(function(e) { e.classList.add('visible'); });
+  }
+}
+</script>
+
+</body>
+</html>

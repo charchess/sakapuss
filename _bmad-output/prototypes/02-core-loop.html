@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Sakapuss — Core Loop Prototype</title>
+<style>
+  /* ==================== DESIGN TOKENS ==================== */
+  :root {
+    /* Brand */
+    --primary: #6C5CE7;
+    --primary-light: #A29BFE;
+    --primary-dark: #4A3FC7;
+    --secondary: #00CEC9;
+    --secondary-light: #81ECEC;
+    --accent: #FDCB6E;
+    --accent-dark: #E17055;
+
+    /* Neutral */
+    --bg: #FAFAFA;
+    --surface: #FFFFFF;
+    --text-primary: #2D3436;
+    --text-secondary: #636E72;
+    --text-muted: #B2BEC3;
+    --border: #DFE6E9;
+
+    /* Semantic */
+    --success: #00B894;
+    --warning: #FDCB6E;
+    --error: #E17055;
+    --info: #74B9FF;
+
+    /* Categories */
+    --cat-health: #E17055;
+    --cat-weight: #6C5CE7;
+    --cat-food: #00CEC9;
+    --cat-litter: #FDCB6E;
+    --cat-behavior: #A29BFE;
+    --cat-event: #636E72;
+    --cat-reminders: #E17055;
+    --cat-activity: #74B9FF;
+
+    /* Spacing */
+    --space-2xs: 2px;
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 12px;
+    --space-lg: 16px;
+    --space-xl: 24px;
+    --space-2xl: 32px;
+    --space-3xl: 48px;
+
+    /* Radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-full: 9999px;
+
+    /* Elevation */
+    --elevation-sm: 0 1px 3px rgba(0,0,0,0.08);
+    --elevation-md: 0 4px 12px rgba(0,0,0,0.1);
+    --elevation-lg: 0 8px 24px rgba(0,0,0,0.12);
+
+    /* Type */
+    --font-display: 'Nunito', system-ui, sans-serif;
+    --font-default: 'Inter', system-ui, sans-serif;
+  }
+
+  /* ==================== RESET ==================== */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-default);
+    background: #1a1a2e;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  /* ==================== PHONE FRAME ==================== */
+  .phone {
+    width: 375px;
+    height: 812px;
+    background: var(--bg);
+    border-radius: 40px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3), inset 0 0 0 3px #333;
+  }
+
+  .phone-screen {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    padding-bottom: 80px;
+  }
+
+  /* Hide scrollbar */
+  .phone-screen::-webkit-scrollbar { display: none; }
+  .phone-screen { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Status bar */
+  .status-bar {
+    height: 44px;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--space-xl);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .status-bar-icons { display: flex; gap: 6px; font-size: 12px; }
+
+  /* ==================== PAGE: DASHBOARD ==================== */
+  .page { display: none; width: 100%; min-height: 100%; }
+  .page.active { display: block; }
+
+  /* Header */
+  .dashboard-header {
+    background: var(--surface);
+    padding: var(--space-lg) var(--space-lg) var(--space-md);
+  }
+  .greeting {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: var(--space-md);
+  }
+  .animal-tabs {
+    display: flex;
+    gap: var(--space-sm);
+    overflow-x: auto;
+    padding-bottom: var(--space-sm);
+  }
+  .animal-tab {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    border: 2px solid var(--border);
+    background: var(--surface);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .animal-tab.active {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: rgba(108, 92, 231, 0.06);
+  }
+  .animal-tab .avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  /* Action Grid */
+  .action-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+  }
+  .action-tile {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg) var(--space-sm);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: var(--elevation-sm);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .action-tile:active {
+    transform: scale(0.95);
+    border-color: var(--primary-light);
+  }
+  .action-tile .icon {
+    font-size: 28px;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+  }
+  .action-tile .label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    text-align: center;
+  }
+  .action-tile[data-cat="litter"] .icon { background: rgba(253,203,110,0.15); }
+  .action-tile[data-cat="food"] .icon { background: rgba(0,206,201,0.15); }
+  .action-tile[data-cat="weight"] .icon { background: rgba(108,92,231,0.15); }
+  .action-tile[data-cat="health"] .icon { background: rgba(225,112,85,0.15); }
+  .action-tile[data-cat="behavior"] .icon { background: rgba(162,155,254,0.15); }
+  .action-tile[data-cat="event"] .icon { background: rgba(99,110,114,0.15); }
+
+  /* Reminder Banner */
+  .reminder-banner {
+    margin: 0 var(--space-lg);
+    padding: var(--space-md);
+    background: rgba(253,203,110,0.1);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+  }
+  .reminder-banner .content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .reminder-banner .title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .reminder-banner .date {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .reminder-banner .see-all {
+    font-size: 13px;
+    color: var(--primary);
+    font-weight: 500;
+  }
+
+  /* Recent Activity */
+  .recent-section {
+    padding: var(--space-xl) var(--space-lg) var(--space-lg);
+  }
+  .recent-header {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-md);
+  }
+  .recent-entry {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm) 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .recent-entry:last-child { border-bottom: none; }
+  .category-badge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+  }
+  .badge-litter { background: rgba(253,203,110,0.15); color: #d4a017; }
+  .badge-food { background: rgba(0,206,201,0.15); color: #00a8a3; }
+  .badge-weight { background: rgba(108,92,231,0.15); color: var(--primary); }
+  .recent-entry .text {
+    flex: 1;
+    font-size: 14px;
+    color: var(--text-primary);
+  }
+  .recent-entry .time {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ==================== BOTTOM NAV ==================== */
+  .bottom-nav {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 72px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 var(--space-sm);
+    z-index: 20;
+  }
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    cursor: pointer;
+    padding: var(--space-xs);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-item .nav-icon { font-size: 22px; }
+  .nav-item .nav-label { font-size: 10px; color: var(--text-muted); font-weight: 500; }
+  .nav-item.active .nav-label { color: var(--primary); }
+  .nav-item.active .nav-icon { filter: none; }
+
+  .nav-center {
+    width: 52px;
+    height: 52px;
+    background: var(--primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: white;
+    cursor: pointer;
+    margin-top: -20px;
+    box-shadow: var(--elevation-md);
+    transition: transform 0.15s;
+  }
+  .nav-center:active { transform: scale(0.92); }
+
+  /* ==================== BOTTOM SHEET (Quick Log Selection) ==================== */
+  .sheet-backdrop {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 30;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .sheet-backdrop.visible { display: block; opacity: 1; }
+
+  .bottom-sheet {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    z-index: 31;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    padding-bottom: 34px;
+  }
+  .bottom-sheet.open { transform: translateY(0); }
+
+  .sheet-handle {
+    width: 40px;
+    height: 4px;
+    background: var(--border);
+    border-radius: var(--radius-full);
+    margin: var(--space-sm) auto var(--space-md);
+  }
+  .sheet-content { padding: 0 var(--space-lg) var(--space-lg); }
+
+  .sheet-action-label {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .sheet-section-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--space-sm);
+  }
+
+  .animal-selector {
+    display: flex;
+    gap: var(--space-lg);
+    justify-content: center;
+    margin-bottom: var(--space-xl);
+  }
+  .animal-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .animal-option .avatar-lg {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    border: 3px solid var(--border);
+    transition: all 0.2s;
+  }
+  .animal-option:active .avatar-lg,
+  .animal-option.selected .avatar-lg {
+    border-color: var(--primary);
+    transform: scale(1.05);
+    box-shadow: 0 0 0 3px rgba(108,92,231,0.2);
+  }
+  .animal-option .name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .resource-grid {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+  }
+  .resource-pill {
+    padding: var(--space-sm) var(--space-md);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-full);
+    font-size: 14px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--surface);
+  }
+  .resource-pill:active,
+  .resource-pill.selected {
+    border-color: var(--primary);
+    background: rgba(108,92,231,0.06);
+    color: var(--primary);
+  }
+
+  /* ==================== TOAST (Quick Log Confirmation) ==================== */
+  .toast-container {
+    position: absolute;
+    bottom: 84px;
+    left: var(--space-lg);
+    right: var(--space-lg);
+    z-index: 25;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    pointer-events: none;
+  }
+  .toast-container.visible {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .toast {
+    background: rgba(45, 52, 54, 0.94);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md) var(--space-lg);
+    color: var(--surface);
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+    position: relative;
+  }
+  .toast-main {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+  }
+  .toast-check {
+    width: 24px;
+    height: 24px;
+    background: var(--success);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .toast-message {
+    font-size: 15px;
+    font-weight: 500;
+  }
+  .toast-time {
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    margin-left: auto;
+  }
+
+  .toast-actions {
+    display: flex;
+    gap: var(--space-md);
+    margin-bottom: var(--space-sm);
+  }
+  .toast-action {
+    padding: var(--space-xs) var(--space-md);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    background: transparent;
+    transition: all 0.15s;
+  }
+  .toast-action:hover {
+    border-color: rgba(255,255,255,0.4);
+    color: white;
+  }
+  .toast-action-undo {
+    margin-left: auto;
+    border: none;
+    color: rgba(255,255,255,0.4);
+    font-size: 12px;
+  }
+
+  .toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: rgba(255,255,255,0.3);
+    transition: width 3s linear;
+    width: 100%;
+  }
+  .toast-progress.running { width: 0%; }
+
+  /* Toast expanded */
+  .toast-expanded {
+    display: none;
+    margin-top: var(--space-sm);
+  }
+  .toast-expanded.visible { display: block; }
+  .toast-input {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: var(--radius-sm);
+    color: white;
+    font-size: 15px;
+    font-family: var(--font-default);
+    outline: none;
+    margin-bottom: var(--space-sm);
+  }
+  .toast-input::placeholder { color: rgba(255,255,255,0.3); }
+  .toast-save {
+    width: 100%;
+    padding: var(--space-sm);
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-default);
+  }
+
+  /* ==================== NAVIGATION HINT ==================== */
+  .proto-hint {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(45,52,54,0.9);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-family: var(--font-default);
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+  .proto-hint.show { opacity: 1; }
+
+  /* ==================== PROTOTYPE LABEL ==================== */
+  .proto-label {
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-default);
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="proto-label">Sakapuss Prototype — Scénario 02 : Core Loop</div>
+
+<div class="phone">
+  <div class="phone-screen" id="screen">
+
+    <!-- STATUS BAR -->
+    <div class="status-bar">
+      <span>9:14</span>
+      <span class="status-bar-icons">
+        <span>&#9679;</span>
+        <span>&#9679;</span>
+        <span>&#9679;</span>
+      </span>
+    </div>
+
+    <!-- ==================== PAGE: DASHBOARD ==================== -->
+    <div class="page active" id="page-dashboard">
+
+      <!-- Header -->
+      <div class="dashboard-header">
+        <div class="greeting">Bonjour, Camille</div>
+        <div class="animal-tabs">
+          <div class="animal-tab active">
+            <span>Tous</span>
+          </div>
+          <div class="animal-tab" onclick="filterAnimal('pixel')">
+            <div class="avatar">&#128049;</div>
+            <span>Pixel</span>
+          </div>
+          <div class="animal-tab" onclick="filterAnimal('luna')">
+            <div class="avatar">&#128049;</div>
+            <span>Luna</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Action Grid -->
+      <div class="action-grid">
+        <div class="action-tile" data-cat="litter" data-action="Caisse nettoyée" data-icon="&#129529;" onclick="openQuickLog(this)">
+          <div class="icon">&#129529;</div>
+          <div class="label">Caisse nettoyée</div>
+        </div>
+        <div class="action-tile" data-cat="food" data-action="Gamelle remplie" data-icon="&#127869;" onclick="openQuickLog(this)">
+          <div class="icon">&#127869;</div>
+          <div class="label">Gamelle remplie</div>
+        </div>
+        <div class="action-tile" data-cat="weight" data-action="Pesée" data-icon="&#9878;&#65039;" onclick="openQuickLog(this)">
+          <div class="icon">&#9878;&#65039;</div>
+          <div class="label">Pesée</div>
+        </div>
+        <div class="action-tile" data-cat="health" data-action="Médicament" data-icon="&#128138;" onclick="openQuickLog(this)">
+          <div class="icon">&#128138;</div>
+          <div class="label">Médicament</div>
+        </div>
+        <div class="action-tile" data-cat="behavior" data-action="Observation" data-icon="&#128065;" onclick="openQuickLog(this)">
+          <div class="icon">&#128065;</div>
+          <div class="label">Observation</div>
+        </div>
+        <div class="action-tile" data-cat="event" data-action="Événement libre" data-icon="&#128221;" onclick="openQuickLog(this)">
+          <div class="icon">&#128221;</div>
+          <div class="label">Événement libre</div>
+        </div>
+      </div>
+
+      <!-- Reminder Banner -->
+      <div class="reminder-banner">
+        <div class="content">
+          <div class="title">&#128138; Vermifuge de Pixel</div>
+          <div class="date">Dans 3 jours</div>
+        </div>
+        <div class="see-all">Voir tout &#8250;</div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="recent-section">
+        <div class="recent-header">Récent</div>
+        <div class="recent-entry">
+          <span class="category-badge badge-litter">Litière</span>
+          <span class="text">Pixel — Caisse nettoyée</span>
+          <span class="time">il y a 2h</span>
+        </div>
+        <div class="recent-entry">
+          <span class="category-badge badge-food">Aliment.</span>
+          <span class="text">Tous — Gamelle remplie</span>
+          <span class="time">il y a 5h</span>
+        </div>
+        <div class="recent-entry">
+          <span class="category-badge badge-weight">Poids</span>
+          <span class="text">Luna — 4.2 kg</span>
+          <span class="time">hier</span>
+        </div>
+      </div>
+
+    </div>
+    <!-- END DASHBOARD -->
+
+    <!-- ==================== BOTTOM SHEET: Quick Log Selection ==================== -->
+    <div class="sheet-backdrop" id="sheetBackdrop" onclick="closeSheet()"></div>
+    <div class="bottom-sheet" id="bottomSheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-content">
+        <div class="sheet-action-label" id="sheetActionLabel">&#129529; Caisse nettoyée</div>
+
+        <div class="sheet-section-label">Quel animal ?</div>
+        <div class="animal-selector">
+          <div class="animal-option" onclick="selectAnimal(this, 'Pixel')">
+            <div class="avatar-lg">&#128049;</div>
+            <div class="name">Pixel</div>
+          </div>
+          <div class="animal-option" onclick="selectAnimal(this, 'Luna')">
+            <div class="avatar-lg">&#128049;</div>
+            <div class="name">Luna</div>
+          </div>
+        </div>
+
+        <div id="resourceSection" style="display:none;">
+          <div class="sheet-section-label">Ressource du foyer</div>
+          <div class="resource-grid">
+            <div class="resource-pill" onclick="selectResource(this, 'Caisse cuisine')">Caisse cuisine</div>
+            <div class="resource-pill" onclick="selectResource(this, 'Caisse salon')">Caisse salon</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TOAST: Quick Log Confirmation ==================== -->
+    <div class="toast-container" id="toastContainer">
+      <div class="toast">
+        <div class="toast-main">
+          <div class="toast-check">&#10003;</div>
+          <div class="toast-message" id="toastMessage">Caisse de Pixel nettoyée</div>
+          <div class="toast-time" id="toastTime">09h14</div>
+        </div>
+        <div class="toast-actions">
+          <div class="toast-action" onclick="expandNote()">
+            &#128221; <span>Note</span>
+          </div>
+          <div class="toast-action" onclick="expandWeight()">
+            &#9878;&#65039; <span>Poids</span>
+          </div>
+          <div class="toast-action toast-action-undo" onclick="undoEntry()">
+            Annuler
+          </div>
+        </div>
+        <div class="toast-expanded" id="toastExpanded">
+          <input class="toast-input" id="toastInput" placeholder="Ajouter une note...">
+          <button class="toast-save" onclick="saveExpanded()">Enregistrer</button>
+        </div>
+        <div class="toast-progress" id="toastProgress"></div>
+      </div>
+    </div>
+
+    <!-- ==================== BOTTOM NAV ==================== -->
+    <div class="bottom-nav">
+      <div class="nav-item active">
+        <div class="nav-icon">&#127968;</div>
+        <div class="nav-label">Accueil</div>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">&#128197;</div>
+        <div class="nav-label">Timeline</div>
+      </div>
+      <div class="nav-center" onclick="openQuickLogFromNav()">+</div>
+      <div class="nav-item">
+        <div class="nav-icon">&#128276;</div>
+        <div class="nav-label">Rappels</div>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">&#128100;</div>
+        <div class="nav-label">Profil</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Hint -->
+<div class="proto-hint" id="hint">Tape une action pour lancer le Quick Log &#8593;</div>
+
+<script>
+  // ==================== STATE ====================
+  let currentAction = '';
+  let currentIcon = '';
+  let selectedAnimal = '';
+  let toastTimer = null;
+  let showResources = false;
+
+  // ==================== HINT ====================
+  setTimeout(() => {
+    document.getElementById('hint').classList.add('show');
+    setTimeout(() => document.getElementById('hint').classList.remove('show'), 4000);
+  }, 1000);
+
+  // ==================== QUICK LOG FLOW ====================
+
+  function openQuickLog(tile) {
+    currentAction = tile.dataset.action;
+    currentIcon = tile.querySelector('.icon').textContent;
+    showResources = (currentAction === 'Caisse nettoyée' || currentAction === 'Gamelle remplie');
+
+    document.getElementById('sheetActionLabel').textContent = currentIcon + ' ' + currentAction;
+    document.getElementById('resourceSection').style.display = showResources ? 'block' : 'none';
+
+    // Reset selections
+    document.querySelectorAll('.animal-option').forEach(o => o.classList.remove('selected'));
+    document.querySelectorAll('.resource-pill').forEach(p => p.classList.remove('selected'));
+    selectedAnimal = '';
+
+    // Open sheet
+    document.getElementById('sheetBackdrop').classList.add('visible');
+    setTimeout(() => document.getElementById('bottomSheet').classList.add('open'), 10);
+  }
+
+  function openQuickLogFromNav() {
+    currentAction = '';
+    currentIcon = '+';
+    document.getElementById('sheetActionLabel').textContent = 'Quelle action ?';
+    document.getElementById('resourceSection').style.display = 'none';
+    document.getElementById('sheetBackdrop').classList.add('visible');
+    setTimeout(() => document.getElementById('bottomSheet').classList.add('open'), 10);
+  }
+
+  function closeSheet() {
+    document.getElementById('bottomSheet').classList.remove('open');
+    setTimeout(() => document.getElementById('sheetBackdrop').classList.remove('visible'), 350);
+  }
+
+  function selectAnimal(el, name) {
+    document.querySelectorAll('.animal-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedAnimal = name;
+
+    if (!showResources) {
+      // No resources needed — go to confirmation
+      setTimeout(() => {
+        closeSheet();
+        setTimeout(() => showToast(name), 400);
+      }, 200);
+    }
+  }
+
+  function selectResource(el, resource) {
+    document.querySelectorAll('.resource-pill').forEach(p => p.classList.remove('selected'));
+    el.classList.add('selected');
+
+    if (selectedAnimal) {
+      setTimeout(() => {
+        closeSheet();
+        setTimeout(() => showToast(selectedAnimal, resource), 400);
+      }, 200);
+    }
+  }
+
+  // ==================== TOAST ====================
+
+  function showToast(animal, resource) {
+    const now = new Date();
+    const timeStr = now.getHours().toString().padStart(2,'0') + 'h' + now.getMinutes().toString().padStart(2,'0');
+
+    let msg = '';
+    if (resource) {
+      msg = resource + ' nettoyée';
+    } else {
+      msg = currentAction.replace('nettoyée', 'de ' + animal + ' nettoyée')
+            .replace('remplie', 'de ' + animal + ' remplie')
+            .replace('Pesée', 'Pesée de ' + animal)
+            .replace('Médicament', 'Médicament pour ' + animal)
+            .replace('Observation', 'Observation de ' + animal)
+            .replace('Événement libre', 'Événement pour ' + animal);
+    }
+
+    document.getElementById('toastMessage').textContent = msg;
+    document.getElementById('toastTime').textContent = timeStr;
+    document.getElementById('toastExpanded').classList.remove('visible');
+
+    const container = document.getElementById('toastContainer');
+    const progress = document.getElementById('toastProgress');
+
+    container.classList.add('visible');
+    progress.classList.remove('running');
+
+    // Start countdown
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        progress.classList.add('running');
+      });
+    });
+
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      dismissToast();
+    }, 3200);
+  }
+
+  function dismissToast() {
+    document.getElementById('toastContainer').classList.remove('visible');
+    clearTimeout(toastTimer);
+  }
+
+  function expandNote() {
+    clearTimeout(toastTimer);
+    document.getElementById('toastProgress').classList.remove('running');
+    document.getElementById('toastProgress').style.display = 'none';
+
+    const expanded = document.getElementById('toastExpanded');
+    expanded.classList.add('visible');
+    const input = document.getElementById('toastInput');
+    input.placeholder = 'Ajouter une note...';
+    input.type = 'text';
+    input.value = '';
+    setTimeout(() => input.focus(), 100);
+  }
+
+  function expandWeight() {
+    clearTimeout(toastTimer);
+    document.getElementById('toastProgress').classList.remove('running');
+    document.getElementById('toastProgress').style.display = 'none';
+
+    const expanded = document.getElementById('toastExpanded');
+    expanded.classList.add('visible');
+    const input = document.getElementById('toastInput');
+    input.placeholder = '0,0 kg';
+    input.type = 'number';
+    input.step = '0.1';
+    input.value = '';
+    setTimeout(() => input.focus(), 100);
+  }
+
+  function saveExpanded() {
+    dismissToast();
+    document.getElementById('toastProgress').style.display = '';
+    // Brief "Saved" feedback could go here
+  }
+
+  function undoEntry() {
+    dismissToast();
+    document.getElementById('toastProgress').style.display = '';
+  }
+
+  function filterAnimal(name) {
+    // Visual feedback only for prototype
+    document.querySelectorAll('.animal-tab').forEach(t => t.classList.remove('active'));
+    event.target.closest('.animal-tab').classList.add('active');
+  }
+</script>
+
+</body>
+</html>

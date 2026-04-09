@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sakapuss - Onboarding Prototype (01 - Camille s'installe)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F8F6FF;
+    --surface: #FFFFFF;
+    --primary: #6C5CE7;
+    --primary-light: #A29BFE;
+    --secondary: #00CEC9;
+    --success: #00B894;
+    --warning: #FDCB6E;
+    --error: #E17055;
+    --text-primary: #2D3436;
+    --text-secondary: #636E72;
+    --text-muted: #B2BEC3;
+    --border: #EDE9FE;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-full: 9999px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #1a1a2e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: var(--text-primary);
+  }
+
+  h1, h2, h3, h4 { font-family: 'Nunito', sans-serif; }
+
+  .phone-frame {
+    width: 375px;
+    height: 812px;
+    border-radius: 44px;
+    background: var(--bg);
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 0 8px #2d2d4e, 0 0 60px rgba(108, 92, 231, 0.3);
+  }
+
+  .steps-container {
+    display: flex;
+    width: 300%;
+    height: 100%;
+    transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .step {
+    width: 375px;
+    height: 100%;
+    flex-shrink: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .step::-webkit-scrollbar { display: none; }
+
+  /* ===== STEP 1 ===== */
+  .step1 {
+    padding: 48px 28px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cat-illustration {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 16px;
+  }
+
+  .app-name {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+
+  .tagline {
+    font-size: 14px;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-bottom: 36px;
+    line-height: 1.5;
+  }
+
+  .form-group {
+    width: 100%;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .input-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  .input-wrapper svg.input-icon-left {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+
+  .input-wrapper svg.input-icon-right {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  .input-wrapper svg.input-icon-right:hover {
+    color: var(--text-secondary);
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 14px 16px 14px 48px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .form-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .form-input:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px rgba(162, 155, 254, 0.15);
+  }
+
+  .form-input.has-right-icon {
+    padding-right: 48px;
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 4px 16px rgba(108, 92, 231, 0.35);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin: 20px 0;
+    gap: 12px;
+  }
+
+  .divider-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .divider-text {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .btn-social {
+    width: 100%;
+    padding: 13px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    background: var(--surface);
+    color: var(--text-primary);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: border-color 0.2s, background 0.2s;
+    margin-bottom: 10px;
+  }
+
+  .btn-social:hover {
+    border-color: var(--primary-light);
+    background: #faf9ff;
+  }
+
+  .bottom-link {
+    margin-top: 20px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .bottom-link a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .bottom-link a:hover {
+    text-decoration: underline;
+  }
+
+  /* ===== PROGRESS DOTS ===== */
+  .progress-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 0 8px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.3s, width 0.3s;
+  }
+
+  .dot.active {
+    width: 24px;
+    border-radius: 4px;
+    background: var(--primary);
+  }
+
+  .dot.done {
+    background: var(--primary-light);
+  }
+
+  /* ===== STEP 2 ===== */
+  .step2 {
+    padding: 40px 24px 32px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .step-header {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+
+  .step-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  .chips-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    min-height: 0;
+    margin-bottom: 0;
+    transition: min-height 0.3s, margin-bottom 0.3s;
+  }
+
+  .chips-row.has-chips {
+    min-height: 36px;
+    margin-bottom: 16px;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--surface);
+    border: 1.5px solid var(--primary-light);
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--primary);
+    animation: chipIn 0.3s ease;
+  }
+
+  @keyframes chipIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .chip svg { width: 14px; height: 14px; }
+
+  .chip-remove {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+
+  .chip-remove:hover { opacity: 1; }
+
+  .animal-card {
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    box-shadow: 0 2px 16px rgba(108, 92, 231, 0.06);
+    margin-bottom: 20px;
+  }
+
+  .photo-placeholder {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .photo-placeholder:hover {
+    background: #ddd6fe;
+  }
+
+  .photo-placeholder svg {
+    color: var(--primary-light);
+  }
+
+  .photo-label {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  .card-input {
+    width: 100%;
+    padding: 13px 16px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg);
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    margin-bottom: 14px;
+  }
+
+  .card-input::placeholder { color: var(--text-muted); }
+
+  .card-input:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px rgba(162, 155, 254, 0.15);
+  }
+
+  .species-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .species-option {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 8px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  .species-option:hover {
+    border-color: var(--primary-light);
+  }
+
+  .species-option.selected {
+    border-color: var(--primary);
+    background: #f5f3ff;
+    color: var(--primary);
+  }
+
+  .species-option svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .expand-link {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-family: 'Inter', sans-serif;
+    transition: color 0.2s;
+    padding: 0;
+    margin-bottom: 4px;
+  }
+
+  .expand-link:hover { color: var(--text-secondary); }
+
+  .expand-link svg {
+    transition: transform 0.3s;
+  }
+
+  .expand-link.open svg {
+    transform: rotate(180deg);
+  }
+
+  .extra-fields {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+  }
+
+  .extra-fields.open {
+    max-height: 300px;
+  }
+
+  .extra-fields .card-input {
+    font-size: 13px;
+    padding: 11px 14px;
+    margin-bottom: 10px;
+  }
+
+  .btn-outlined {
+    width: 100%;
+    padding: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    background: var(--surface);
+    color: var(--secondary);
+    border: 1.5px solid var(--secondary);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-bottom: 10px;
+  }
+
+  .btn-outlined:hover {
+    background: #e8fffe;
+  }
+
+  /* ===== STEP 3 ===== */
+  .step3 {
+    padding: 40px 24px 32px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .step3-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .mini-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .speech-bubble {
+    background: var(--surface);
+    border-radius: 16px 16px 16px 4px;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-style: italic;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    position: relative;
+    line-height: 1.5;
+  }
+
+  .category-card {
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    margin-bottom: 14px;
+    background: var(--surface);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  }
+
+  .category-header {
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .category-header.sante {
+    background: linear-gradient(135deg, #fde8e2, #f8a89a);
+  }
+
+  .category-header.poids {
+    background: linear-gradient(135deg, #ede9fe, #c4b5fd);
+  }
+
+  .category-header.alimentation {
+    background: linear-gradient(135deg, #ccfbf1, #81ecec);
+  }
+
+  .category-title {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text-primary);
+  }
+
+  .category-body {
+    padding: 14px 18px;
+  }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+  }
+
+  .toggle-row + .toggle-row {
+    border-top: 1px solid var(--border);
+  }
+
+  .toggle-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .toggle-freq {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .toggle-switch {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: #ddd;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 3px;
+    top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  }
+
+  .toggle-switch input:checked + .toggle-slider {
+    background: var(--primary);
+  }
+
+  .toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(20px);
+  }
+
+  .ghost-link {
+    display: block;
+    text-align: right;
+    font-size: 12px;
+    color: var(--text-muted);
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-family: 'Inter', sans-serif;
+    padding: 8px 0 4px;
+    transition: color 0.2s;
+  }
+
+  .ghost-link:hover { color: var(--text-secondary); }
+
+  .weight-input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 0;
+  }
+
+  .weight-input {
+    width: 80px;
+    padding: 10px 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg);
+    color: var(--text-primary);
+    outline: none;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+
+  .weight-input:focus {
+    border-color: var(--primary-light);
+  }
+
+  .weight-unit {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  .weight-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+
+  .meal-pills {
+    display: flex;
+    gap: 10px;
+    padding: 4px 0;
+  }
+
+  .meal-pill {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .meal-pill.selected {
+    border-color: var(--primary);
+    background: #f5f3ff;
+    color: var(--primary);
+  }
+
+  .meal-pill:hover {
+    border-color: var(--primary-light);
+  }
+
+  .meal-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+
+  /* Success state */
+  .success-overlay {
+    position: absolute;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s;
+    z-index: 10;
+    padding: 40px;
+  }
+
+  .success-overlay.visible {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .success-circle {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 24px;
+  }
+
+  .success-circle circle {
+    fill: none;
+    stroke: var(--success);
+    stroke-width: 3;
+    stroke-dasharray: 340;
+    stroke-dashoffset: 340;
+    transition: stroke-dashoffset 0.8s ease;
+  }
+
+  .success-overlay.visible .success-circle circle {
+    stroke-dashoffset: 0;
+  }
+
+  .success-circle polyline {
+    fill: none;
+    stroke: var(--success);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 60;
+    stroke-dashoffset: 60;
+    transition: stroke-dashoffset 0.5s ease 0.6s;
+  }
+
+  .success-overlay.visible .success-circle polyline {
+    stroke-dashoffset: 0;
+  }
+
+  .success-text {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 24px;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+
+  .success-sub {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 32px;
+  }
+
+  .btn-success-go {
+    width: 100%;
+    max-width: 280px;
+    padding: 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    background: var(--success);
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s;
+  }
+
+  .btn-success-go:hover {
+    box-shadow: 0 4px 16px rgba(0, 184, 148, 0.35);
+    transform: translateY(-1px);
+  }
+
+  /* Annotations strip */
+  .annotation-bar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(45, 52, 54, 0.9);
+    color: #ddd;
+    padding: 8px 20px;
+    border-radius: var(--radius-full);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+  }
+
+  .annotation-bar .step-label {
+    color: var(--primary-light);
+    font-weight: 600;
+  }
+
+  .annotation-bar button {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .annotation-bar button:hover {
+    background: rgba(255,255,255,0.25);
+  }
+
+  .annotation-bar button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+</style>
+</head>
+<body>
+
+<div class="phone-frame" id="phone">
+  <div class="steps-container" id="stepsContainer">
+
+    <!-- ===== STEP 1: Inscription ===== -->
+    <div class="step step1">
+      <!-- Cat illustration -->
+      <svg class="cat-illustration" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Ears -->
+        <path d="M25 45 L18 18 L40 35" stroke="#6C5CE7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="#EDE9FE"/>
+        <path d="M75 45 L82 18 L60 35" stroke="#6C5CE7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="#EDE9FE"/>
+        <!-- Inner ears -->
+        <path d="M27 40 L23 24 L37 35" stroke="#A29BFE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="#f5f3ff"/>
+        <path d="M73 40 L77 24 L63 35" stroke="#A29BFE" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="#f5f3ff"/>
+        <!-- Head -->
+        <circle cx="50" cy="55" r="28" stroke="#6C5CE7" stroke-width="2.5" fill="#EDE9FE"/>
+        <!-- Eyes -->
+        <circle cx="40" cy="50" r="4" fill="#6C5CE7"/>
+        <circle cx="60" cy="50" r="4" fill="#6C5CE7"/>
+        <circle cx="41.5" cy="48.5" r="1.5" fill="white"/>
+        <circle cx="61.5" cy="48.5" r="1.5" fill="white"/>
+        <!-- Nose -->
+        <path d="M48 58 L50 60 L52 58" stroke="#00CEC9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Mouth -->
+        <path d="M50 60 L50 63" stroke="#00CEC9" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M46 64 Q50 67 54 64" stroke="#00CEC9" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        <!-- Whiskers -->
+        <line x1="16" y1="52" x2="34" y2="56" stroke="#A29BFE" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="14" y1="58" x2="33" y2="59" stroke="#A29BFE" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="18" y1="64" x2="34" y2="62" stroke="#A29BFE" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="84" y1="52" x2="66" y2="56" stroke="#A29BFE" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="86" y1="58" x2="67" y2="59" stroke="#A29BFE" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="82" y1="64" x2="66" y2="62" stroke="#A29BFE" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+
+      <h1 class="app-name">Sakapuss</h1>
+      <p class="tagline">Le carnet de sant&#233; qui parle pour tes animaux</p>
+
+      <!-- Email -->
+      <div class="form-group">
+        <div class="input-wrapper">
+          <svg class="input-icon-left" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <path d="M22 7l-10 6L2 7"/>
+          </svg>
+          <input class="form-input" type="email" placeholder="Adresse email" value="camille@email.com">
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <div class="input-wrapper">
+          <svg class="input-icon-left" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2"/>
+            <path d="M7 11V7a5 5 0 0110 0v4"/>
+          </svg>
+          <input class="form-input has-right-icon" type="password" placeholder="Mot de passe" id="passwordInput" value="monmotdepasse">
+          <svg class="input-icon-right" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="eyeToggle" onclick="togglePassword()">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <button class="btn-primary" onclick="goToStep(2)" style="margin-top: 8px;">Cr&#233;er mon compte</button>
+
+      <!-- Divider -->
+      <div class="divider">
+        <div class="divider-line"></div>
+        <span class="divider-text">ou</span>
+        <div class="divider-line"></div>
+      </div>
+
+      <!-- Social -->
+      <button class="btn-social">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continuer avec Google
+      </button>
+
+      <button class="btn-social">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.32 2.32-2.11 4.45-3.74 4.25z"/>
+        </svg>
+        Continuer avec Apple
+      </button>
+
+      <p class="bottom-link">D&#233;j&#224; un compte ? <a href="#">Se connecter</a></p>
+    </div>
+
+    <!-- ===== STEP 2: Ajout animal ===== -->
+    <div class="step step2">
+      <div class="progress-dots">
+        <div class="dot done"></div>
+        <div class="dot active"></div>
+        <div class="dot"></div>
+      </div>
+
+      <h2 class="step-header">Qui sont tes animaux ?</h2>
+      <p class="step-subtitle">Nom et esp&#232;ce suffisent pour commencer</p>
+
+      <!-- Chips row -->
+      <div class="chips-row" id="chipsRow"></div>
+
+      <!-- Animal form card -->
+      <div class="animal-card">
+        <!-- Photo placeholder -->
+        <div class="photo-placeholder">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+        </div>
+        <p class="photo-label">Optionnel</p>
+
+        <!-- Name -->
+        <input class="card-input" type="text" placeholder="Comment s'appelle-t-il ?" id="animalName" value="Pixel" oninput="checkAnimalForm()">
+
+        <!-- Species -->
+        <div class="species-selector">
+          <div class="species-option selected" onclick="selectSpecies(this, 'cat')">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 22 L5 8 L13 16"/>
+              <path d="M24 22 L27 8 L19 16"/>
+              <circle cx="16" cy="20" r="9"/>
+              <circle cx="13" cy="18" r="1.5" fill="currentColor"/>
+              <circle cx="19" cy="18" r="1.5" fill="currentColor"/>
+              <path d="M15 22 L16 23 L17 22"/>
+            </svg>
+            <span>Chat</span>
+          </div>
+          <div class="species-option" onclick="selectSpecies(this, 'dog')">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 14 Q4 8 6 4 L12 12"/>
+              <path d="M24 14 Q28 8 26 4 L20 12"/>
+              <ellipse cx="16" cy="20" rx="10" ry="9"/>
+              <circle cx="13" cy="18" r="1.5" fill="currentColor"/>
+              <circle cx="19" cy="18" r="1.5" fill="currentColor"/>
+              <ellipse cx="16" cy="22" rx="3" ry="2"/>
+            </svg>
+            <span>Chien</span>
+          </div>
+          <div class="species-option" onclick="selectSpecies(this, 'other')">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <ellipse cx="10" cy="9" rx="3" ry="3.5"/>
+              <ellipse cx="22" cy="9" rx="3" ry="3.5"/>
+              <ellipse cx="7" cy="17" rx="3" ry="3.5"/>
+              <ellipse cx="25" cy="17" rx="3" ry="3.5"/>
+              <ellipse cx="16" cy="23" rx="5" ry="5"/>
+            </svg>
+            <span>Autre</span>
+          </div>
+        </div>
+
+        <!-- Expand link -->
+        <button class="expand-link" id="expandLink" onclick="toggleDetails()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+          Plus de d&#233;tails
+        </button>
+
+        <div class="extra-fields" id="extraFields">
+          <input class="card-input" type="text" placeholder="Race (optionnel)">
+          <input class="card-input" type="text" placeholder="Date de naissance (optionnel)">
+          <input class="card-input" type="text" placeholder="N&#176; puce (optionnel)">
+          <input class="card-input" type="text" placeholder="V&#233;t&#233;rinaire (optionnel)">
+        </div>
+      </div>
+
+      <!-- Bottom CTAs -->
+      <button class="btn-outlined" onclick="addAnother()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Ajouter un autre
+      </button>
+
+      <button class="btn-primary" id="continueBtn" onclick="goToStep(3)">Continuer
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-left: 4px;">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- ===== STEP 3: Onboarding Admin ===== -->
+    <div class="step step3">
+      <div class="progress-dots">
+        <div class="dot done"></div>
+        <div class="dot done"></div>
+        <div class="dot active"></div>
+      </div>
+
+      <div class="step3-header">
+        <div class="mini-avatar">
+          <svg width="22" height="22" viewBox="0 0 32 32" fill="none" stroke="#6C5CE7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 22 L5 8 L13 16"/>
+            <path d="M24 22 L27 8 L19 16"/>
+            <circle cx="16" cy="20" r="9"/>
+            <circle cx="13" cy="18" r="1.5" fill="#6C5CE7"/>
+            <circle cx="19" cy="18" r="1.5" fill="#6C5CE7"/>
+            <path d="M15 22 L16 23 L17 22"/>
+          </svg>
+        </div>
+        <h2 class="step-header" style="margin-bottom:0">Configurer Pixel</h2>
+      </div>
+
+      <!-- Speech bubble -->
+      <div class="speech-bubble">
+        Tu veux qu'on s'occupe de mes rappels ?
+      </div>
+
+      <!-- Sante card -->
+      <div class="category-card">
+        <div class="category-header sante">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E17055" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v4M12 18v4M2 12h4M18 12h4M12 8a4 4 0 100 8 4 4 0 000-8z"/>
+          </svg>
+          <span class="category-title">Rappels sant&#233;</span>
+        </div>
+        <div class="category-body">
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Vermifuge</div>
+              <div class="toggle-freq">tous les 3 mois</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Antipuce</div>
+              <div class="toggle-freq">tous les 3 mois</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Vaccins</div>
+              <div class="toggle-freq">tous les 3 mois</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <button class="ghost-link">Passer</button>
+        </div>
+      </div>
+
+      <!-- Poids card -->
+      <div class="category-card">
+        <div class="category-header poids">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6C5CE7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a4 4 0 00-4 4h8a4 4 0 00-4-4z"/>
+            <path d="M4 7h16l-1.5 14H5.5L4 7z"/>
+            <line x1="12" y1="11" x2="12" y2="17"/>
+            <line x1="9" y1="14" x2="15" y2="14"/>
+          </svg>
+          <span class="category-title">Suivi de poids</span>
+        </div>
+        <div class="category-body">
+          <div class="weight-label">Poids actuel de Pixel ?</div>
+          <div class="weight-input-row">
+            <input class="weight-input" type="number" placeholder="4.5" value="4.2">
+            <span class="weight-unit">kg</span>
+          </div>
+          <button class="ghost-link">Passer</button>
+        </div>
+      </div>
+
+      <!-- Alimentation card -->
+      <div class="category-card">
+        <div class="category-header alimentation">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00CEC9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 15C3 15 4 20 12 20C20 20 21 15 21 15"/>
+            <path d="M3 15C3 13 6 11 12 11C18 11 21 13 21 15"/>
+            <path d="M8 11V6"/>
+            <path d="M12 11V4"/>
+            <path d="M16 11V6"/>
+          </svg>
+          <span class="category-title">Alimentation</span>
+        </div>
+        <div class="category-body">
+          <div class="meal-label">Repas par jour ?</div>
+          <div class="meal-pills">
+            <div class="meal-pill" onclick="selectMeal(this)">1</div>
+            <div class="meal-pill selected" onclick="selectMeal(this)">2</div>
+            <div class="meal-pill" onclick="selectMeal(this)">3</div>
+          </div>
+          <button class="ghost-link">Passer</button>
+        </div>
+      </div>
+
+      <!-- Bottom CTA -->
+      <button class="btn-primary" onclick="showSuccess()" style="margin-top: 8px;">C'est parti !</button>
+
+      <!-- Success overlay -->
+      <div class="success-overlay" id="successOverlay">
+        <svg class="success-circle" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="54" stroke-dasharray="340" stroke-dashoffset="340"/>
+          <polyline points="38 62 52 76 82 46" stroke-dasharray="60" stroke-dashoffset="60"/>
+        </svg>
+        <div class="success-text">Pixel est pr&#234;t !</div>
+        <p class="success-sub">Tout est configur&#233;. On y va !</p>
+        <button class="btn-success-go">Aller au dashboard
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -3px; margin-left: 4px;">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Navigation bar -->
+<div class="annotation-bar">
+  <button id="prevBtn" onclick="navPrev()" disabled>Pr&#233;c&#233;dent</button>
+  <span class="step-label" id="stepLabel">01.1 Inscription</span>
+  <button id="nextBtn" onclick="navNext()">Suivant</button>
+</div>
+
+<script>
+  let currentStep = 1;
+  let animals = [];
+  const stepLabels = {
+    1: '01.1 Inscription',
+    2: '01.2 Ajout animal',
+    3: '01.3 Onboarding Admin'
+  };
+
+  function goToStep(step) {
+    // When going to step 3, ensure Pixel is added as chip
+    if (step === 3 && animals.length === 0) {
+      const name = document.getElementById('animalName').value.trim() || 'Pixel';
+      animals.push(name);
+      renderChips();
+    }
+    currentStep = step;
+    document.getElementById('stepsContainer').style.transform =
+      'translateX(-' + ((step - 1) * 375) + 'px)';
+    updateNav();
+  }
+
+  function updateNav() {
+    document.getElementById('stepLabel').textContent = stepLabels[currentStep];
+    document.getElementById('prevBtn').disabled = currentStep === 1;
+    document.getElementById('nextBtn').disabled = currentStep === 3;
+  }
+
+  function navPrev() {
+    if (currentStep > 1) goToStep(currentStep - 1);
+  }
+
+  function navNext() {
+    if (currentStep < 3) goToStep(currentStep + 1);
+  }
+
+  function togglePassword() {
+    var input = document.getElementById('passwordInput');
+    var eye = document.getElementById('eyeToggle');
+    if (input.type === 'password') {
+      input.type = 'text';
+      eye.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+    } else {
+      input.type = 'password';
+      eye.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+    }
+  }
+
+  function selectSpecies(el, species) {
+    var options = document.querySelectorAll('.species-option');
+    for (var i = 0; i < options.length; i++) {
+      options[i].classList.remove('selected');
+    }
+    el.classList.add('selected');
+  }
+
+  function toggleDetails() {
+    var link = document.getElementById('expandLink');
+    var fields = document.getElementById('extraFields');
+    link.classList.toggle('open');
+    fields.classList.toggle('open');
+  }
+
+  function checkAnimalForm() {
+    var name = document.getElementById('animalName').value.trim();
+    var btn = document.getElementById('continueBtn');
+    btn.disabled = !name && animals.length === 0;
+  }
+
+  function renderChips() {
+    var row = document.getElementById('chipsRow');
+    if (animals.length > 0) {
+      row.classList.add('has-chips');
+    } else {
+      row.classList.remove('has-chips');
+    }
+    var html = '';
+    for (var i = 0; i < animals.length; i++) {
+      html += '<div class="chip">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M6 17 L3 5 L9 12"/><path d="M18 17 L21 5 L15 12"/><circle cx="12" cy="15" r="7"/>' +
+        '</svg>' +
+        animals[i] +
+        '<span class="chip-remove" onclick="removeAnimal(' + i + ')">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+        '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>' +
+        '</svg></span></div>';
+    }
+    row.innerHTML = html;
+  }
+
+  function removeAnimal(index) {
+    animals.splice(index, 1);
+    renderChips();
+    checkAnimalForm();
+  }
+
+  function addAnother() {
+    var nameInput = document.getElementById('animalName');
+    var name = nameInput.value.trim();
+    if (name && animals.indexOf(name) === -1) {
+      animals.push(name);
+      renderChips();
+      nameInput.value = '';
+      nameInput.focus();
+      checkAnimalForm();
+    }
+  }
+
+  function selectMeal(el) {
+    var pills = document.querySelectorAll('.meal-pill');
+    for (var i = 0; i < pills.length; i++) {
+      pills[i].classList.remove('selected');
+    }
+    el.classList.add('selected');
+  }
+
+  function showSuccess() {
+    var overlay = document.getElementById('successOverlay');
+    overlay.classList.add('visible');
+  }
+
+  // Initialize form state
+  checkAnimalForm();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+
+# Build artifacts
+frontend/build/
+frontend/.svelte-kit/
+frontend/node_modules/.vite/
+
+# Test artifacts
+playwright-report/
+test-results/
+
+# Data (local dev)
+data/
+media/
+
+# Environment
+.env
+.envrc
+
+# Agent memory
+.opencode/memory/
+.opencode/napkin.md
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,10 @@
+fastapi==0.135.1
+uvicorn[standard]
+sqlalchemy>=2.0
+alembic
+pydantic>=2.10
+pydantic-settings
+python-multipart
+gmqtt
+bcrypt
+python-jose[cryptography]

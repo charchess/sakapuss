@@ -1,0 +1,15 @@
+# Gitleaks configuration for Sakapuss
+title = "Sakapuss Gitleaks Config"
+
+[allowlist]
+  description = "Known safe patterns"
+  paths = [
+    '''.env\.example''',
+    '''\.claude/''',
+    '''_bmad/''',
+    '''_bmad-output/''',
+    '''node_modules/''',
+    '''\.venv/''',
+    '''playwright-report/''',
+    '''test-results/''',
+  ]

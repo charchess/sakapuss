@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Sakapuss — Core Loop v3</title>
+<style>
+  :root {
+    --primary: #6C5CE7;
+    --primary-light: #A29BFE;
+    --primary-soft: rgba(108,92,231,0.08);
+    --secondary: #00CEC9;
+    --accent: #FDCB6E;
+    --accent-dark: #E17055;
+
+    --bg: #F8F6FF;
+    --surface: #FFFFFF;
+    --text-primary: #2D3436;
+    --text-secondary: #636E72;
+    --text-muted: #B2BEC3;
+    --border: #EDE9FE;
+
+    --success: #00B894;
+    --warning: #FDCB6E;
+    --error: #E17055;
+
+    --font-display: 'Nunito', system-ui, sans-serif;
+    --font-default: 'Inter', system-ui, sans-serif;
+
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-full: 9999px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font-default);
+    background: #1a1a2e;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  /* ==================== PHONE ==================== */
+  .phone {
+    width: 375px;
+    height: 812px;
+    background: var(--bg);
+    border-radius: 44px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.35), inset 0 0 0 2.5px #222;
+  }
+  .phone-screen {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    padding-bottom: 80px;
+  }
+  .phone-screen::-webkit-scrollbar { display: none; }
+  .phone-screen { scrollbar-width: none; }
+
+  /* ==================== HEADER ==================== */
+  .header {
+    padding: 52px 24px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .header-greeting {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1.1;
+  }
+  .header-greeting span {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+  .header-avatars {
+    display: flex;
+  }
+  .h-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2.5px solid var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    position: relative;
+  }
+  .h-avatar:nth-child(2) { margin-left: -10px; }
+  .h-avatar.pixel { background: linear-gradient(135deg, #a29bfe, #6c5ce7); }
+  .h-avatar.luna { background: linear-gradient(135deg, #81ecec, #00cec9); }
+  .h-avatar:active { transform: scale(1.12); z-index: 2; }
+  .notif-dot {
+    position: absolute;
+    top: -1px; right: -1px;
+    width: 9px; height: 9px;
+    background: var(--error);
+    border-radius: 50%;
+    border: 2px solid var(--bg);
+  }
+
+  /* ==================== ANIMAL HERO ==================== */
+  .animal-hero {
+    margin: 8px 24px 20px;
+  }
+  .animal-card {
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    padding: 16px 16px 14px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    box-shadow: 0 2px 16px rgba(108,92,231,0.07);
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .animal-card:active { transform: scale(0.98); }
+  .animal-face {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #ddd6fe, #a29bfe);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .animal-face::after {
+    content: '';
+    position: absolute;
+    bottom: -3px; right: -3px;
+    width: 14px; height: 14px;
+    background: var(--success);
+    border-radius: 50%;
+    border: 2.5px solid var(--surface);
+  }
+  .animal-speech { flex: 1; }
+  .animal-name {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+  }
+  .animal-bubble {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.35;
+    font-style: italic;
+  }
+  .animal-bubble em { color: var(--primary); font-style: normal; font-weight: 600; }
+  .animal-tags {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .atag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-weight: 500;
+  }
+  .atag-reminder { background: rgba(253,203,110,0.2); color: #c97f0a; }
+  .atag-weight { background: rgba(108,92,231,0.1); color: var(--primary); }
+
+  .hero-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .hdot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
+  .hdot.on { background: var(--primary); width: 16px; border-radius: 3px; }
+
+  /* ==================== ACTION GARDEN ==================== */
+  .action-garden {
+    padding: 0 20px;
+    margin-bottom: 8px;
+  }
+  .garden-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    margin-bottom: 16px;
+    padding-left: 4px;
+  }
+
+  .garden-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 18px 14px;
+  }
+
+  /* === Each action: just an icon blob + label, no box === */
+  .action-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    padding: 6px 0;
+  }
+
+  .action-icon {
+    width: 62px;
+    height: 62px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
+    position: relative;
+  }
+  .action-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+  .action-item:active .action-icon {
+    transform: scale(0.88);
+  }
+
+  .action-label {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-align: center;
+    line-height: 1.2;
+    max-width: 85px;
+  }
+
+  /* === SVG icon colors per action === */
+  .act-litter .action-icon svg { stroke: #b8860b; }
+  .act-food .action-icon svg { stroke: #0e8a86; }
+  .act-weight .action-icon svg { stroke: #5b4bc9; }
+  .act-medicine .action-icon svg { stroke: #c0533a; }
+  .act-observation .action-icon svg { stroke: #7c5cbf; }
+  .act-event .action-icon svg { stroke: #4a6fa5; }
+
+  /* Each action has its own personality */
+  .act-litter .action-icon {
+    background: linear-gradient(145deg, #fef9e7, #fde68a);
+    box-shadow: 0 5px 16px rgba(253,203,110,0.28);
+  }
+  .act-food .action-icon {
+    background: linear-gradient(145deg, #d5f5f3, #81ecec);
+    box-shadow: 0 5px 16px rgba(0,206,201,0.22);
+  }
+  .act-weight .action-icon {
+    background: linear-gradient(145deg, #ede9fe, #c4b5fd);
+    box-shadow: 0 5px 16px rgba(108,92,231,0.2);
+  }
+  .act-medicine .action-icon {
+    background: linear-gradient(145deg, #fde8e2, #f8a89a);
+    box-shadow: 0 5px 16px rgba(225,112,85,0.2);
+  }
+  .act-observation .action-icon {
+    background: linear-gradient(145deg, #ede3ff, #d0b8ff);
+    box-shadow: 0 5px 16px rgba(162,155,254,0.22);
+  }
+  .act-event .action-icon {
+    background: linear-gradient(145deg, #dbeafe, #93c5fd);
+    box-shadow: 0 5px 16px rgba(74,111,165,0.18);
+  }
+
+  /* Subtle shape variation per action */
+  .act-litter .action-icon { border-radius: 20px; }
+  .act-food .action-icon { border-radius: 22px 18px 22px 18px; }
+  .act-weight .action-icon { border-radius: 50%; }
+  .act-medicine .action-icon { border-radius: 16px 22px 16px 22px; }
+  .act-observation .action-icon { border-radius: 22px 18px 22px 18px; }
+  .act-event .action-icon { border-radius: 18px; }
+
+  /* Hover/tap distinct per action */
+  .act-litter:active .action-icon { box-shadow: 0 2px 22px rgba(253,203,110,0.5); }
+  .act-food:active .action-icon { box-shadow: 0 2px 22px rgba(0,206,201,0.45); }
+  .act-weight:active .action-icon { box-shadow: 0 2px 22px rgba(108,92,231,0.4); }
+  .act-medicine:active .action-icon { box-shadow: 0 2px 22px rgba(225,112,85,0.4); }
+  .act-observation:active .action-icon { box-shadow: 0 2px 22px rgba(162,155,254,0.45); }
+  .act-event:active .action-icon { box-shadow: 0 2px 22px rgba(74,111,165,0.35); }
+
+  /* ==================== REMINDER NUDGE ==================== */
+  .reminder-nudge {
+    margin: 16px 24px 0;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, rgba(253,203,110,0.12), rgba(225,112,85,0.06));
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .reminder-nudge:active { transform: scale(0.98); }
+  .reminder-icon { font-size: 22px; }
+  .reminder-body { flex: 1; }
+  .reminder-main { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+  .reminder-sub { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+  .reminder-chevron { color: var(--text-muted); font-size: 18px; }
+
+  /* ==================== STREAM ==================== */
+  .stream {
+    padding: 28px 24px 16px;
+  }
+  .stream-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 16px;
+  }
+  .stream-title {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .stream-more { font-size: 13px; color: var(--primary); font-weight: 500; cursor: pointer; }
+
+  .stream-item {
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+  }
+  .stream-item + .stream-item { border-top: 1px solid rgba(237,233,254,0.5); }
+  .stream-dot-col { display: flex; flex-direction: column; align-items: center; padding-top: 4px; width: 16px; }
+  .stream-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .stream-line { width: 1.5px; flex: 1; margin-top: 4px; background: var(--border); }
+  .s-text { font-size: 14px; color: var(--text-primary); line-height: 1.35; }
+  .s-text strong { font-weight: 600; }
+  .s-when { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ==================== BOTTOM NAV ==================== */
+  .bottom-nav {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 76px;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    z-index: 20;
+    box-shadow: 0 -1px 0 var(--border);
+  }
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    cursor: pointer;
+    padding: 4px 10px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-icon { font-size: 22px; opacity: 0.35; }
+  .nav-label { font-size: 10px; color: var(--text-muted); font-weight: 500; }
+  .nav-item.active .nav-icon { opacity: 1; }
+  .nav-item.active .nav-label { color: var(--primary); font-weight: 600; }
+
+  .nav-add {
+    width: 48px; height: 48px;
+    background: var(--primary);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    color: white;
+    cursor: pointer;
+    margin-top: -12px;
+    box-shadow: 0 4px 16px rgba(108,92,231,0.35);
+    transition: all 0.2s;
+    font-weight: 300;
+  }
+  .nav-add:active { transform: scale(0.9) rotate(90deg); }
+
+  /* ==================== BOTTOM SHEET ==================== */
+  .sheet-bg {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 30;
+    opacity: 0;
+    transition: opacity 0.3s;
+    backdrop-filter: blur(2px);
+  }
+  .sheet-bg.on { display: block; opacity: 1; }
+
+  .sheet {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    z-index: 31;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+    padding-bottom: 40px;
+  }
+  .sheet.open { transform: translateY(0); }
+
+  .sheet-bar {
+    width: 36px; height: 4px;
+    background: var(--border);
+    border-radius: 99px;
+    margin: 10px auto 20px;
+  }
+  .sheet-inner { padding: 0 24px 20px; }
+
+  .sheet-q {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  .sheet-ctx {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+  }
+
+  .pick-row {
+    display: flex;
+    gap: 28px;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+  .pick {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .pick-face {
+    width: 72px; height: 72px;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 38px;
+    border: 3px solid transparent;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .pick.pixel .pick-face { background: linear-gradient(135deg, #ede9fe, #c4b5fd); }
+  .pick.luna .pick-face { background: linear-gradient(135deg, #ccfbf1, #81ecec); }
+  .pick:active .pick-face,
+  .pick.sel .pick-face {
+    border-color: var(--primary);
+    transform: scale(1.08);
+    box-shadow: 0 4px 20px rgba(108,92,231,0.25);
+  }
+  .pick-n { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+
+  .res-area { display: none; }
+  .res-label {
+    font-size: 12px; font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .res-list { display: flex; gap: 8px; flex-wrap: wrap; }
+  .res-opt {
+    padding: 10px 18px;
+    border-radius: var(--radius-full);
+    font-size: 14px; font-weight: 500;
+    color: var(--text-secondary);
+    background: var(--bg);
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1.5px solid transparent;
+  }
+  .res-opt:active, .res-opt.sel {
+    color: var(--primary);
+    background: var(--primary-soft);
+    border-color: var(--primary-light);
+  }
+
+  /* ==================== TOAST ==================== */
+  .toast-wrap {
+    position: absolute;
+    bottom: 88px;
+    left: 16px; right: 16px;
+    z-index: 25;
+    transform: translateY(16px);
+    opacity: 0;
+    transition: all 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    pointer-events: none;
+  }
+  .toast-wrap.on { transform: translateY(0); opacity: 1; pointer-events: all; }
+
+  .toast {
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    padding: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.04);
+    position: relative;
+    overflow: hidden;
+  }
+  .toast-row { display: flex; align-items: center; gap: 12px; }
+  .toast-ico {
+    width: 40px; height: 40px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #d3f9d8, #00b894);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: white; flex-shrink: 0;
+  }
+  .toast-body { flex: 1; }
+  .toast-msg { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+  .toast-time { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+
+  .toast-btns { display: flex; gap: 8px; margin-top: 12px; }
+  .toast-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: var(--radius-lg);
+    background: var(--bg);
+    border: none;
+    font-size: 13px; font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+    font-family: var(--font-default);
+    transition: all 0.15s;
+  }
+  .toast-btn:active { background: var(--primary-soft); color: var(--primary); }
+  .toast-undo {
+    flex: 0; background: transparent; color: var(--text-muted); font-size: 12px;
+  }
+
+  .toast-prog {
+    position: absolute;
+    bottom: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    width: 100%;
+    transition: width 3s linear;
+    border-radius: 0 0 0 var(--radius-xl);
+  }
+  .toast-prog.go { width: 0%; }
+
+  .toast-exp { display: none; margin-top: 12px; }
+  .toast-exp.on { display: block; }
+  .toast-field {
+    width: 100%;
+    padding: 12px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    font-size: 15px; font-family: var(--font-default);
+    color: var(--text-primary);
+    outline: none;
+  }
+  .toast-field:focus { border-color: var(--primary-light); }
+  .toast-field::placeholder { color: var(--text-muted); }
+  .toast-save {
+    width: 100%;
+    margin-top: 8px;
+    padding: 12px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: 15px; font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-default);
+  }
+  .toast-save:active { transform: scale(0.98); }
+
+  /* ==================== PROTO ==================== */
+  .proto-label {
+    position: fixed;
+    top: 12px; left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-default);
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="proto-label">Sakapuss — v3</div>
+
+<div class="phone">
+  <div class="phone-screen">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="header-greeting">
+        Salut Camille
+        <span>2 chats &middot; tout va bien</span>
+      </div>
+      <div class="header-avatars">
+        <div class="h-avatar pixel">&#128049;</div>
+        <div class="h-avatar luna">&#128049;<div class="notif-dot"></div></div>
+      </div>
+    </div>
+
+    <!-- ANIMAL HERO -->
+    <div class="animal-hero">
+      <div class="animal-card">
+        <div class="animal-face">&#128049;</div>
+        <div class="animal-speech">
+          <div class="animal-name">Pixel</div>
+          <div class="animal-bubble">"Ma caisse est <em>propre depuis 2h</em>, merci&nbsp;!"</div>
+          <div class="animal-tags">
+            <span class="atag atag-reminder">Vermifuge dans 3j</span>
+            <span class="atag atag-weight">4.8 kg &middot; stable</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-dots">
+        <div class="hdot on"></div>
+        <div class="hdot"></div>
+      </div>
+    </div>
+
+    <!-- ==================== ACTION GARDEN ==================== -->
+    <div class="action-garden">
+      <div class="garden-label">Qu'est-ce que tu viens de faire&nbsp;?</div>
+
+      <div class="garden-grid">
+
+        <div class="action-item act-litter" data-action="Caisse nettoyée" data-label="Caisse" data-res="1" onclick="go(this)">
+          <div class="action-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <!-- Sparkle / clean broom -->
+              <path d="M12 3v5M8 5l1.5 3M16 5l-1.5 3"/>
+              <path d="M7 10h10l-1.5 8a2 2 0 01-2 1.5h-3a2 2 0 01-2-1.5L7 10z"/>
+              <line x1="10" y1="13" x2="10" y2="16"/>
+              <line x1="14" y1="13" x2="14" y2="16"/>
+            </svg>
+          </div>
+          <div class="action-label">Caisse nettoyée</div>
+        </div>
+
+        <div class="action-item act-food" data-action="Gamelle remplie" data-label="Gamelle" data-res="1" onclick="go(this)">
+          <div class="action-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <!-- Bowl -->
+              <path d="M4 12a8 8 0 0016 0"/>
+              <path d="M3 12h18"/>
+              <path d="M8 16c1 2 3 3 4 3s3-1 4-3"/>
+              <!-- Steam -->
+              <path d="M9 8c0-1 1-2 1-3M12 7c0-1 1-2 1-3M15 8c0-1 1-2 1-3" opacity="0.5"/>
+            </svg>
+          </div>
+          <div class="action-label">Gamelle remplie</div>
+        </div>
+
+        <div class="action-item act-weight" data-action="Pesée" data-label="Poids" onclick="go(this)">
+          <div class="action-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <!-- Bathroom scale -->
+              <rect x="4" y="8" width="16" height="12" rx="3"/>
+              <circle cx="12" cy="14" r="3.5"/>
+              <path d="M12 12v2l1.5 1"/>
+              <!-- Feet marks -->
+              <ellipse cx="8.5" cy="5.5" rx="1.5" ry="1" opacity="0.4"/>
+              <ellipse cx="15.5" cy="5.5" rx="1.5" ry="1" opacity="0.4"/>
+            </svg>
+          </div>
+          <div class="action-label">Pesée</div>
+        </div>
+
+        <div class="action-item act-medicine" data-action="Médicament" data-label="Médoc" onclick="go(this)">
+          <div class="action-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <!-- Pill capsule -->
+              <rect x="5" y="9" width="14" height="6" rx="3" transform="rotate(-30 12 12)"/>
+              <line x1="12" y1="8" x2="12" y2="16" transform="rotate(-30 12 12)"/>
+              <!-- Plus -->
+              <line x1="18" y1="4" x2="18" y2="8" opacity="0.4"/>
+              <line x1="16" y1="6" x2="20" y2="6" opacity="0.4"/>
+            </svg>
+          </div>
+          <div class="action-label">Médicament</div>
+        </div>
+
+        <div class="action-item act-observation" data-action="Observation" data-label="Obs." onclick="go(this)">
+          <div class="action-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <!-- Eye -->
+              <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </div>
+          <div class="action-label">Observation</div>
+        </div>
+
+        <div class="action-item act-event" data-action="Événement" data-label="Event" onclick="go(this)">
+          <div class="action-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <!-- Calendar -->
+              <rect x="3" y="5" width="18" height="16" rx="2"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+              <line x1="8" y1="3" x2="8" y2="7"/>
+              <line x1="16" y1="3" x2="16" y2="7"/>
+              <!-- Date dot -->
+              <circle cx="12" cy="15" r="1.5" fill="currentColor" opacity="0.4"/>
+            </svg>
+          </div>
+          <div class="action-label">Événement</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- REMINDER -->
+    <div class="reminder-nudge">
+      <div class="reminder-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c0533a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="5" y="9" width="14" height="6" rx="3" transform="rotate(-30 12 12)"/>
+          <line x1="12" y1="8" x2="12" y2="16" transform="rotate(-30 12 12)"/>
+        </svg>
+      </div>
+      <div class="reminder-body">
+        <div class="reminder-main">Vermifuge de Pixel</div>
+        <div class="reminder-sub">Dans 3 jours &middot; Penser à commander</div>
+      </div>
+      <div class="reminder-chevron">&#8250;</div>
+    </div>
+
+    <!-- STREAM -->
+    <div class="stream">
+      <div class="stream-head">
+        <div class="stream-title">Aujourd'hui</div>
+        <div class="stream-more">Tout voir</div>
+      </div>
+      <div class="stream-item">
+        <div class="stream-dot-col">
+          <div class="stream-dot" style="background:#FDCB6E"></div>
+          <div class="stream-line"></div>
+        </div>
+        <div>
+          <div class="s-text"><strong>Pixel</strong> &middot; Caisse nettoyée</div>
+          <div class="s-when">il y a 2h</div>
+        </div>
+      </div>
+      <div class="stream-item">
+        <div class="stream-dot-col">
+          <div class="stream-dot" style="background:#00CEC9"></div>
+          <div class="stream-line"></div>
+        </div>
+        <div>
+          <div class="s-text"><strong>Pixel + Luna</strong> &middot; Gamelle remplie</div>
+          <div class="s-when">il y a 5h</div>
+        </div>
+      </div>
+      <div class="stream-item">
+        <div class="stream-dot-col">
+          <div class="stream-dot" style="background:#6C5CE7"></div>
+        </div>
+        <div>
+          <div class="s-text"><strong>Luna</strong> &middot; 4.2 kg <span style="color:#00B894;font-size:12px">stable</span></div>
+          <div class="s-when">hier</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SHEET -->
+    <div class="sheet-bg" id="sBg" onclick="closeS()"></div>
+    <div class="sheet" id="sSheet">
+      <div class="sheet-bar"></div>
+      <div class="sheet-inner">
+        <div class="sheet-q" id="sQ">Pour qui ?</div>
+        <div class="sheet-ctx" id="sCtx">&#129529; Caisse nettoyée</div>
+        <div class="pick-row">
+          <div class="pick pixel" onclick="pickA(this,'Pixel')">
+            <div class="pick-face">&#128049;</div>
+            <div class="pick-n">Pixel</div>
+          </div>
+          <div class="pick luna" onclick="pickA(this,'Luna')">
+            <div class="pick-face">&#128049;</div>
+            <div class="pick-n">Luna</div>
+          </div>
+        </div>
+        <div class="res-area" id="resArea">
+          <div class="res-label">Quelle caisse ?</div>
+          <div class="res-list">
+            <div class="res-opt" onclick="pickR(this,'Caisse cuisine')">Caisse cuisine</div>
+            <div class="res-opt" onclick="pickR(this,'Caisse salon')">Caisse salon</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast-wrap" id="tW">
+      <div class="toast">
+        <div class="toast-row">
+          <div class="toast-ico">&#10003;</div>
+          <div class="toast-body">
+            <div class="toast-msg" id="tMsg">Noté !</div>
+            <div class="toast-time" id="tTime">09h14</div>
+          </div>
+        </div>
+        <div class="toast-btns" id="tBtns">
+          <div class="toast-btn" onclick="expNote()">+ Note</div>
+          <div class="toast-btn" onclick="expWt()">+ Poids</div>
+          <div class="toast-btn toast-undo" onclick="killT()">Annuler</div>
+        </div>
+        <div class="toast-exp" id="tExp">
+          <input class="toast-field" id="tField" placeholder="Ajouter une note...">
+          <button class="toast-save" onclick="saveT()">Enregistrer</button>
+        </div>
+        <div class="toast-prog" id="tProg"></div>
+      </div>
+    </div>
+
+    <!-- NAV -->
+    <div class="bottom-nav">
+      <div class="nav-item active">
+        <div class="nav-icon">&#127968;</div>
+        <div class="nav-label">Accueil</div>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">&#128197;</div>
+        <div class="nav-label">Timeline</div>
+      </div>
+      <div class="nav-add" onclick="goNav()">+</div>
+      <div class="nav-item">
+        <div class="nav-icon">&#128276;</div>
+        <div class="nav-label">Rappels</div>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">&#128100;</div>
+        <div class="nav-label">Profil</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let cAction='', cIcon='', needRes=false, selAnimal='', timer=null;
+
+  function go(el){
+    cAction=el.dataset.action; cIcon=el.dataset.icon; needRes=!!el.dataset.res; selAnimal='';
+    document.getElementById('sQ').textContent='Pour qui ?';
+    document.getElementById('sCtx').innerHTML=cIcon+' '+cAction;
+    document.getElementById('resArea').style.display='none';
+    document.querySelectorAll('.pick').forEach(p=>p.classList.remove('sel'));
+    document.querySelectorAll('.res-opt').forEach(r=>r.classList.remove('sel'));
+    document.getElementById('sBg').classList.add('on');
+    setTimeout(()=>document.getElementById('sSheet').classList.add('open'),10);
+  }
+  function goNav(){
+    cAction=''; cIcon='+'; needRes=false;
+    document.getElementById('sQ').textContent="Qu'est-ce que tu viens de faire ?";
+    document.getElementById('sCtx').textContent='Choisis une action';
+    document.getElementById('resArea').style.display='none';
+    document.getElementById('sBg').classList.add('on');
+    setTimeout(()=>document.getElementById('sSheet').classList.add('open'),10);
+  }
+  function closeS(){
+    document.getElementById('sSheet').classList.remove('open');
+    setTimeout(()=>document.getElementById('sBg').classList.remove('on'),350);
+  }
+  function pickA(el,name){
+    document.querySelectorAll('.pick').forEach(p=>p.classList.remove('sel'));
+    el.classList.add('sel'); selAnimal=name;
+    if(needRes){document.getElementById('resArea').style.display='block';}
+    else{setTimeout(()=>{closeS();setTimeout(()=>showT(name),400);},250);}
+  }
+  function pickR(el,res){
+    document.querySelectorAll('.res-opt').forEach(r=>r.classList.remove('sel'));
+    el.classList.add('sel');
+    setTimeout(()=>{closeS();setTimeout(()=>showT(selAnimal,res),400);},250);
+  }
+  function showT(animal,res){
+    const now=new Date();
+    const t=now.getHours().toString().padStart(2,'0')+'h'+now.getMinutes().toString().padStart(2,'0');
+    document.getElementById('tMsg').textContent=res?res+' nettoyée':cAction+' — '+animal;
+    document.getElementById('tTime').textContent=t;
+    document.getElementById('tExp').classList.remove('on');
+    document.getElementById('tBtns').style.display='flex';
+    const w=document.getElementById('tW'), bar=document.getElementById('tProg');
+    w.classList.add('on'); bar.classList.remove('go'); bar.style.display='';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>bar.classList.add('go')));
+    clearTimeout(timer); timer=setTimeout(killT,3300);
+  }
+  function killT(){document.getElementById('tW').classList.remove('on');clearTimeout(timer);}
+  function expNote(){
+    clearTimeout(timer);
+    document.getElementById('tProg').style.display='none';
+    document.getElementById('tBtns').style.display='none';
+    document.getElementById('tExp').classList.add('on');
+    const f=document.getElementById('tField');f.placeholder='Ajouter une note...';f.type='text';f.value='';
+    setTimeout(()=>f.focus(),100);
+  }
+  function expWt(){
+    clearTimeout(timer);
+    document.getElementById('tProg').style.display='none';
+    document.getElementById('tBtns').style.display='none';
+    document.getElementById('tExp').classList.add('on');
+    const f=document.getElementById('tField');f.placeholder='0,0 kg';f.type='number';f.step='0.1';f.value='';
+    setTimeout(()=>f.focus(),100);
+  }
+  function saveT(){killT();document.getElementById('tProg').style.display='';}
+</script>
+</body>
+</html>

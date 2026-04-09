@@ -1,0 +1,141 @@
+# Content & Language: Sakapuss
+
+> Tone of Voice & Content Guidelines
+
+**Created:** 2026-04-07
+**Author:** Charchess
+**Related:** [Product Brief](./project-brief.md)
+
+---
+
+## Brand Personality
+
+Sakapuss n'a pas une personnalité de marque abstraite — **l'app prend la voix de l'animal lui-même**. La photo de votre chat (ou chien, ou autre) est le visage de l'app. Les notifications viennent de votre animal, en première personne. C'est intime, personnel, impossible à copier : chaque expérience est unique parce que chaque animal est unique.
+
+### Personality Attributes
+
+| Attribut | Description | Expression |
+|----------|-------------|------------|
+| **L'animal lui-même** | La voix de l'app, c'est votre animal | Photo de l'animal + notifications en première personne |
+| **Présent & attentif** | Toujours là, sans juger, sans oublier | Rappels avant la deadline, jamais alarmistes |
+| **Personnel** | Chaque expérience est unique | Nom + photo de votre animal, pas un avatar générique |
+| **Discret** | Ne parle que quand c'est utile | Sobriété — pas de notifications inutiles |
+
+---
+
+## Tone of Voice
+
+### Core Tone
+
+**Primary Tone :** Chaleureux, direct, rassurant, sobre
+
+L'app parle à des gens qui aiment leurs animaux. Le ton reflète cet attachement sans être mièvre. Les messages sont courts, actionnables, jamais alarmistes.
+
+### Tone Spectrum
+
+| Dimension | Position Sakapuss | Exemple |
+|-----------|-------------------|---------|
+| Formel ↔ Casual | Légèrement casual | "Pense à prendre rendez-vous" vs "Veuillez prendre rendez-vous" |
+| Sérieux ↔ Joueur | Équilibré (varie selon contexte) | Notifications médicales = sobre / Facecam animal = espiègle |
+| Technique ↔ Simple | Simple | Pas de jargon médical |
+| Réservé ↔ Enthousiaste | Réservé | Pas d'exclamations excessives |
+
+### Notifications Facecam — Concept Clé
+
+Les rappels et alertes s'expriment **à la première personne de l'animal**, avec la photo de l'animal en visuel. Plusieurs phrases par type d'événement pour éviter la monotonie.
+
+**Exemples (variantes par type) :**
+
+*Vaccin à venir :*
+- "Miaou, j'ai un vaccin dans deux semaines, pense à prendre rendez-vous"
+- "Hey ! Mon vaccin approche — dans 14 jours. Tu peux appeler le cabinet ?"
+- "Je suis en bonne santé, mais mon rappel vaccin arrive bientôt..."
+
+*Stock faible :*
+- "Mes croquettes sont presque finies... tu penses à commander ?"
+- "J'ai vérifié ma gamelle. Il va falloir s'approvisionner bientôt."
+
+**Règle :** Pool de 3-5 variantes minimum par type d'événement et par espèce.
+
+### We Say / We Don't Say
+
+**On dit :**
+- "Pense à commander" / "Prends rendez-vous"
+- "Il reste peu de croquettes"
+- "En attente de validation"
+- "Rien encore — note ta première observation"
+
+**On ne dit pas :**
+- "ALERTE : stock critique !"
+- "Vous devez immédiatement..."
+- Jargon médical non expliqué
+- Rappels qui disparaissent sans être validés
+
+---
+
+## Language Strategy
+
+### Supported Languages
+
+| Langue | Priorité | Couverture | Notes |
+|--------|----------|------------|-------|
+| Français | Primary | 100% | Langue de lancement |
+| Anglais | Secondary | À définir | Expansion internationale |
+| Autres | Future | TBD | Selon adoption géographique |
+
+### Translation Approach
+
+Français d'abord, qualité native. Pas de traduction automatique pour le lancement — mieux vaut un produit excellent dans une langue qu'approximatif dans plusieurs.
+
+### Localization Notes
+
+- **Français :** Tutoiement (ton casual mais chaleureux). Pas de vouvoiement — on s'adresse à quelqu'un qui aime son animal, pas à un client corporate.
+
+---
+
+## Content Types
+
+### UI Microcopy
+
+**Guidelines :**
+- Labels courts, verbes d'action
+- Pas de jargon médical
+- Toujours actionnable
+
+**Exemples :**
+| Contexte | ✅ Do | ❌ Don't |
+|----------|-------|---------|
+| Bouton saisie | "Enregistrer" | "Submit" |
+| Stock faible | "Il reste peu de croquettes" | "Warning: low stock" |
+| État vide | "Rien encore — notez votre première observation" | "No events" |
+| Erreur | "Quelque chose cloche — vérifiez les informations" | "Invalid input" |
+
+### Marketing Content
+
+*(À définir lors du lancement public — non prioritaire à ce stade)*
+
+**Orientation :** Axé sur la sérénité et la mémoire institutionnelle. Pas sur les features, sur le bénéfice émotionnel : "Ne plus jamais oublier."
+
+---
+
+## SEO Strategy
+
+*(Non prioritaire pour le lancement — app self-hosted / cloud fermé dans un premier temps)*
+
+**Mots-clés cibles à terme :**
+- "carnet de santé chat en ligne"
+- "suivi alimentation chat application"
+- "rappels vétérinaire application"
+- "application santé animaux domestiques"
+
+---
+
+## Next Steps
+
+- [ ] **Visual Direction** — Établir le style visuel (l'animal en facecam = contrainte de design)
+- [ ] **Phase 2 : Trigger Mapping** — Connecter le contenu à la psychologie utilisateur
+- [ ] **Éditorial :** Écrire les pools de phrases facecam (3-5 variantes par type × espèce)
+
+---
+
+_Generated by Whiteport Design Studio_

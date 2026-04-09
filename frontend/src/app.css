@@ -1,0 +1,142 @@
+/* ============================================================
+   Sakapuss Design System — CSS Tokens
+   Source: _bmad-output/D-Design-System/00-design-system.md
+   ============================================================ */
+
+:root {
+  /* --- Brand Colors --- */
+  --color-primary: #6C5CE7;
+  --color-primary-light: #A29BFE;
+  --color-primary-dark: #4A3FC7;
+  --color-primary-soft: rgba(108, 92, 231, 0.08);
+  --color-secondary: #00CEC9;
+  --color-secondary-light: #81ECEC;
+  --color-accent: #FDCB6E;
+  --color-accent-dark: #E17055;
+
+  /* --- Neutral Colors --- */
+  --color-bg: #F8F6FF;
+  --color-surface: #FFFFFF;
+  --color-text-primary: #2D3436;
+  --color-text-secondary: #636E72;
+  --color-text-muted: #B2BEC3;
+  --color-border: #EDE9FE;
+  --color-border-focus: #6C5CE7;
+
+  /* --- Semantic Colors --- */
+  --color-success: #00B894;
+  --color-warning: #FDCB6E;
+  --color-error: #E17055;
+  --color-info: #74B9FF;
+
+  /* --- Category Colors --- */
+  --color-cat-health: #E17055;
+  --color-cat-weight: #6C5CE7;
+  --color-cat-food: #00CEC9;
+  --color-cat-litter: #FDCB6E;
+  --color-cat-behavior: #A29BFE;
+  --color-cat-event: #636E72;
+  --color-cat-reminders: #E17055;
+  --color-cat-activity: #74B9FF;
+
+  /* --- Spacing Scale --- */
+  --space-2xs: 2px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --space-3xl: 48px;
+
+  /* --- Border Radius --- */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* --- Elevation --- */
+  --elevation-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --elevation-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --elevation-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* --- Typography --- */
+  --font-display: 'Nunito', system-ui, sans-serif;
+  --font-default: 'Inter', system-ui, sans-serif;
+
+  /* --- Type Scale --- */
+  --text-2xs: 10px;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-md: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 28px;
+
+  /* --- Legacy compat (old token names → new) --- */
+  --color-neutral-50: var(--color-bg);
+  --color-neutral-900: var(--color-text-primary);
+  --font-family: var(--font-default);
+  --radius: var(--radius-xl);
+  --space-unit: var(--space-sm);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-default);
+  font-size: var(--text-md);
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+}
+
+h2 {
+  font-size: var(--text-xl);
+  font-weight: 600;
+}
+
+h3 {
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Minimum touch target for mobile (48px) */
+button, [role="button"], a[href] {
+  min-height: 44px;
+}
+
+/* Focus ring for accessibility */
+:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
