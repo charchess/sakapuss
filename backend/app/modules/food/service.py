@@ -50,6 +50,11 @@ def delete_product(db: Session, product_id: str) -> bool:
     product = get_product(db, product_id)
     if product is None:
         return False
+    # Detach bowls referencing this product
+    from backend.app.modules.food.models import Bowl
+    db.query(Bowl).filter(Bowl.current_product_id == product_id).update(
+        {"current_product_id": None}
+    )
     db.delete(product)
     db.commit()
     return True

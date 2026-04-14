@@ -1,5 +1,9 @@
 <script lang="ts">
   import { page } from '$app/stores';
+  import { getApiUrl } from '$lib/api';
+  import { onMount } from 'svelte';
+
+  let profileBadge = $state(false);
 
   const navItems = [
     { href: '/', label: 'Accueil', icon: 'home' },
@@ -13,6 +17,21 @@
     if (href === '/') return currentPath === '/';
     return currentPath.startsWith(href);
   };
+
+  // Check if features need configuration
+  onMount(async () => {
+    try {
+      const [bowlsRes, resourcesRes, productsRes] = await Promise.all([
+        fetch(`${getApiUrl()}/bowls`).catch(() => null),
+        fetch(`${getApiUrl()}/resources?type=litter`).catch(() => null),
+        fetch(`${getApiUrl()}/food/products`).catch(() => null),
+      ]);
+      const bowls = bowlsRes?.ok ? await bowlsRes.json() : [];
+      const litter = resourcesRes?.ok ? await resourcesRes.json() : [];
+      const products = productsRes?.ok ? await productsRes.json() : [];
+      profileBadge = bowls.length === 0 || litter.length === 0 || products.length === 0;
+    } catch { /* ignore */ }
+  });
 </script>
 
 <nav class="bottom-nav" role="navigation" aria-label="Navigation principale">
@@ -32,6 +51,9 @@
         aria-current={isActive(item.href, $page.url.pathname) ? 'page' : undefined}
       >
         <span class="nav-icon">
+          {#if item.icon === 'user' && profileBadge}
+            <span class="nav-badge"></span>
+          {/if}
           {#if item.icon === 'home'}
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
@@ -93,6 +115,19 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+  }
+
+  .nav-badge {
+    position: absolute;
+    top: -2px;
+    right: -4px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-error);
+    border: 2px solid var(--color-surface);
+    z-index: 1;
   }
 
   .nav-icon svg {

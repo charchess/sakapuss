@@ -66,11 +66,30 @@ def delete_bowl(bowl_id: str, db: DbSession):
     response_model=ServingResponse,
 )
 def fill_bowl(bowl_id: str, data: ServingCreate, db: DbSession):
+    from backend.app.modules.food.models import FoodBag
+
     # Validate bowl exists
     bowl = service.get_bowl(db, bowl_id)
     if bowl is None:
         raise HTTPException(status_code=404, detail="Bowl not found")
-    return service.create_serving(db, bowl_id, data)
+
+    # Auto-link to opened bag of the bowl's product
+    serving_data = data.model_dump()
+    if not serving_data.get("bag_id") and bowl.current_product_id:
+        opened_bag = (
+            db.query(FoodBag)
+            .filter(FoodBag.product_id == bowl.current_product_id, FoodBag.status == "opened")
+            .first()
+        )
+        if opened_bag:
+            serving_data["bag_id"] = opened_bag.id
+
+    from backend.app.modules.food.models import Serving
+    serving = Serving(bowl_id=bowl_id, **serving_data)
+    db.add(serving)
+    db.commit()
+    db.refresh(serving)
+    return serving
 
 
 @router.get("/bowls/{bowl_id}/servings", response_model=list[ServingResponse])

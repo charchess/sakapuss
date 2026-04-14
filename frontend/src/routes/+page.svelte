@@ -6,7 +6,7 @@
 
   let selectedPetIndex = $state(0);
   const selectedPet = $derived(data.pets[selectedPetIndex] || null);
-
+  const litterResources = $derived(data.resources.filter((r: any) => r.type === 'litter'));
   // Quick Log state
   let sheetOpen = $state(false);
   let sheetAction = $state('');
@@ -15,12 +15,7 @@
 
   function openQuickLog(action: string) {
     sheetAction = action;
-    if (data.pets.length === 1) {
-      // Auto-skip: log directly for single pet
-      sheetOpen = true; // triggers auto-log via QuickLogSheet $effect
-    } else if (data.pets.length > 1) {
-      sheetOpen = true;
-    }
+    sheetOpen = true;
   }
 
   function onEventLogged(event: any) {
@@ -28,14 +23,22 @@
     toastVisible = true;
   }
 
-  const actionTiles = [
-    { action: 'litter_clean', label: 'Caisse nettoyée', class: 'act-litter' },
-    { action: 'food_serve', label: 'Gamelle remplie', class: 'act-food' },
-    { action: 'weight', label: 'Pesée', class: 'act-weight' },
-    { action: 'health_note', label: 'Médicament', class: 'act-medicine' },
-    { action: 'behavior', label: 'Observation', class: 'act-observation' },
-    { action: 'custom', label: 'Événement', class: 'act-event' },
+  const allTiles = [
+    { action: 'litter_clean', label: 'Caisse nettoyée', class: 'act-litter', requires: 'litter' },
+    { action: 'food_serve', label: 'Gamelle remplie', class: 'act-food', requires: 'bowls' },
+    { action: 'weight', label: 'Pesée', class: 'act-weight', requires: null },
+    { action: 'health_note', label: 'Médicament', class: 'act-medicine', requires: null },
+    { action: 'behavior', label: 'Observation', class: 'act-observation', requires: null },
+    { action: 'custom', label: 'Événement', class: 'act-event', requires: null },
   ];
+
+  const actionTiles = $derived(
+    allTiles.filter(t => {
+      if (t.requires === 'litter') return litterResources.length > 0;
+      if (t.requires === 'bowls') return data.bowls.length > 0;
+      return true;
+    })
+  );
 
   function getSpeciesEmoji(species: string): string {
     if (species?.toLowerCase().includes('cat') || species?.toLowerCase().includes('chat')) return '🐱';
@@ -73,7 +76,7 @@
         <h1>Salut !</h1>
         <span>{data.pets.length} {data.pets.length > 1 ? 'animaux' : 'animal'}</span>
       </div>
-      <div class="avatar-group">
+      <div class="header-right">
         {#each data.pets as pet, i}
           <button
             class="h-avatar"
@@ -173,6 +176,9 @@
   bind:open={sheetOpen}
   action={sheetAction}
   pets={data.pets}
+  litterResources={litterResources}
+  bowlResources={data.bowls}
+  foodProducts={data.foodProducts}
   onLogged={onEventLogged}
 />
 <ConfirmationToast
@@ -184,6 +190,7 @@
   .dashboard {
     padding: 52px var(--space-lg) var(--space-lg);
   }
+
 
   /* Empty state */
   .empty-state {
@@ -223,7 +230,7 @@
     font-size: var(--text-sm);
     color: var(--color-text-muted);
   }
-  .avatar-group { display: flex; }
+  .header-right { display: flex; align-items: center; }
   .h-avatar {
     width: 38px;
     height: 38px;
@@ -240,6 +247,7 @@
     overflow: hidden;
   }
   .h-avatar:first-child { margin-left: 0; }
+
   .h-avatar.active { transform: scale(1.12); z-index: 2; border-color: var(--color-primary); }
   .h-avatar img { width: 100%; height: 100%; object-fit: cover; }
 

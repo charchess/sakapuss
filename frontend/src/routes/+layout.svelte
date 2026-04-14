@@ -2,11 +2,24 @@
   import '../app.css';
   import BottomNav from '$lib/components/BottomNav.svelte';
   import { page } from '$app/stores';
+  import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
+  import { browser } from '$app/environment';
 
   let { children } = $props();
 
-  const authPages = ['/login', '/register'];
-  const showNav = $derived(!authPages.includes($page.url.pathname));
+  const publicPages = ['/login', '/register', '/invite'];
+  const isPublic = $derived(publicPages.some(p => $page.url.pathname.startsWith(p)) || $page.url.pathname.startsWith('/vet/dossier'));
+  const showNav = $derived(!isPublic);
+
+  // Auth guard
+  onMount(() => {
+    if (!browser) return;
+    const token = localStorage.getItem('token');
+    if (!token && !isPublic) {
+      goto(`/login?redirect=${encodeURIComponent($page.url.pathname)}`);
+    }
+  });
 </script>
 
 <div class="app-shell">
