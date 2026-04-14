@@ -4,7 +4,10 @@
   const API_URL = getApiUrl();
 
   const SPECIES_OPTIONS = [
-    'Cat', 'Dog', 'Rabbit', 'Bird', 'Fish', 'Hamster', 'Guinea Pig', 'Turtle', 'Other'
+    { value: 'Cat', label: 'Chat', emoji: '🐱' },
+    { value: 'Dog', label: 'Chien', emoji: '🐶' },
+    { value: 'Rabbit', label: 'Lapin', emoji: '🐰' },
+    { value: 'Other', label: 'Autre', emoji: '🐾' },
   ];
 
   let name = $state('');
@@ -124,13 +127,20 @@
     </div>
 
     <div class="form-group">
-      <label for="pet-species">Espèce *</label>
-      <select id="pet-species" data-testid="pet-species" required bind:value={species}>
-        <option value="" disabled>Choisir une espèce</option>
+      <label>Espèce *</label>
+      <div class="species-grid" data-testid="pet-species">
         {#each SPECIES_OPTIONS as sp}
-          <option value={sp}>{sp}</option>
+          <button
+            type="button"
+            class="species-btn"
+            class:active={species === sp.value}
+            onclick={() => species = sp.value}
+          >
+            <span class="species-emoji">{sp.emoji}</span>
+            <span class="species-label">{sp.label}</span>
+          </button>
         {/each}
-      </select>
+      </div>
     </div>
 
     <div class="form-group">
@@ -286,4 +296,21 @@
     opacity: 0.6;
     cursor: not-allowed;
   }
+
+  .species-grid { display: flex; gap: var(--space-sm); }
+  .species-btn {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: var(--space-xs);
+    padding: var(--space-md); border: 2px solid var(--color-border, #EDE9FE);
+    border-radius: 16px; background: white; cursor: pointer;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .species-btn.active {
+    border-color: var(--color-primary, #6C5CE7);
+    background: rgba(108, 92, 231, 0.06);
+    box-shadow: 0 2px 12px rgba(108, 92, 231, 0.15);
+  }
+  .species-btn:active { transform: scale(0.95); }
+  .species-emoji { font-size: 28px; }
+  .species-label { font-size: 12px; font-weight: 500; color: #636E72; }
+  .species-btn.active .species-label { color: var(--color-primary, #6C5CE7); font-weight: 600; }
 </style>

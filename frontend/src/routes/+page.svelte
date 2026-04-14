@@ -114,6 +114,24 @@
       </a>
     {/if}
 
+    <!-- Reminder Nudge -->
+    {#if data.pendingReminders.length > 0}
+      {@const r = data.pendingReminders[0]}
+      <a href="/reminders" class="reminder-nudge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--color-cat-health)" stroke-width="2" stroke-linecap="round" class="nudge-icon">
+          <rect x="5" y="9" width="14" height="6" rx="3" transform="rotate(-30 12 12)"/>
+        </svg>
+        <div class="nudge-text">
+          <span class="nudge-title">{r.name}{r.pet_name ? ` de ${r.pet_name}` : ''}</span>
+          <span class="nudge-date">{r.next_due_date}</span>
+        </div>
+        {#if data.pendingReminders.length > 1}
+          <span class="nudge-badge">+{data.pendingReminders.length - 1}</span>
+        {/if}
+        <span class="nudge-arrow">›</span>
+      </a>
+    {/if}
+
     <!-- Action Garden -->
     <div class="action-section">
       <div class="section-label">Qu'est-ce que tu viens de faire ?</div>
@@ -292,6 +310,27 @@
     font-style: italic;
   }
   .animal-bubble em { color: var(--color-primary); font-style: normal; font-weight: 600; }
+
+  /* Reminder Nudge */
+  .reminder-nudge {
+    display: flex; align-items: center; gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+    background: linear-gradient(135deg, rgba(225,112,85,0.06), rgba(253,203,110,0.04));
+    border-radius: var(--radius-lg); margin-bottom: var(--space-lg);
+    text-decoration: none; color: inherit; transition: transform 0.15s;
+  }
+  .reminder-nudge:hover { text-decoration: none; }
+  .reminder-nudge:active { transform: scale(0.98); }
+  .nudge-icon { width: 22px; height: 22px; flex-shrink: 0; }
+  .nudge-text { flex: 1; }
+  .nudge-title { display: block; font-size: var(--text-sm); font-weight: 600; color: var(--color-text-primary); }
+  .nudge-date { font-size: var(--text-xs); color: var(--color-text-muted); }
+  .nudge-badge {
+    font-size: var(--text-xs); font-weight: 600; padding: 2px 8px;
+    background: rgba(225,112,85,0.1); color: var(--color-error);
+    border-radius: var(--radius-full);
+  }
+  .nudge-arrow { color: var(--color-text-muted); font-size: 18px; }
 
   /* Action Garden */
   .action-section { margin-bottom: var(--space-xl); }
