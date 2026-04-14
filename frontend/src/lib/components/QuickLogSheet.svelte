@@ -131,8 +131,66 @@
     return '🐾';
   }
 
-  function isLitterAction(): boolean {
-    return action === 'litter_clean';
+  function isLitterAction(): boolean { return action === 'litter_clean'; }
+  function isWeightAction(): boolean { return action === 'weight'; }
+  function isMedicineAction(): boolean { return action === 'health_note'; }
+  function isObservationAction(): boolean { return action === 'behavior'; }
+  function isEventAction(): boolean { return action === 'custom'; }
+  function isFormAction(): boolean { return isWeightAction() || isMedicineAction() || isObservationAction() || isEventAction(); }
+
+  // Form action states
+  let formWeight = $state('');
+  let formMedicineName = $state('');
+  let formNote = $state('');
+  let formTags = $state<Record<string, boolean>>({});
+
+  const behaviorTags = ['Vomissement', 'Diarrhée', 'Léthargie', 'Appétit élevé', 'Appétit faible', 'Soif excessive', 'Grattage', 'Éternuement', 'Agressivité', 'Se cache', 'Hyperactivité'];
+
+  function getFormTitle(): string {
+    if (isWeightAction()) return 'Pesée';
+    if (isMedicineAction()) return 'Médicament';
+    if (isObservationAction()) return 'Observation';
+    return 'Événement';
+  }
+
+  async function logFormAction() {
+    if (isLogging) return;
+    isLogging = true;
+
+    const petId = pets.length === 1 ? pets[0].id : selectedPetId || pets[0]?.id;
+    if (!petId) { isLogging = false; return; }
+
+    const token = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    let payload: Record<string, any> = {};
+
+    if (isWeightAction()) {
+      if (!formWeight) { isLogging = false; return; }
+      payload = { value: parseFloat(formWeight), unit: 'kg' };
+    } else if (isMedicineAction()) {
+      payload = { name: formMedicineName.trim() || 'Médicament', note: formNote.trim() || null };
+    } else if (isObservationAction()) {
+      const tags = Object.keys(formTags).filter(k => formTags[k]);
+      payload = { tags, note: formNote.trim() || null };
+    } else {
+      payload = { note: formNote.trim() || null };
+    }
+
+    try {
+      const res = await fetch(`${getApiUrl()}/pets/${petId}/events`, {
+        method: 'POST', headers,
+        body: JSON.stringify({ type: action, payload, occurred_at: new Date().toISOString() }),
+      });
+      if (res.ok) {
+        const event = await res.json();
+        open = false;
+        onLogged(event);
+      }
+    } finally {
+      isLogging = false;
+    }
   }
 
   // Determine weight mode from resource config
@@ -153,10 +211,10 @@
     return selectedBowlIds.indexOf(id) !== -1;
   }
 
-  // Auto-skip for single pet (simple actions only — not litter or bowls)
+  // Auto-select pet for form actions when single pet
   $effect(() => {
-    if (open && pets.length === 1 && !isLitterAction() && !isBowlAction()) {
-      logEvent(pets[0].id);
+    if (open && isFormAction() && pets.length === 1 && !selectedPetId) {
+      selectedPetId = pets[0].id;
     }
   });
 
@@ -171,6 +229,11 @@
       bowlAmounts = {};
       bowlProducts = {};
       bowlNote = '';
+      formWeight = '';
+      formMedicineName = '';
+      formNote = '';
+      formTags = {};
+      selectedPetId = '';
     }
   });
 
@@ -207,6 +270,7 @@
         headers,
         body: JSON.stringify({
           type: 'litter_clean',
+          occurred_at: new Date().toISOString(),
           payload: {
             resources,
             global_weight_g: globalWeight ? parseFloat(globalWeight) : null,
@@ -238,7 +302,7 @@
       const res = await fetch(`${getApiUrl()}/pets/${petId}/events`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ type: action, payload: { status: 'ras' } }),
+        body: JSON.stringify({ type: action, payload: { status: 'ras' }, occurred_at: new Date().toISOString() }),
       });
 
       if (res.ok) {
@@ -395,6 +459,73 @@
         <button class="btn-log" disabled={selectedBowlIds.length < 1 || isLogging} onclick={logBowlFill}>
           {isLogging ? 'Enregistrement...' : 'Enregistrer'}
         </button>
+
+      {:else if isFormAction()}
+        <!-- ═══ FORM ACTIONS (weight, medicine, observation, event) ═══ -->
+        <div class="sheet-question">{getFormTitle()}</div>
+
+        {#if pets.length > 1 && !selectedPetId}
+          <div class="sheet-context">Pour qui ?</div>
+          <div class="animal-selector">
+            {#each pets as pet}
+              <!-- svelte-ignore a11y_click_events_have_key_events -->
+              <!-- svelte-ignore a11y_no_static_element_interactions -->
+              <div class="animal-pick" onclick={() => selectedPetId = pet.id} role="button" tabindex="0">
+                <div class="pick-face">{getSpeciesEmoji(pet.species)}</div>
+                <div class="pick-name">{pet.name}</div>
+              </div>
+            {/each}
+          </div>
+        {:else}
+
+          {#if isWeightAction()}
+            <!-- WEIGHT -->
+            <div class="form-section">
+              <div class="weight-big">
+                <input type="number" step="0.01" bind:value={formWeight} placeholder="0.00" class="weight-input-lg" autofocus />
+                <span class="weight-unit-lg">kg</span>
+              </div>
+            </div>
+
+          {:else if isMedicineAction()}
+            <!-- MEDICINE -->
+            <div class="form-section">
+              <input type="text" bind:value={formMedicineName} placeholder="Nom du médicament" class="form-input" />
+              <input type="text" bind:value={formNote} placeholder="Note (optionnel)" class="form-input form-input-light" />
+            </div>
+
+          {:else if isObservationAction()}
+            <!-- OBSERVATION — behavioral tags -->
+            <div class="form-section">
+              <div class="tags-grid">
+                {#each behaviorTags as tag}
+                  <!-- svelte-ignore a11y_click_events_have_key_events -->
+                  <!-- svelte-ignore a11y_no_static_element_interactions -->
+                  <div
+                    class="tag-chip"
+                    class:active={formTags[tag]}
+                    onclick={() => formTags = { ...formTags, [tag]: !formTags[tag] }}
+                    role="button"
+                    tabindex="0"
+                  >
+                    {tag}
+                  </div>
+                {/each}
+              </div>
+              <input type="text" bind:value={formNote} placeholder="Note libre (optionnel)" class="form-input form-input-light" />
+            </div>
+
+          {:else}
+            <!-- FREE EVENT -->
+            <div class="form-section">
+              <input type="text" bind:value={formNote} placeholder="Qu'est-ce qui s'est passé ?" class="form-input" />
+            </div>
+          {/if}
+
+          <button class="btn-log" disabled={isLogging || (isWeightAction() && !formWeight)} onclick={logFormAction}>
+            {isLogging ? 'Enregistrement...' : 'Enregistrer'}
+          </button>
+        {/if}
 
       {:else if pets.length > 1}
         <!-- ═══ STANDARD MULTI-PET FLOW ═══ -->
@@ -583,6 +714,49 @@
     text-overflow: ellipsis;
   }
   .amount-row { display: flex; align-items: center; gap: var(--space-2xs); }
+  /* ═══ Form actions ═══ */
+  .form-section { margin-bottom: var(--space-lg); }
+
+  .weight-big {
+    display: flex; align-items: baseline; justify-content: center; gap: var(--space-sm);
+    padding: var(--space-xl) 0;
+  }
+  .weight-input-lg {
+    width: 140px; padding: var(--space-md);
+    border: none; border-bottom: 3px solid var(--color-primary);
+    font-size: 48px; font-weight: 700; text-align: center;
+    font-family: var(--font-display); color: var(--color-text-primary);
+    background: transparent;
+  }
+  .weight-input-lg:focus { outline: none; border-bottom-color: var(--color-primary-light); }
+  .weight-input-lg::placeholder { color: var(--color-border); }
+  .weight-unit-lg { font-size: 24px; color: var(--color-text-muted); font-weight: 600; }
+
+  .form-input {
+    width: 100%; padding: var(--space-md);
+    border: 1.5px solid var(--color-border); border-radius: var(--radius-lg);
+    font-size: var(--text-md); font-family: var(--font-default);
+    color: var(--color-text-primary); margin-bottom: var(--space-sm);
+  }
+  .form-input:focus { outline: none; border-color: var(--color-primary-light); }
+  .form-input::placeholder { color: var(--color-text-muted); }
+  .form-input-light { border-color: var(--color-bg); background: var(--color-bg); font-size: var(--text-sm); }
+
+  .tags-grid {
+    display: flex; flex-wrap: wrap; gap: var(--space-xs); margin-bottom: var(--space-md);
+  }
+  .tag-chip {
+    padding: var(--space-xs) var(--space-md);
+    border: 1.5px solid var(--color-border); border-radius: var(--radius-full);
+    font-size: var(--text-xs); cursor: pointer; transition: all 0.15s;
+    font-family: var(--font-default); user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tag-chip.active {
+    border-color: var(--color-cat-behavior); background: rgba(162,155,254,0.1);
+    color: var(--color-cat-behavior); font-weight: 600;
+  }
+
   /* ═══ Standard animal selector ═══ */
   .animal-selector { display: flex; gap: var(--space-xl); justify-content: center; }
   .animal-pick {
