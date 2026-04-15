@@ -202,7 +202,6 @@
   );
 
   const selectedBowlCount = $derived(selectedBowlIds.length);
-  const selectedLitterCount = $derived(selectedLitterIds.length);
 
   // Reactive check for bowl selection (Svelte 5 needs this for .includes tracking)
   function isBowlSelected(id: string): boolean {
@@ -238,6 +237,7 @@
   });
 
   const selectedLitterIds = $derived(Object.keys(selectedLitterMap).filter(k => selectedLitterMap[k]));
+  const selectedLitterCount = $derived(selectedLitterIds.length);
 
   function toggleLitter(id: string) {
     selectedLitterMap = { ...selectedLitterMap, [id]: !selectedLitterMap[id] };

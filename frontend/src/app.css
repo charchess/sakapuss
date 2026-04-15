@@ -75,6 +75,10 @@
   --text-2xl: 24px;
   --text-3xl: 28px;
 
+  /* --- Breakpoints --- */
+  --breakpoint-desktop: 1024px;
+  --sidebar-width: 240px;
+
   /* --- Legacy compat (old token names → new) --- */
   --color-neutral-50: var(--color-bg);
   --color-neutral-900: var(--color-text-primary);

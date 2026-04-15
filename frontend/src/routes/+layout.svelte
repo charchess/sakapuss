@@ -45,4 +45,14 @@
   .app-main.has-nav {
     padding-bottom: 80px;
   }
+
+  @media (min-width: 1024px) {
+    .app-shell {
+      flex-direction: row;
+    }
+    .app-main.has-nav {
+      padding-bottom: 0;
+      padding-left: var(--sidebar-width);
+    }
+  }
 </style>
