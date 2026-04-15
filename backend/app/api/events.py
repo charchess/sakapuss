@@ -27,7 +27,7 @@ DbSession = Annotated[Session, Depends(get_db)]
 @router.get("/events", response_model=list[EventResponse])
 def list_all_events(
     db: DbSession,
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_optional_user),
     limit: int = 50,
 ):
     """All events across all pets, ordered by date desc."""
