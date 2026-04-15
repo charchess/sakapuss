@@ -24,6 +24,21 @@ def get_db():
 DbSession = Annotated[Session, Depends(get_db)]
 
 
+@router.get("/events", response_model=list[EventResponse])
+def list_all_events(
+    db: DbSession,
+    current_user: User = Depends(get_current_user),
+    limit: int = 50,
+):
+    """All events across all pets, ordered by date desc."""
+    from sqlalchemy import select as sa_select
+
+    from backend.app.modules.health.models import Event
+
+    stmt = sa_select(Event).order_by(Event.occurred_at.desc()).limit(limit)
+    return db.execute(stmt).scalars().all()
+
+
 @router.post(
     "/pets/{pet_id}/events",
     status_code=status.HTTP_201_CREATED,

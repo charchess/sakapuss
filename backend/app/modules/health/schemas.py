@@ -9,8 +9,13 @@ ALLOWED_EVENT_TYPES = [
     "vaccine",
     "treatment",
     "litter",
+    "litter_clean",
     "food",
+    "food_serve",
     "relation",
+    "health_note",
+    "behavior",
+    "custom",
 ]
 
 
