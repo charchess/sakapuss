@@ -35,6 +35,15 @@
 </script>
 
 <nav class="bottom-nav" role="navigation" aria-label="Navigation principale">
+  <div class="sidebar-header">
+    <svg class="sidebar-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M16 28c-6 0-10-3-10-7s1.5-7 4-10l1.5-7 4 4h1l4-4 1.5 7c2.5 3 4 6 4 10s-4 7-10 7z" fill="var(--color-primary-light)" stroke="var(--color-primary)" stroke-width="1.5"/>
+      <circle cx="12" cy="18" r="1.5" fill="var(--color-primary)"/>
+      <circle cx="20" cy="18" r="1.5" fill="var(--color-primary)"/>
+    </svg>
+    <span class="sidebar-app-name">Sakapuss</span>
+  </div>
+
   {#each navItems as item}
     {#if item.isCenter}
       <a href={item.href} class="nav-center" aria-label="Quick Log">
@@ -42,6 +51,7 @@
           <line x1="12" y1="5" x2="12" y2="19"/>
           <line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
+        <span class="nav-center-label">Quick Log</span>
       </a>
     {:else}
       <a
@@ -83,6 +93,10 @@
 </nav>
 
 <style>
+  .sidebar-header {
+    display: none;
+  }
+
   .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -97,6 +111,97 @@
     box-shadow: 0 -1px 0 var(--color-border);
     padding: 0 var(--space-sm);
     padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  @media (min-width: 1024px) {
+    .bottom-nav {
+      top: 0;
+      bottom: 0;
+      right: auto;
+      width: var(--sidebar-width);
+      height: 100vh;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: stretch;
+      padding: var(--space-xl) var(--space-md);
+      gap: var(--space-xs);
+      box-shadow: 1px 0 0 var(--color-border);
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-md);
+      margin-bottom: var(--space-lg);
+    }
+
+    .sidebar-logo {
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-app-name {
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      font-weight: 800;
+      color: var(--color-primary);
+    }
+
+    .nav-item {
+      flex-direction: row;
+      gap: var(--space-md);
+      width: 100%;
+      padding: var(--space-md);
+      border-radius: var(--radius-lg);
+      justify-content: flex-start;
+      min-height: 44px;
+    }
+
+    .nav-item:hover {
+      background: var(--color-primary-soft);
+    }
+
+    .nav-item.active {
+      background: var(--color-primary-soft);
+    }
+
+    .nav-icon svg {
+      opacity: 0.5;
+    }
+
+    .nav-item.active .nav-icon svg {
+      opacity: 1;
+    }
+
+    .nav-label {
+      font-size: var(--text-sm);
+    }
+
+    .nav-center {
+      flex-direction: row;
+      gap: var(--space-md);
+      width: 100%;
+      height: 44px;
+      border-radius: var(--radius-lg);
+      margin-top: 0;
+      justify-content: flex-start;
+      padding: 0 var(--space-md);
+    }
+
+    .nav-center svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .nav-center-label {
+      display: block;
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: white;
+    }
   }
 
   .nav-item {
@@ -176,5 +281,9 @@
 
   .nav-center:active {
     transform: scale(0.9) rotate(90deg);
+  }
+
+  .nav-center-label {
+    display: none;
   }
 </style>
