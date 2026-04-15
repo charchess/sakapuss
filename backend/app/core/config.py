@@ -26,7 +26,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    @computed_field(return_type=str)
+    @computed_field(return_type=str)  # type: ignore[prop-decorator]
     @property
     def database_url(self) -> str:
         return f"sqlite+pysqlite:///{self.db_path}"
