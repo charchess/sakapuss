@@ -93,7 +93,7 @@
 </svelte:head>
 
 <section class="pet-form-page">
-  <a href="/" class="back-link">← Retour au dashboard</a>
+  <a href="/" class="back-link">← Dashboard</a>
 
   <h1>Ajouter un animal</h1>
 
