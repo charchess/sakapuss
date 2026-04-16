@@ -58,6 +58,14 @@
     return species;
   }
 
+  const displayName = $derived((() => {
+    if (typeof localStorage === 'undefined') return '';
+    try {
+      const u = JSON.parse(localStorage.getItem('user') || '{}');
+      return u.display_name || u.name || u.email?.split('@')[0] || '';
+    } catch { return ''; }
+  })());
+
   function getEventLabel(type: string): string {
     const labels: Record<string, string> = {
       weight: 'Pesée',
@@ -103,7 +111,7 @@
     <!-- Header -->
     <div class="header">
       <div class="greeting">
-        <h1>Salut !</h1>
+        <h1>Salut{displayName ? `, ${displayName}` : ''} !</h1>
         <span>{data.pets.length} {data.pets.length > 1 ? 'animaux' : 'animal'}</span>
       </div>
       <div class="header-right">

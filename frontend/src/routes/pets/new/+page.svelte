@@ -272,16 +272,17 @@
     align-items: center;
     justify-content: center;
     gap: var(--space-sm);
-    width: 120px;
-    height: 120px;
+    width: 140px;
+    height: 140px;
     border: 2px dashed var(--color-border);
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-full);
     cursor: pointer;
     color: var(--color-text-muted);
     font-size: var(--text-sm);
     transition: border-color 0.2s, background 0.2s;
     position: relative;
     overflow: hidden;
+    background: var(--color-primary-soft);
   }
 
   .photo-upload:hover {
