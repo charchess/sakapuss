@@ -50,6 +50,33 @@
     return groups;
   });
 
+  const TYPE_LABELS: Record<string, string> = {
+    weight:       'Pesée',
+    litter_clean: 'Litière nettoyée',
+    litter:       'Litière',
+    food_serve:   'Repas',
+    food:         'Alimentation',
+    vaccine:      'Vaccin',
+    health:       'Santé',
+    treatment:    'Traitement',
+    medicine:     'Médicament',
+    behavior:     'Comportement',
+    observation:  'Observation',
+    note:         'Note',
+    event:        'Événement',
+    relation:     'Relation',
+    photo:        'Photo',
+  };
+
+  function getTypeLabel(type: string): string {
+    if (TYPE_LABELS[type]) return TYPE_LABELS[type];
+    // partial match fallback
+    for (const [key, label] of Object.entries(TYPE_LABELS)) {
+      if (type.includes(key)) return label;
+    }
+    return type.replace(/_/g, ' ');
+  }
+
   function getCategoryColor(type: string): string {
     if (type.includes('weight')) return 'var(--color-cat-weight)';
     if (type.includes('litter')) return 'var(--color-cat-litter)';
@@ -67,10 +94,15 @@
     return new Date(dateStr).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
   }
 
+  function authHdr(): Record<string, string> {
+    const t = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
+    return t ? { Authorization: `Bearer ${t}` } : {};
+  }
+
   onMount(async () => {
     const [petsRes, eventsRes] = await Promise.all([
-      fetch(`${getApiUrl()}/pets`),
-      fetch(`${getApiUrl()}/events?limit=50`),
+      fetch(`${getApiUrl()}/pets`, { headers: authHdr() }),
+      fetch(`${getApiUrl()}/events?limit=50`, { headers: authHdr() }),
     ]);
     if (petsRes.ok) pets = await petsRes.json();
     if (eventsRes.ok) events = await eventsRes.json();
@@ -119,7 +151,7 @@
           </div>
           <div class="stream-content">
             <div class="stream-text">
-              <strong>{getPetName(event.pet_id)}</strong> · {event.type.replace(/_/g, ' ')}
+              <strong>{getPetName(event.pet_id)}</strong> · {getTypeLabel(event.type)}
               {#if event.payload?.value}
                 <span class="value">{event.payload.value} {event.payload.unit || ''}</span>
               {/if}
