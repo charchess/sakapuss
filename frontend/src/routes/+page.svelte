@@ -420,11 +420,10 @@
   /* Action Garden */
   .action-section { margin-bottom: var(--space-xl); }
   .section-label {
-    font-size: 12px;
+    font-size: var(--text-xs);
     font-weight: 600;
     color: var(--color-text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.7px;
+    letter-spacing: 0.3px;
     margin-bottom: var(--space-lg);
   }
   .action-garden {

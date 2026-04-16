@@ -23,7 +23,7 @@ test.describe('Bowls Management UI (ATDD - Stories 8.1, 8.2, 8.3)', () => {
     await page.getByTestId('add-bowl-btn').click();
     await page.getByTestId('bowl-name').fill('Salon A');
     await page.getByTestId('bowl-location').fill('Salon');
-    await page.getByTestId('bowl-type').selectOption('food');
+    await page.getByTestId('bowl-type-food').click(); // Nourriture toggle
     await page.getByTestId('bowl-capacity').fill('200');
     await page.getByTestId('bowl-submit').click();
 
@@ -64,7 +64,7 @@ test.describe('Bowls Management UI (ATDD - Stories 8.1, 8.2, 8.3)', () => {
     await page.getByTestId('add-bowl-btn').click();
     await page.getByTestId('bowl-name').fill('Fontaine');
     await page.getByTestId('bowl-location').fill('Cuisine');
-    await page.getByTestId('bowl-type').selectOption('water');
+    await page.getByTestId('bowl-type-water').click(); // Eau toggle
     await page.getByTestId('bowl-capacity').fill('500');
     await page.getByTestId('bowl-submit').click();
 

@@ -718,6 +718,14 @@
   }
   .fast-action:hover { border-color: var(--color-primary-light); color: var(--color-primary); background: var(--color-primary-soft); }
   .fast-action svg { width: 22px; height: 22px; }
+  [data-testid="fast-action-litter"]  { background: #fffbeb; border-color: #fde68a; color: #92660a; }
+  [data-testid="fast-action-litter"] svg { stroke: #b8860b; }
+  [data-testid="fast-action-food"]    { background: #f0fdfd; border-color: #a7f3f0; color: #0e7a77; }
+  [data-testid="fast-action-food"] svg { stroke: #0e8a86; }
+  [data-testid="fast-action-weight"]  { background: #f5f3ff; border-color: #ddd6fe; color: #5b4bc9; }
+  [data-testid="fast-action-weight"] svg { stroke: #5b4bc9; }
+  [data-testid="fast-action-health"]  { background: #fff5f3; border-color: #fecaca; color: #c0533a; }
+  [data-testid="fast-action-health"] svg { stroke: #c0533a; }
   /* Event form */
   .timeline-actions { display: flex; align-items: center; gap: var(--space-sm); }
   .add-event-btn {
