@@ -10,7 +10,7 @@
   let petName = $state('');
   let done = $state(false);
 
-  const totalSteps = 5;
+  const totalSteps = 3;
 
   // Step 1 — Health reminders
   let vermifuge = $state(true);
@@ -20,17 +20,8 @@
   // Step 2 — Weight
   let weight = $state('');
 
-  // Step 3 — Bowls (gamelles)
-  let bowls = $state([{ name: '', type: 'food' as 'food' | 'water' }]);
-
-  // Step 4 — Litter boxes (caisses)
-  const litterColors = ['#6C5CE7', '#00CEC9', '#E17055', '#FDCB6E', '#A29BFE', '#00B894'];
-  let litterBoxes = $state([{ name: '', color: '#6C5CE7', tracking_mode: 'weight' as string }]);
-
-  // Step 5 — Food stock
-  let foodName = $state('');
-  let foodBrand = $state('');
-  let bagWeight = $state('');
+  // Step 3 — Food / alimentation
+  let mealsPerDay = $state(2);
 
   function getToken(): string | null {
     return typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
@@ -85,84 +76,9 @@
     step = 3;
   }
 
-  // Step 3 — Save bowls
-  function addBowl() {
-    bowls = [...bowls, { name: '', type: 'food' }];
-  }
-  function removeBowl(i: number) {
-    bowls = bowls.filter((_, idx) => idx !== i);
-  }
-
-  async function saveBowls() {
-    for (const b of bowls) {
-      if (!b.name.trim()) continue;
-      await fetch(`${getApiUrl()}/bowls`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({
-          name: b.name.trim(),
-          bowl_type: b.type,
-          capacity_g: b.type === 'water' ? 500 : 200,
-          location: '',
-        }),
-      });
-    }
-    step = 4;
-  }
-
-  // Step 4 — Save litter boxes
-  function addLitterBox() {
-    const nextColor = litterColors[litterBoxes.length % litterColors.length];
-    litterBoxes = [...litterBoxes, { name: '', color: nextColor, tracking_mode: 'weight' }];
-  }
-  function removeLitterBox(i: number) {
-    litterBoxes = litterBoxes.filter((_, idx) => idx !== i);
-  }
-
-  async function saveLitterBoxes() {
-    for (const lb of litterBoxes) {
-      if (!lb.name.trim()) continue;
-      await fetch(`${getApiUrl()}/resources`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({
-          name: lb.name.trim(),
-          type: 'litter',
-          color: lb.color,
-          tracking_mode: lb.tracking_mode,
-        }),
-      });
-    }
-    step = 5;
-  }
-
-  // Step 5 — Save food stock
-  async function saveFoodStock() {
-    if (foodName.trim()) {
-      const prodRes = await fetch(`${getApiUrl()}/food/products`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({
-          name: foodName.trim(),
-          brand: foodBrand.trim() || null,
-          food_type: 'kibble',
-          food_category: 'main',
-          default_bag_weight_g: bagWeight ? parseFloat(bagWeight) * 1000 : null,
-        }),
-      });
-      if (prodRes.ok && bagWeight) {
-        const prod = await prodRes.json();
-        await fetch(`${getApiUrl()}/food/bags`, {
-          method: 'POST',
-          headers: authHeaders(),
-          body: JSON.stringify({
-            product_id: prod.id,
-            weight_g: parseFloat(bagWeight) * 1000,
-            purchased_at: new Date().toISOString(),
-          }),
-        });
-      }
-    }
+  // Step 3 — Save food preferences and finish
+  async function saveFood() {
+    // Could store meals_per_day preference in the future
     finish();
   }
 
@@ -246,126 +162,30 @@
       </div>
 
     {:else if step === 3}
-      <!-- BOWLS (GAMELLES) -->
-      <div class="wizard-card food" data-testid="wizard-bowls">
+      <!-- ALIMENTATION -->
+      <div class="wizard-card food" data-testid="wizard-food">
         <div class="card-header">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12a8 8 0 0016 0"/><path d="M3 12h18"/></svg>
-          <h2>Gamelles</h2>
+          <h2>Alimentation</h2>
         </div>
-        <p class="speech">"Où est-ce que je mange ?"</p>
+        <p class="speech">"Combien de fois par jour est-ce que je mange ?"</p>
 
-        {#each bowls as bowl, i}
-          <div class="resource-row">
-            <input
-              type="text"
-              bind:value={bowl.name}
-              placeholder="Ex: Gamelle cuisine"
-              class="resource-input"
-            />
-            <select bind:value={bowl.type} class="type-select">
-              <option value="food">Nourriture</option>
-              <option value="water">Eau</option>
-            </select>
-            {#if bowls.length > 1}
-              <button class="btn-remove" onclick={() => removeBowl(i)}>×</button>
-            {/if}
-          </div>
-        {/each}
-
-        <button class="btn-add" onclick={addBowl}>+ Ajouter une gamelle</button>
-
-        <div class="actions">
-          <button class="btn-skip" onclick={() => step = 4}>Passer</button>
-          <button class="btn-primary" onclick={saveBowls}>Continuer</button>
-        </div>
-      </div>
-
-    {:else if step === 4}
-      <!-- LITTER BOXES (CAISSES) -->
-      <div class="wizard-card litter" data-testid="wizard-litter">
-        <div class="card-header">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M12 3v5M8 5l1.5 3M16 5l-1.5 3"/>
-            <path d="M7 10h10l-1.5 8a2 2 0 01-2 1.5h-3a2 2 0 01-2-1.5L7 10z"/>
-          </svg>
-          <h2>Caisses</h2>
-        </div>
-        <p class="speech">"Et mes toilettes, elles sont où ?"</p>
-
-        {#each litterBoxes as lb, i}
-          <div class="litter-row">
-            <div class="litter-main">
-              <div class="color-dot" style="background: {lb.color}"></div>
-              <input
-                type="text"
-                bind:value={lb.name}
-                placeholder="Ex: Caisse salon"
-                class="resource-input"
-              />
-              {#if litterBoxes.length > 1}
-                <button class="btn-remove" onclick={() => removeLitterBox(i)}>×</button>
-              {/if}
-            </div>
-            <div class="litter-options">
-              <div class="color-picker">
-                {#each litterColors as c}
-                  <button
-                    class="color-swatch"
-                    class:active={lb.color === c}
-                    style="background: {c}"
-                    onclick={() => lb.color = c}
-                  ></button>
-                {/each}
-              </div>
-              <div class="tracking-toggle">
-                <span class="tracking-label">Suivi :</span>
-                <button class="track-opt" class:active={lb.tracking_mode === 'weight'} onclick={() => lb.tracking_mode = 'weight'}>Poids</button>
-                <button class="track-opt" class:active={lb.tracking_mode === 'volume'} onclick={() => lb.tracking_mode = 'volume'}>Volume</button>
-                <button class="track-opt" class:active={lb.tracking_mode === 'none'} onclick={() => lb.tracking_mode = 'none'}>Aucun</button>
-              </div>
-            </div>
-          </div>
-        {/each}
-
-        <button class="btn-add" onclick={addLitterBox}>+ Ajouter une caisse</button>
-
-        <div class="actions">
-          <button class="btn-skip" onclick={() => step = 5}>Passer</button>
-          <button class="btn-primary" onclick={saveLitterBoxes}>Continuer</button>
-        </div>
-      </div>
-
-    {:else if step === 5}
-      <!-- FOOD STOCK -->
-      <div class="wizard-card food-stock" data-testid="wizard-food-stock">
-        <div class="card-header">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <rect x="3" y="5" width="18" height="16" rx="2"/>
-            <line x1="3" y1="10" x2="21" y2="10"/>
-          </svg>
-          <h2>Stock de nourriture</h2>
-        </div>
-        <p class="speech">"Et je mange quoi en ce moment ?"</p>
-
-        <div class="field">
-          <label>Nom du produit</label>
-          <input type="text" bind:value={foodName} placeholder="Ex: Royal Canin Indoor" class="resource-input" />
-        </div>
-        <div class="field">
-          <label>Marque</label>
-          <input type="text" bind:value={foodBrand} placeholder="Ex: Royal Canin" class="resource-input" />
-        </div>
-        <div class="field">
-          <label>Poids du sac (kg)</label>
-          <div class="weight-input-sm">
-            <input type="number" step="0.1" bind:value={bagWeight} placeholder="0.0" class="resource-input" />
-            <span class="unit-sm">kg</span>
+        <div class="meals-section">
+          <span class="meals-label">Repas par jour</span>
+          <div class="meals-pills">
+            {#each [1, 2, 3, 4] as n}
+              <button
+                class="meal-pill"
+                class:active={mealsPerDay === n}
+                onclick={() => mealsPerDay = n}
+              >{n}</button>
+            {/each}
           </div>
         </div>
 
         <div class="actions">
           <button class="btn-skip" onclick={finish}>Passer</button>
-          <button class="btn-primary" onclick={saveFoodStock}>C'est parti !</button>
+          <button class="btn-primary" onclick={saveFood}>C'est parti !</button>
         </div>
       </div>
     {/if}
@@ -471,6 +291,19 @@
   .field label { display: block; font-size: var(--text-sm); font-weight: 500; color: var(--color-text-secondary); margin-bottom: var(--space-xs); }
   .weight-input-sm { display: flex; align-items: center; gap: var(--space-sm); }
   .unit-sm { font-size: var(--text-md); color: var(--color-text-muted); font-weight: 600; }
+
+  .meals-section { margin: var(--space-lg) 0; }
+  .meals-label { display: block; font-size: var(--text-sm); font-weight: 600; color: var(--color-text-secondary); margin-bottom: var(--space-sm); }
+  .meals-pills { display: flex; gap: var(--space-sm); }
+  .meal-pill {
+    flex: 1; padding: var(--space-md); border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-lg); font-size: var(--text-lg); font-weight: 600;
+    background: var(--color-surface); color: var(--color-text-secondary);
+    cursor: pointer; font-family: var(--font-default); transition: all 0.15s;
+    text-align: center;
+  }
+  .meal-pill.active { border-color: var(--color-primary); background: var(--color-primary-soft); color: var(--color-primary); }
+  .meal-pill:hover { border-color: var(--color-primary-light); }
 
   .actions { display: flex; gap: var(--space-md); margin-top: var(--space-xl); }
   .btn-skip { flex: 0; background: none; border: none; color: var(--color-text-muted); font-size: var(--text-sm); cursor: pointer; font-family: var(--font-default); }

@@ -1,55 +1,81 @@
-import { test, chromium } from '@playwright/test';
-import { mkdirSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { test, expect } from '../support/merged-fixtures';
 
-const SCREENSHOT_DIR = '/tmp/sakapuss-screenshots';
-const BASE_URL = 'http://localhost:5173';
-const API_URL = 'http://localhost:8000';
+const API_URL = process.env.API_URL || 'http://localhost:8000';
 
-test('take screenshots of all pages', async () => {
-  if (!existsSync(SCREENSHOT_DIR)) {
-    mkdirSync(SCREENSHOT_DIR, { recursive: true });
-  }
+test.describe('Visual Screenshots', () => {
+  let petId: string;
 
-  const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
-  const page = await context.newPage();
+  test.beforeAll(async () => {
+    try {
+      const response = await fetch(`${API_URL}/pets`);
+      const pets = await response.json();
+      if (pets.length > 0) {
+        petId = pets[0].id;
+      }
+    } catch (e) {
+      console.log('Could not fetch pet ID');
+    }
+  });
 
-  // Register (idempotent)
-  await fetch(`${API_URL}/auth/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: 'test@sakapuss.fr', password: 'TestPass123' }),
-  }).catch(() => null);
+  test('dashboard', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: '/tmp/screenshots/dashboard.png', fullPage: true });
+  });
 
-  // Unauthenticated pages
-  await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle' });
-  await page.screenshot({ path: join(SCREENSHOT_DIR, '01-login.png'), fullPage: true });
+  test('pets-new', async ({ page }) => {
+    await page.goto('/pets/new', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: '/tmp/screenshots/pets-new.png', fullPage: true });
+  });
 
-  await page.goto(`${BASE_URL}/register`, { waitUntil: 'networkidle' });
-  await page.screenshot({ path: join(SCREENSHOT_DIR, '02-register.png'), fullPage: true });
+  test('settings', async ({ page }) => {
+    await page.goto('/settings', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: '/tmp/screenshots/settings.png', fullPage: true });
+  });
 
-  // Login
-  await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle' });
-  await page.fill('input[type="email"]', 'test@sakapuss.fr');
-  await page.fill('input[type="password"]', 'TestPass123');
-  await page.click('button[type="submit"]');
-  await page.waitForTimeout(2000);
+  test('reminders', async ({ page }) => {
+    await page.goto('/reminders', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: '/tmp/screenshots/reminders.png', fullPage: true });
+  });
 
-  // Authenticated pages
-  for (const [name, url] of [
-    ['03-dashboard', '/'],
-    ['04-timeline', '/timeline'],
-    ['05-reminders', '/reminders'],
-    ['06-settings', '/settings'],
-    ['07-pets-new', '/pets/new'],
-    ['08-bowls', '/bowls'],
-    ['09-food', '/food'],
-  ]) {
-    await page.goto(`${BASE_URL}${url}`, { waitUntil: 'networkidle' });
-    await page.waitForTimeout(800);
-    await page.screenshot({ path: join(SCREENSHOT_DIR, `${name}.png`), fullPage: true });
-  }
+  test('food', async ({ page }) => {
+    await page.goto('/food', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: '/tmp/screenshots/food.png', fullPage: true });
+  });
 
-  await browser.close();
+  test('bowls', async ({ page }) => {
+    await page.goto('/bowls', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: '/tmp/screenshots/bowls.png', fullPage: true });
+  });
+
+  test('timeline', async ({ page }) => {
+    await page.goto('/timeline', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: '/tmp/screenshots/timeline.png', fullPage: true });
+  });
+
+  test('onboarding', async ({ page }) => {
+    await page.goto('/onboarding', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: '/tmp/screenshots/onboarding.png', fullPage: true });
+  });
+
+  test('pet-profile', async ({ page, seedPet }) => {
+    const pet = await seedPet({ name: `Screenshot-${Date.now()}` });
+    await page.goto(`/pets/${pet.id}`, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: '/tmp/screenshots/pet-profile.png', fullPage: true });
+  });
+
+  test('pet-edit', async ({ page, seedPet }) => {
+    const pet = await seedPet({ name: `Edit-${Date.now()}` });
+    await page.goto(`/pets/${pet.id}/edit`, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: '/tmp/screenshots/pet-edit.png', fullPage: true });
+  });
 });

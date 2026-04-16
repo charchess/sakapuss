@@ -11,7 +11,7 @@ test.describe('Correlation Insights & Vet Summary (ATDD - Stories 5.3 & 5.4)', (
     petId = pet.id;
   });
 
-  test('[P0] should show correlation insight card on pet profile', async ({ page, request }) => {
+  test('[P0] should show correlation insight card on pet profile', async ({ page, request, authHeaders }) => {
     // Seed food change + symptom within 72h
     await request.post(`${API_URL}/pets/${petId}/events`, {
       data: {
@@ -19,6 +19,7 @@ test.describe('Correlation Insights & Vet Summary (ATDD - Stories 5.3 & 5.4)', (
         occurred_at: '2026-03-01T10:00:00Z',
         payload: { brand: 'New Brand', change: true },
       },
+      headers: authHeaders,
     });
     await request.post(`${API_URL}/pets/${petId}/events`, {
       data: {
@@ -26,6 +27,7 @@ test.describe('Correlation Insights & Vet Summary (ATDD - Stories 5.3 & 5.4)', (
         occurred_at: '2026-03-02T10:00:00Z',
         payload: { anomalies: ['diarrhea'] },
       },
+      headers: authHeaders,
     });
 
     await page.goto(`/pets/${petId}`, { waitUntil: 'networkidle' });
@@ -41,7 +43,7 @@ test.describe('Correlation Insights & Vet Summary (ATDD - Stories 5.3 & 5.4)', (
     await expect(page.getByTestId('correlation-insight')).not.toBeVisible();
   });
 
-  test('[P0] should show vet summary section with recent history', async ({ page, request }) => {
+  test('[P0] should show vet summary section with recent history', async ({ page, request, authHeaders }) => {
     // Seed some events for the pet
     await request.post(`${API_URL}/pets/${petId}/events`, {
       data: {
@@ -49,6 +51,7 @@ test.describe('Correlation Insights & Vet Summary (ATDD - Stories 5.3 & 5.4)', (
         occurred_at: new Date().toISOString(),
         payload: { value: 4.2, unit: 'kg' },
       },
+      headers: authHeaders,
     });
     await request.post(`${API_URL}/pets/${petId}/events`, {
       data: {
@@ -56,6 +59,7 @@ test.describe('Correlation Insights & Vet Summary (ATDD - Stories 5.3 & 5.4)', (
         occurred_at: new Date().toISOString(),
         payload: { name: 'Rage' },
       },
+      headers: authHeaders,
     });
 
     await page.goto(`/pets/${petId}/vet`, { waitUntil: 'networkidle' });

@@ -21,6 +21,7 @@ function getStoredToken(): string | null {
 type SakapussFixtures = {
   seedPet: (overrides?: Partial<Pet>) => Promise<Pet>;
   loginAs: () => Promise<string>; // returns JWT token
+  authHeaders: Record<string, string>;
 };
 
 export const test = base.extend<SakapussFixtures>({
@@ -50,6 +51,11 @@ export const test = base.extend<SakapussFixtures>({
     for (const id of createdPetIds) {
       await request.delete(`${API_URL}/pets/${id}`, { headers: authHeaders });
     }
+  },
+
+  authHeaders: async ({}, use) => {
+    const token = getStoredToken();
+    await use(token ? { Authorization: `Bearer ${token}` } : {});
   },
 
   loginAs: async ({ request, page }, use) => {

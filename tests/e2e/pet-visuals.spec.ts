@@ -11,7 +11,7 @@ test.describe('Photo Gallery & Visuals (ATDD - Story 5.2)', () => {
     petId = pet.id;
   });
 
-  test('[P0] should display photo grid when events have photo_url', async ({ page, request }) => {
+  test('[P0] should display photo grid when events have photo_url', async ({ page, request, authHeaders }) => {
     // Seed events with photos
     await request.post(`${API_URL}/pets/${petId}/events`, {
       data: {
@@ -19,6 +19,7 @@ test.describe('Photo Gallery & Visuals (ATDD - Story 5.2)', () => {
         occurred_at: '2026-03-01T10:00:00Z',
         payload: { text: 'Wound day 1', photo_url: '/media/wound1.jpg' },
       },
+      headers: authHeaders,
     });
     await request.post(`${API_URL}/pets/${petId}/events`, {
       data: {
@@ -26,6 +27,7 @@ test.describe('Photo Gallery & Visuals (ATDD - Story 5.2)', () => {
         occurred_at: '2026-03-03T10:00:00Z',
         payload: { text: 'Wound day 3', photo_url: '/media/wound3.jpg' },
       },
+      headers: authHeaders,
     });
 
     await page.goto(`/pets/${petId}`, { waitUntil: 'networkidle' });
@@ -45,13 +47,14 @@ test.describe('Photo Gallery & Visuals (ATDD - Story 5.2)', () => {
     await expect(page.getByTestId('photo-gallery')).not.toBeVisible();
   });
 
-  test('[P1] should show date on photo thumbnails', async ({ page, request }) => {
+  test('[P1] should show date on photo thumbnails', async ({ page, request, authHeaders }) => {
     await request.post(`${API_URL}/pets/${petId}/events`, {
       data: {
         type: 'note',
         occurred_at: '2026-03-05T14:00:00Z',
         payload: { text: 'Check', photo_url: '/media/check.jpg' },
       },
+      headers: authHeaders,
     });
 
     await page.goto(`/pets/${petId}`, { waitUntil: 'networkidle' });

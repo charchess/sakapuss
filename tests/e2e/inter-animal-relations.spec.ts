@@ -24,7 +24,7 @@ test.describe('Inter-Animal Relations (ATDD - Story 9.2)', () => {
     await expect(page.getByText('Bagarre pour la gamelle')).toBeVisible();
   });
 
-  test('[P0] should show relation event in object pet timeline too', async ({ request, seedPet, page }) => {
+  test('[P0] should show relation event in object pet timeline too', async ({ request, seedPet, page, authHeaders }) => {
     const cat1 = await seedPet({ name: 'RelCat1' });
     const cat2 = await seedPet({ name: 'RelCat2' });
 
@@ -40,6 +40,7 @@ test.describe('Inter-Animal Relations (ATDD - Story 9.2)', () => {
           text: 'Playing together',
         },
       },
+      headers: authHeaders,
     });
 
     // Also create on cat2's timeline
@@ -54,6 +55,7 @@ test.describe('Inter-Animal Relations (ATDD - Story 9.2)', () => {
           text: 'Playing together',
         },
       },
+      headers: authHeaders,
     });
 
     // Verify on cat2's timeline
