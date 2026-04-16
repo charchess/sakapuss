@@ -12,7 +12,7 @@ test.describe('Pet Onboarding CRUD (ATDD - Stories 6.2 & 6.3)', () => {
     await page.goto('/pets/new', { waitUntil: 'networkidle' });
 
     await page.getByTestId('pet-name').fill(petName);
-    await page.getByTestId('pet-species').selectOption('Cat');
+    await page.getByTestId('pet-species').getByText('Chat').click();
     await page.getByTestId('pet-birth-date').fill('2021-06-15');
     await page.getByTestId('pet-breed').fill('Persan');
     await page.getByTestId('pet-sterilized').check();

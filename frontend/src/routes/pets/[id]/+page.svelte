@@ -1,5 +1,15 @@
 <script lang="ts">
+  import { getApiUrl } from '$lib/api';
+
   let { data } = $props();
+
+  let events = $state([...data.events]);
+  let showEventForm = $state(false);
+  let eventType = $state('note');
+  let eventDate = $state('');
+  let eventPayloadName = $state('');
+  let eventPayloadText = $state('');
+  let eventSubmitting = $state(false);
 
   function getSpeciesEmoji(species: string): string {
     if (species?.toLowerCase().includes('cat') || species?.toLowerCase().includes('chat')) return '🐱';
@@ -34,7 +44,7 @@
   }
 
   const weightEvents = $derived(
-    data.events.filter((e: any) => e.type === 'weight' && e.payload?.value)
+    events.filter((e: any) => e.type === 'weight' && e.payload?.value)
       .sort((a: any, b: any) => new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime())
   );
   const latestWeight = $derived(weightEvents[0]?.payload?.value);
@@ -46,7 +56,56 @@
     return diff > 0 ? 'up' : 'down';
   });
 
-  const recentEvents = $derived(data.events.slice(0, 5));
+  const recentEvents = $derived(
+    [...events].sort((a: any, b: any) => new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime()).slice(0, 5)
+  );
+
+  function getEventTypeLabel(type: string): string {
+    const labels: Record<string, string> = {
+      weight: 'Poids', litter_clean: 'Litière nettoyée', food_serve: 'Gamelle remplie',
+      health_note: 'Médicament', behavior: 'Observation', vaccine: 'Vaccin',
+      note: 'Note', custom: 'Événement', treatment: 'Traitement', relation: 'Relation',
+    };
+    return labels[type] ?? type.replace(/_/g, ' ');
+  }
+
+  function getToken(): string | null {
+    return typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
+  }
+
+  async function submitEvent() {
+    if (!eventDate) return;
+    eventSubmitting = true;
+    const payload: Record<string, string> = {};
+    if (eventType === 'vaccine' && eventPayloadName) payload.name = eventPayloadName;
+    if (eventType === 'note' && eventPayloadText) payload.text = eventPayloadText;
+    const token = getToken();
+    try {
+      const res = await fetch(`${getApiUrl()}/pets/${data.pet.id}/events`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          type: eventType,
+          occurred_at: new Date(eventDate).toISOString(),
+          payload,
+        }),
+      });
+      if (res.ok) {
+        const created = await res.json();
+        events = [created, ...events];
+        showEventForm = false;
+        eventPayloadName = '';
+        eventPayloadText = '';
+        eventDate = '';
+        eventType = 'note';
+      }
+    } finally {
+      eventSubmitting = false;
+    }
+  }
 </script>
 
 <svelte:head><title>{data.pet.name} — Sakapuss</title></svelte:head>
@@ -69,9 +128,63 @@
       </p>
       {#if data.pet.microchip}<p class="hero-chip">Puce: {data.pet.microchip}</p>{/if}
     </div>
-    <a href="/pets/{data.pet.id}/edit" class="edit-btn" aria-label="Modifier">
+    <a href="/pets/{data.pet.id}/edit" class="edit-btn" aria-label="Modifier" data-testid="edit-link">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
     </a>
+  </div>
+
+  {#if data.allPets?.length > 1}
+    <nav class="pet-switcher" data-testid="pet-switcher" aria-label="Changer d'animal">
+      {#each data.allPets as p}
+        <a
+          href="/pets/{p.id}"
+          class="switcher-item"
+          class:active={p.id === data.pet.id}
+          aria-current={p.id === data.pet.id ? 'page' : undefined}
+        >
+          {p.name}
+        </a>
+      {/each}
+    </nav>
+  {/if}
+
+  <div class="fast-action-grid" data-testid="fast-action-grid">
+    <button class="fast-action" onclick={() => { showEventForm = true; eventType = 'weight'; }}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M12 3C7 3 3 7 3 12s4 9 9 9 9-4 9-9-4-9-9-9z"/><path d="M12 7v5l3 3"/>
+      </svg>
+      <span>Poids</span>
+    </button>
+    <button class="fast-action" onclick={() => { showEventForm = true; eventType = 'vaccine'; }}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M3 21l9-9"/><path d="M12.7 4.3a1 1 0 011.4 0l5.6 5.6a1 1 0 010 1.4l-7 7a1 1 0 01-1.4 0L5.7 12.7a1 1 0 010-1.4l7-7z"/>
+      </svg>
+      <span>Vaccin</span>
+    </button>
+    <button class="fast-action" onclick={() => { showEventForm = true; eventType = 'note'; }}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/>
+      </svg>
+      <span>Note</span>
+    </button>
+    <button class="fast-action" onclick={() => { showEventForm = true; eventType = 'litter_clean'; }}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>
+      </svg>
+      <span>Litière</span>
+    </button>
+    <button class="fast-action" onclick={() => { showEventForm = true; eventType = 'food_serve'; }}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>
+      </svg>
+      <span>Repas</span>
+    </button>
+    <button class="fast-action" onclick={() => { showEventForm = true; eventType = 'custom'; }}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+      </svg>
+      <span>Autre</span>
+    </button>
   </div>
 
   {#if data.anomalies?.length > 0}
@@ -116,22 +229,95 @@
     {/if}
   </section>
 
-  <section class="section">
-    <div class="section-header"><h2>Activité récente</h2><a href="/timeline" class="section-link">Tout voir →</a></div>
+  <section class="section" data-testid="pet-timeline">
+    <div class="section-header">
+      <h2>Activité récente</h2>
+      <div class="timeline-actions">
+        <a href="/timeline" class="section-link">Tout voir →</a>
+        <button class="add-event-btn" data-testid="add-event-btn" onclick={() => showEventForm = !showEventForm}>
+          {showEventForm ? '✕' : '+ Ajouter'}
+        </button>
+      </div>
+    </div>
+
+    {#if showEventForm}
+      <form class="event-form" data-testid="event-form" onsubmit={(e) => { e.preventDefault(); submitEvent(); }}>
+        <select class="event-select" data-testid="event-type" bind:value={eventType}>
+          <option value="note">Note</option>
+          <option value="weight">Poids</option>
+          <option value="vaccine">Vaccin</option>
+          <option value="litter_clean">Litière nettoyée</option>
+          <option value="food_serve">Repas</option>
+          <option value="health_note">Médicament</option>
+          <option value="behavior">Observation</option>
+          <option value="custom">Autre</option>
+        </select>
+        <input
+          type="datetime-local"
+          class="event-date-input"
+          data-testid="event-date"
+          bind:value={eventDate}
+          required
+        />
+        {#if eventType === 'vaccine'}
+          <input
+            type="text"
+            class="event-text-input"
+            data-testid="event-payload-name"
+            placeholder="Nom du vaccin (ex: Rage)"
+            bind:value={eventPayloadName}
+          />
+        {/if}
+        {#if eventType === 'note' || eventType === 'behavior' || eventType === 'custom'}
+          <textarea
+            class="event-textarea"
+            data-testid="event-payload-text"
+            placeholder="Décrivez l'observation..."
+            bind:value={eventPayloadText}
+            rows="2"
+          ></textarea>
+        {/if}
+        <button type="submit" class="event-submit-btn" data-testid="event-submit" disabled={eventSubmitting}>
+          {eventSubmitting ? 'Enregistrement…' : 'Enregistrer'}
+        </button>
+      </form>
+    {/if}
+
     {#if recentEvents.length > 0}
       {#each recentEvents as event}
-        <div class="activity-row">
-          <span class="activity-type">{event.type.replace(/_/g, ' ')}</span>
-          {#if event.payload?.value}<span class="activity-value">{event.payload.value} {event.payload.unit || ''}</span>{/if}
+        <div class="activity-row" data-testid="timeline-event">
+          <span class="event-icon-wrap" data-testid="event-icon" aria-hidden="true">
+            {#if event.type === 'weight'}⚖️
+            {:else if event.type === 'vaccine'}💉
+            {:else if event.type === 'note'}📝
+            {:else if event.type === 'litter_clean'}🪣
+            {:else if event.type === 'food_serve'}🥣
+            {:else if event.type === 'health_note'}💊
+            {:else if event.type === 'behavior'}👁️
+            {:else}📋{/if}
+          </span>
+          <div class="activity-content">
+            <span class="activity-type" data-testid="event-type">{getEventTypeLabel(event.type)}</span>
+            <span class="activity-date" data-testid="event-date">{new Date(event.occurred_at).toLocaleDateString('fr-FR')}</span>
+            {#if event.payload?.value}
+              <span class="activity-value">{event.payload.value} {event.payload.unit || ''}</span>
+            {/if}
+            {#if event.payload?.text}
+              <span class="activity-text">{event.payload.text}</span>
+            {/if}
+            {#if event.payload?.name}
+              <span class="activity-text">{event.payload.name}</span>
+            {/if}
+          </div>
           <span class="activity-when">{getTimeAgo(event.occurred_at)}</span>
         </div>
       {/each}
     {:else}
-      <p class="empty">Aucune activité</p>
+      <p class="empty" data-testid="timeline-empty">Aucune activité enregistrée</p>
     {/if}
   </section>
 
-  <a href="/settings/vet-sharing" class="share-btn">
+  <a href="/pets/{data.pet.id}/vet" class="share-btn" data-testid="vet-link">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.8 2.3A.3.3 0 015 2h14a.3.3 0 01.2.3L18 10H6L4.8 2.3z"/><path d="M6 10v9a3 3 0 003 3h6a3 3 0 003-3v-9"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
     Partager avec mon vétérinaire
   </a>
@@ -174,10 +360,15 @@
   .reminder-info { flex: 1; }
   .reminder-name { font-size: var(--text-sm); font-weight: 500; display: block; }
   .reminder-date { font-size: var(--text-xs); color: var(--color-text-muted); }
-  .activity-row { display: flex; align-items: center; gap: var(--space-sm); padding: var(--space-xs) 0; font-size: var(--text-sm); }
-  .activity-type { flex: 1; text-transform: capitalize; }
-  .activity-value { font-weight: 600; color: var(--color-primary); }
-  .activity-when { font-size: var(--text-xs); color: var(--color-text-muted); }
+  .activity-row { display: flex; align-items: flex-start; gap: var(--space-sm); padding: var(--space-sm) 0; border-bottom: 1px solid var(--color-border); font-size: var(--text-sm); }
+  .activity-row:last-child { border-bottom: none; }
+  .event-icon-wrap { font-size: 16px; flex-shrink: 0; padding-top: 2px; }
+  .activity-content { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  .activity-type { font-weight: 500; text-transform: capitalize; }
+  .activity-date { font-size: var(--text-xs); color: var(--color-text-muted); }
+  .activity-value { font-weight: 600; color: var(--color-primary); font-size: var(--text-sm); }
+  .activity-text { font-size: var(--text-xs); color: var(--color-text-secondary); }
+  .activity-when { font-size: var(--text-xs); color: var(--color-text-muted); flex-shrink: 0; }
   .share-btn { display: flex; align-items: center; justify-content: center; gap: var(--space-sm); width: 100%; padding: var(--space-lg); background: var(--color-primary); color: white; border-radius: var(--radius-lg); font-size: var(--text-md); font-weight: 600; text-decoration: none; margin: var(--space-xl) 0; }
   .share-btn:hover { text-decoration: none; opacity: 0.9; }
   .share-btn svg { width: 22px; height: 22px; }
@@ -187,4 +378,103 @@
   .info-label { color: var(--color-text-muted); }
   .empty { font-size: var(--text-sm); color: var(--color-text-muted); }
   .inline-link { color: var(--color-primary); font-weight: 500; }
+  /* Fast action grid */
+  .fast-action-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+  }
+  .fast-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-md) var(--space-sm);
+    background: var(--color-surface);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    min-height: 64px;
+  }
+  .fast-action:hover { border-color: var(--color-primary-light); color: var(--color-primary); background: var(--color-primary-soft); }
+  .fast-action svg { width: 22px; height: 22px; }
+  /* Event form */
+  .timeline-actions { display: flex; align-items: center; gap: var(--space-sm); }
+  .add-event-btn {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-primary);
+    background: var(--color-primary-soft);
+    border: none;
+    border-radius: var(--radius-full);
+    padding: 3px 10px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .event-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--color-bg);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-md);
+    border: 1px solid var(--color-border);
+  }
+  .event-select,
+  .event-date-input,
+  .event-text-input,
+  .event-textarea {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-sizing: border-box;
+  }
+  .event-textarea { resize: vertical; min-height: 56px; }
+  .event-submit-btn {
+    padding: var(--space-sm) var(--space-lg);
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    cursor: pointer;
+    align-self: flex-end;
+  }
+  .event-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .pet-switcher {
+    display: flex;
+    gap: var(--space-xs);
+    overflow-x: auto;
+    padding: var(--space-xs) 0 var(--space-md);
+    scrollbar-width: none;
+  }
+  .switcher-item {
+    flex-shrink: 0;
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--color-text-secondary);
+    background: var(--color-surface);
+    border: 1.5px solid var(--color-border);
+    transition: all 0.15s;
+  }
+  .switcher-item.active {
+    background: var(--color-primary-soft);
+    border-color: var(--color-primary-light);
+    color: var(--color-primary);
+  }
+  .switcher-item:hover { text-decoration: none; border-color: var(--color-primary-light); }
 </style>

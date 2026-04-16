@@ -1,8 +1,9 @@
 import type { PageLoad } from './$types';
 import { getApiUrl } from '$lib/api';
 
-export const load: PageLoad = async ({ fetch }) => {
+export const load: PageLoad = async ({ fetch, url }) => {
   const API_URL = getApiUrl();
+  const selectedPetId = url.searchParams.get('pet');
 
   const [petsRes, eventsRes, bowlsRes, resourcesRes, productsRes, remindersRes] = await Promise.all([
     fetch(`${API_URL}/pets`),
@@ -20,5 +21,5 @@ export const load: PageLoad = async ({ fetch }) => {
   const foodProducts = productsRes?.ok ? await productsRes.json() : [];
   const pendingReminders = remindersRes?.ok ? await remindersRes.json() : [];
 
-  return { pets, recentEvents, bowls, resources, foodProducts, pendingReminders };
+  return { pets, recentEvents, bowls, resources, foodProducts, pendingReminders, selectedPetId };
 };

@@ -36,7 +36,7 @@ test.describe('Pet Photo Upload — Story 10.1 & 10.2', () => {
 
       // Fill required fields
       await page.getByTestId('pet-name').fill(petName);
-      await page.getByTestId('pet-species').selectOption('Cat');
+      await page.getByTestId('pet-species').getByText('Chat').click();
       await page.getByTestId('pet-birth-date').fill('2022-03-10');
 
       // Select a photo
@@ -69,7 +69,7 @@ test.describe('Pet Photo Upload — Story 10.1 & 10.2', () => {
       await page.goto('/pets/new', { waitUntil: 'networkidle' });
 
       await page.getByTestId('pet-name').fill(petName);
-      await page.getByTestId('pet-species').selectOption('Dog');
+      await page.getByTestId('pet-species').getByText('Chien').click();
       await page.getByTestId('pet-birth-date').fill('2021-01-01');
 
       // No photo selected

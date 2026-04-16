@@ -4,7 +4,10 @@
 
   let { data } = $props();
 
-  let selectedPetIndex = $state(0);
+  const initialIndex = data.selectedPetId
+    ? Math.max(0, data.pets.findIndex((p: any) => p.id === data.selectedPetId))
+    : 0;
+  let selectedPetIndex = $state(initialIndex);
   const selectedPet = $derived(data.pets[selectedPetIndex] || null);
   const litterResources = $derived(data.resources.filter((r: any) => r.type === 'litter'));
   // Quick Log state
@@ -104,26 +107,29 @@
         <span>{data.pets.length} {data.pets.length > 1 ? 'animaux' : 'animal'}</span>
       </div>
       <div class="header-right">
-        {#each data.pets as pet, i}
-          <button
-            class="h-avatar"
-            class:active={selectedPetIndex === i}
-            onclick={() => selectedPetIndex = i}
-            aria-label={pet.name}
-          >
-            {#if pet.photo_url}
-              <img src={pet.photo_url} alt={pet.name} />
-            {:else}
-              {getSpeciesEmoji(pet.species)}
-            {/if}
-          </button>
-        {/each}
+        <div class="avatar-group">
+          {#each data.pets as pet, i}
+            <a
+              href="/pets/{pet.id}"
+              class="h-avatar"
+              class:active={selectedPetIndex === i}
+              aria-label={pet.name}
+            >
+              {#if pet.photo_url}
+                <img src={pet.photo_url} alt={pet.name} />
+              {:else}
+                {getSpeciesEmoji(pet.species)}
+              {/if}
+            </a>
+          {/each}
+        </div>
+        <a href="/pets/new" class="h-avatar-add" data-testid="add-pet-btn" aria-label="Ajouter un animal">+</a>
       </div>
     </div>
 
     <!-- Animal Hero Card -->
     {#if selectedPet}
-      <a href="/pets/{selectedPet.id}" class="animal-card">
+      <a href="/pets/{selectedPet.id}" class="animal-card" aria-label="Voir le profil">
         <div class="animal-face">
           {#if selectedPet.photo_url}
             <img src={selectedPet.photo_url} alt={selectedPet.name} />
@@ -214,6 +220,28 @@
       {/if}
     </div>
   {/if}
+
+  <!-- Management shortcuts — always visible -->
+  <div class="mgmt-section">
+    <a href="/bowls" class="mgmt-link" data-testid="bowls-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M4 12a8 8 0 0016 0"/><path d="M3 12h18"/>
+      </svg>
+      Gamelles
+    </a>
+    <a href="/food" class="mgmt-link" data-testid="food-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      Aliments
+    </a>
+    <a href="/reminders" class="mgmt-link" data-testid="reminders-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M18 8A6 6 0 106 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>
+      </svg>
+      Rappels
+    </a>
+  </div>
 </div>
 
 <!-- Quick Log components -->
@@ -295,6 +323,25 @@
 
   .h-avatar.active { transform: scale(1.12); z-index: 2; border-color: var(--color-primary); }
   .h-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .avatar-group { display: flex; align-items: center; }
+  .h-avatar-add {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 22px;
+    font-weight: 300;
+    background: transparent;
+    border: 2px dashed var(--color-border);
+    color: var(--color-text-muted);
+    line-height: 1;
+    margin-left: var(--space-xs);
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .h-avatar-add:hover { border-color: var(--color-primary); color: var(--color-primary); }
 
   /* Animal hero card */
   .animal-card {
@@ -416,6 +463,31 @@
   .act-observation .action-icon svg { stroke: #7c5cbf; }
   .act-event .action-icon { background: linear-gradient(145deg, #dbeafe, #93c5fd); box-shadow: 0 5px 16px rgba(74,111,165,0.18); }
   .act-event .action-icon svg { stroke: #4a6fa5; }
+
+  /* Management shortcuts */
+  .mgmt-section {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xl);
+  }
+  .mgmt-link {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    box-shadow: var(--elevation-sm);
+    transition: background 0.15s, color 0.15s;
+  }
+  .mgmt-link:hover { background: var(--color-primary-soft); color: var(--color-primary); text-decoration: none; }
+  .mgmt-link svg { width: 14px; height: 14px; opacity: 0.7; }
 
   /* Recent activity */
   .recent-section { padding-top: var(--space-lg); }
