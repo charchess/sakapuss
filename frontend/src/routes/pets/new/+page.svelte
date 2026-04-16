@@ -203,10 +203,11 @@
   }
 
   h1 {
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: 800;
     margin-bottom: calc(var(--space-unit) * 3);
-    color: var(--color-neutral-900);
+    color: var(--color-primary);
   }
 
   .form-error {
@@ -325,7 +326,7 @@
   .checkbox-group input[type='checkbox'] {
     width: 18px;
     height: 18px;
-    accent-color: var(--color-accent);
+    accent-color: var(--color-primary);
   }
 
   .btn-submit {

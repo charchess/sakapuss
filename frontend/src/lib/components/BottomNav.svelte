@@ -10,7 +10,7 @@
     { href: '/timeline', label: 'Timeline', icon: 'timeline' },
     { href: '#quicklog', label: '+', icon: 'add', isCenter: true },
     { href: '/reminders', label: 'Rappels', icon: 'bell' },
-    { href: '/settings', label: 'Profil', icon: 'user' },
+    { href: '/settings', label: 'Paramètres', icon: 'user' },
   ];
 
   const isActive = (href: string, currentPath: string) => {

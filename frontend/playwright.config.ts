@@ -1,7 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
+import * as path from 'node:path';
+
+const AUTH_FILE = path.join(__dirname, '../tests/.auth/test-user.json');
 
 export default defineConfig({
   testDir: '../tests',
+  globalSetup: '../tests/global-setup.ts',
+  globalTeardown: '../tests/global-teardown.ts',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -34,6 +39,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         baseURL: process.env.BASE_URL || 'http://localhost:5173',
+        storageState: AUTH_FILE,
       },
     },
     {
@@ -42,6 +48,7 @@ export default defineConfig({
       use: {
         ...devices['Pixel 5'],
         baseURL: process.env.BASE_URL || 'http://localhost:5173',
+        storageState: AUTH_FILE,
       },
     },
   ],
