@@ -135,7 +135,7 @@
                 class="bag-status"
                 data-testid="bag-status-{bag.status}"
               >
-                {bag.status}
+                {bag.status === 'stocked' ? 'En stock' : bag.status === 'opened' ? 'Ouvert' : 'Terminé'}
               </span>
               {#if bag.status === 'stocked'}
                 <button class="btn-action" data-testid="bag-open-btn" onclick={() => openBag(bag.id)}>
@@ -199,7 +199,7 @@
     display: inline-flex;
     align-items: center;
     padding: calc(var(--space-unit) / 2) calc(var(--space-unit) * 1.5);
-    background: var(--color-accent);
+    background: var(--color-primary);
     color: white;
     border: none;
     border-radius: var(--radius-sm);
@@ -210,7 +210,7 @@
   }
 
   .btn-add:hover {
-    background: #059669;
+    background: var(--color-primary-dark);
     text-decoration: none;
   }
 
@@ -285,7 +285,7 @@
   }
 
   .btn-deplete {
-    background: #F59E0B;
+    background: var(--color-error);
   }
 
   .bag-form {
@@ -316,7 +316,7 @@
 
   .btn-submit {
     padding: calc(var(--space-unit) * 1.5);
-    background: var(--color-accent);
+    background: var(--color-primary);
     color: white;
     border: none;
     border-radius: var(--radius-sm);
@@ -325,6 +325,6 @@
   }
 
   .btn-submit:hover {
-    background: #059669;
+    background: var(--color-primary-dark);
   }
 </style>

@@ -165,7 +165,7 @@
     display: inline-flex;
     align-items: center;
     padding: calc(var(--space-unit) / 2) calc(var(--space-unit) * 1.5);
-    background: var(--color-accent);
+    background: var(--color-primary);
     color: white;
     border: none;
     border-radius: var(--radius-sm);
@@ -175,7 +175,7 @@
   }
 
   .btn-add:hover {
-    background: #059669;
+    background: var(--color-primary-dark);
   }
 
   .empty {
@@ -212,7 +212,7 @@
 
   .btn-submit {
     padding: calc(var(--space-unit) * 1.5);
-    background: var(--color-accent);
+    background: var(--color-primary);
     color: white;
     border: none;
     border-radius: var(--radius-sm);
@@ -221,7 +221,7 @@
   }
 
   .btn-submit:hover {
-    background: #059669;
+    background: var(--color-primary-dark);
   }
 
   .bowl-list {

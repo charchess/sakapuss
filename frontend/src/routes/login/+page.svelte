@@ -59,17 +59,28 @@
         <path d="M28 44c1.5 1.5 4 2.5 4 2.5s2.5-1 4-2.5" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round"/>
       </svg>
       <h1 class="app-name">Sakapuss</h1>
+      <p class="tagline">Le carnet de santé qui parle pour tes animaux</p>
     </div>
 
     <form onsubmit={handleLogin}>
       <div class="field">
         <label for="email">Email</label>
-        <input id="email" type="email" bind:value={email} placeholder="camille@exemple.fr" autocomplete="email" />
+        <div class="input-wrap">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4L12 13 2 4"/>
+          </svg>
+          <input id="email" type="email" bind:value={email} placeholder="camille@exemple.fr" autocomplete="email" />
+        </div>
       </div>
 
       <div class="field">
         <label for="password">Mot de passe</label>
-        <input id="password" type="password" bind:value={password} placeholder="Mot de passe" autocomplete="current-password" />
+        <div class="input-wrap">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+          </svg>
+          <input id="password" type="password" bind:value={password} placeholder="Mot de passe" autocomplete="current-password" />
+        </div>
       </div>
 
       {#if error}
@@ -111,18 +122,26 @@
     font-size: var(--text-2xl);
     font-weight: 800;
     color: var(--color-primary);
+    margin-bottom: var(--space-xs);
   }
+  .tagline { font-size: var(--text-sm); color: var(--color-text-muted); }
   form { display: flex; flex-direction: column; gap: var(--space-lg); }
   .field { display: flex; flex-direction: column; gap: var(--space-xs); }
   label { font-size: var(--text-sm); font-weight: 500; color: var(--color-text-secondary); }
+  .input-wrap { position: relative; }
+  .input-icon {
+    position: absolute; left: var(--space-md); top: 50%; transform: translateY(-50%);
+    width: 18px; height: 18px; color: var(--color-text-muted); pointer-events: none;
+  }
   input {
     width: 100%;
-    padding: var(--space-md);
+    padding: var(--space-md) var(--space-md) var(--space-md) 42px;
     border: 1.5px solid var(--color-border);
     border-radius: var(--radius-lg);
     font-size: var(--text-md);
     font-family: var(--font-default);
     color: var(--color-text-primary);
+    background: var(--color-surface);
   }
   input:focus { outline: none; border-color: var(--color-primary-light); box-shadow: 0 0 0 3px var(--color-primary-soft); }
   .error-msg {
@@ -144,8 +163,10 @@
     font-weight: 600;
     font-family: var(--font-default);
     cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
   }
-  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary:hover:not(:disabled) { opacity: 0.9; }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
   .btn-primary:active:not(:disabled) { transform: scale(0.98); }
   .register-link { text-align: center; margin-top: var(--space-xl); font-size: var(--text-sm); color: var(--color-text-muted); }
   .register-link a { color: var(--color-primary); font-weight: 500; }
