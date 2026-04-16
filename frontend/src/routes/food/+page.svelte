@@ -175,37 +175,18 @@
         <p class="empty-title">Aucun sac en stock</p>
         <span class="empty-hint">Enregistre tes sacs de croquettes pour suivre le stock</span>
       </div>
-    {:else if allDepleted}
-      <div class="depleted-nudge">
-        <span class="depleted-nudge-icon">📦</span>
-        <div>
-          <p class="empty-title">Plus de stock actif</p>
-          <span class="empty-hint">Tous tes sacs sont épuisés — pense à en commander un nouveau !</span>
-        </div>
-        <button class="btn-add" onclick={() => { showBagForm = true; }}>+ Sac</button>
-      </div>
-      <div class="bag-list bag-list-depleted">
-        {#each bags as bag}
-          <div class="bag-card" class:depleted={bag.status === 'depleted'}>
-            <div class="bag-icon" class:opened={bag.status === 'opened'} class:depleted={bag.status === 'depleted'}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                <path d="M4 12a8 8 0 0016 0"/><path d="M3 12h18"/>
-              </svg>
-            </div>
-            <div class="bag-info">
-              <strong class="bag-name">{productName(bag.product_id)}</strong>
-              <span class="bag-meta">{productBrand(bag.product_id)} · {(bag.weight_g / 1000).toFixed(1)} kg · {formatDate(bag.purchased_at)}</span>
-            </div>
-            <div class="bag-actions">
-              <span class="bag-status status-depleted" data-testid="bag-status-depleted">
-                {STATUS_LABELS[bag.status] || bag.status}
-              </span>
-            </div>
-          </div>
-        {/each}
-      </div>
     {:else}
-      <div class="bag-list">
+      {#if allDepleted}
+        <div class="depleted-nudge">
+          <span class="depleted-nudge-icon">📦</span>
+          <div>
+            <p class="empty-title">Plus de stock actif</p>
+            <span class="empty-hint">Tous tes sacs sont épuisés — pense à en commander un nouveau !</span>
+          </div>
+          <button class="btn-add" onclick={() => { showBagForm = true; }}>+ Sac</button>
+        </div>
+      {/if}
+      <div class="bag-list" class:bag-list-depleted={allDepleted}>
         {#each bags as bag}
           <div class="bag-card" class:depleted={bag.status === 'depleted'}>
             <div class="bag-icon" class:opened={bag.status === 'opened'} class:depleted={bag.status === 'depleted'}>
