@@ -82,7 +82,7 @@
   </section>
 
   <section class="settings-section">
-    <h2>Configuration des features</h2>
+    <h2>Configuration</h2>
     <a href="/settings/litter" class="config-link">
       <svg viewBox="0 0 24 24" fill="none" stroke="var(--color-cat-litter)" stroke-width="2" stroke-linecap="round"><path d="M12 3v5M8 5l1.5 3M16 5l-1.5 3"/><path d="M7 10h10l-1.5 8a2 2 0 01-2 1.5h-3a2 2 0 01-2-1.5L7 10z"/></svg>
       <span>Caisses / Litières</span>

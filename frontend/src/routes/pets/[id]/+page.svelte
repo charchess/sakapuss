@@ -154,7 +154,16 @@
   function getSpeciesEmoji(species: string): string {
     if (species?.toLowerCase().includes('cat') || species?.toLowerCase().includes('chat')) return '🐱';
     if (species?.toLowerCase().includes('dog') || species?.toLowerCase().includes('chien')) return '🐶';
+    if (species?.toLowerCase().includes('rabbit') || species?.toLowerCase().includes('lapin')) return '🐰';
     return '🐾';
+  }
+
+  function getSpeciesLabel(species: string): string {
+    const s = species?.toLowerCase() || '';
+    if (s.includes('cat') || s.includes('chat')) return 'Chat';
+    if (s.includes('dog') || s.includes('chien')) return 'Chien';
+    if (s.includes('rabbit') || s.includes('lapin')) return 'Lapin';
+    return species;
   }
 
   function getAge(birthDate: string | null): string {
@@ -253,7 +262,7 @@
     <div class="hero-info">
       <h1>{data.pet.name}</h1>
       <p class="hero-meta">
-        {data.pet.species}
+        {getSpeciesLabel(data.pet.species)}
         {#if data.pet.breed} · {data.pet.breed}{/if}
         {#if data.pet.birth_date} · {getAge(data.pet.birth_date)}{/if}
       </p>
