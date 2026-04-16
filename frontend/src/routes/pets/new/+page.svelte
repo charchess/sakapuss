@@ -103,22 +103,27 @@
 
   <form onsubmit={handleSubmit}>
     <div class="form-group">
-      <label for="pet-photo">Photo de profil</label>
+      <label>Photo de profil</label>
+      <label class="photo-upload" class:has-preview={!!photoPreview} for="pet-photo">
+        {#if photoPreview}
+          <img src={photoPreview} alt="Aperçu" data-testid="pet-photo-preview" class="photo-preview" />
+          <span class="photo-change">Changer</span>
+        {:else}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 8v8M8 12h8"/>
+          </svg>
+          <span>Ajouter une photo</span>
+        {/if}
+      </label>
       <input
         id="pet-photo"
         data-testid="pet-photo-input"
         type="file"
         accept="image/*"
         onchange={handlePhotoChange}
+        class="photo-input-hidden"
       />
-      {#if photoPreview}
-        <img
-          src={photoPreview}
-          alt="Aperçu de la photo"
-          data-testid="pet-photo-preview"
-          class="photo-preview"
-        />
-      {/if}
     </div>
 
     <div class="form-group">
@@ -145,7 +150,7 @@
 
     <div class="form-group">
       <label for="pet-birth-date">Date de naissance *</label>
-      <input id="pet-birth-date" data-testid="pet-birth-date" type="date" required bind:value={birthDate} />
+      <input id="pet-birth-date" data-testid="pet-birth-date" type="date" required bind:value={birthDate} lang="fr" />
     </div>
 
     <div class="form-group">
@@ -248,13 +253,61 @@
     border-color: var(--color-primary);
   }
 
+  .photo-input-hidden { display: none; }
+
+  .photo-upload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    width: 120px;
+    height: 120px;
+    border: 2px dashed var(--color-border);
+    border-radius: var(--radius-xl);
+    cursor: pointer;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .photo-upload:hover {
+    border-color: var(--color-primary-light);
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .photo-upload svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .photo-upload.has-preview {
+    border-style: solid;
+    border-color: var(--color-primary-light);
+  }
+
   .photo-preview {
-    width: 80px;
-    height: 80px;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    border-radius: var(--radius-sm);
-    margin-top: var(--space-unit);
-    border: 2px solid var(--color-neutral-200);
+    position: absolute;
+    inset: 0;
+  }
+
+  .photo-change {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(108, 92, 231, 0.75);
+    color: white;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-align: center;
+    padding: var(--space-xs);
   }
 
   .checkbox-group {
@@ -278,7 +331,7 @@
   .btn-submit {
     padding: calc(var(--space-unit) * 1.5);
     min-height: 44px;
-    background: var(--color-accent);
+    background: var(--color-primary);
     color: white;
     border: none;
     border-radius: var(--radius-sm);
@@ -289,7 +342,7 @@
   }
 
   .btn-submit:hover:not(:disabled) {
-    background: #059669;
+    background: var(--color-primary-dark);
   }
 
   .btn-submit:disabled {

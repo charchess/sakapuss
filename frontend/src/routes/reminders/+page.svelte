@@ -150,7 +150,13 @@
 
     {#if reminders.length === 0}
       <div class="empty">
+        <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="40" cy="40" r="36" fill="var(--color-primary-soft)"/>
+          <path d="M40 18a6 6 0 00-6 6v2a14 14 0 00-8 12.5V44l-4 4h36l-4-4v-5.5A14 14 0 0046 26v-2a6 6 0 00-6-6z" fill="var(--color-primary-light)" stroke="var(--color-primary)" stroke-width="1.5"/>
+          <path d="M36 48a4 4 0 008 0" stroke="var(--color-primary)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
         <p>Aucun rappel configuré</p>
+        <span class="empty-hint">Les rappels sont créés automatiquement lors d'un vaccin ou traitement</span>
       </div>
     {/if}
 
@@ -201,7 +207,7 @@
 <style>
   .reminders-page { padding: 52px var(--space-lg) var(--space-lg); max-width: 500px; margin: 0 auto; }
   .page-header { display: flex; align-items: center; gap: var(--space-sm); margin-bottom: var(--space-xl); }
-  h1 { font-family: var(--font-display); font-size: var(--text-2xl); }
+  h1 { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 800; color: var(--color-primary); }
   .overdue-badge {
     background: var(--color-error);
     color: white;
@@ -236,7 +242,17 @@
   .card-title { font-size: var(--text-md); font-weight: 600; color: var(--color-text-primary); }
   .card-sub { font-size: var(--text-xs); color: var(--color-text-secondary); margin-top: 2px; }
   .chevron { color: var(--color-text-muted); font-size: 20px; }
-  .empty { text-align: center; padding: var(--space-3xl) 0; color: var(--color-text-muted); }
+  .empty {
+    text-align: center;
+    padding: var(--space-3xl) var(--space-xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+  }
+  .empty svg { width: 80px; height: 80px; }
+  .empty p { font-size: var(--text-md); font-weight: 500; color: var(--color-text-secondary); }
+  .empty-hint { font-size: var(--text-sm); color: var(--color-text-muted); max-width: 280px; }
 
   /* Detail view */
   .back-btn { background: none; border: none; color: var(--color-primary); font-size: var(--text-md); cursor: pointer; margin-bottom: var(--space-lg); font-family: var(--font-default); }

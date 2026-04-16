@@ -298,7 +298,7 @@
     flex: 1;
     padding: calc(var(--space-unit) * 1.5);
     min-height: 44px;
-    background: var(--color-accent);
+    background: var(--color-primary);
     color: white;
     border: none;
     border-radius: var(--radius-sm);
@@ -308,7 +308,7 @@
   }
 
   .btn-submit:hover:not(:disabled) {
-    background: #059669;
+    background: var(--color-primary-dark);
   }
 
   .btn-submit:disabled {

@@ -136,14 +136,22 @@
 
   {#if filteredEvents.length === 0}
     <div class="empty">
-      <p>Aucune entrée{activeFilter !== 'all' ? ` de type ${activeFilter}` : ''}</p>
+      <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="40" cy="40" r="36" fill="var(--color-primary-soft)"/>
+        <path d="M40 20c-8 0-14 5-14 12s2 9 5 13l1 9 5-4h6l5 4 1-9c3-4 5-6 5-13s-6-12-14-12z" fill="var(--color-primary-light)" stroke="var(--color-primary)" stroke-width="1.5"/>
+        <circle cx="34" cy="32" r="2" fill="var(--color-primary)"/>
+        <circle cx="46" cy="32" r="2" fill="var(--color-primary)"/>
+        <path d="M36 38c1 1.5 3 2 4 2s3-.5 4-2" stroke="var(--color-primary)" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <p>{activeFilter !== 'all' ? `Aucune entrée de type « ${activeFilter} »` : 'Rien ici pour l\'instant'}</p>
+      <span class="empty-hint">Utilise le bouton + pour enregistrer un événement</span>
     </div>
   {/if}
 </div>
 
 <style>
   .timeline-page { padding: 52px var(--space-lg) var(--space-lg); max-width: 600px; margin: 0 auto; }
-  h1 { font-family: var(--font-display); font-size: var(--text-2xl); margin-bottom: var(--space-lg); }
+  h1 { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 800; color: var(--color-primary); margin-bottom: var(--space-lg); }
 
   .pet-filters { display: flex; gap: var(--space-sm); margin-bottom: var(--space-md); overflow-x: auto; }
   .pet-pill {
@@ -197,5 +205,16 @@
   .value { color: var(--color-primary); font-weight: 600; }
   .stream-note { font-size: var(--text-xs); color: var(--color-text-secondary); font-style: italic; margin-top: 2px; }
   .stream-when { font-size: var(--text-xs); color: var(--color-text-muted); margin-top: 2px; }
-  .empty { text-align: center; padding: var(--space-3xl) 0; color: var(--color-text-muted); }
+  .empty {
+    text-align: center;
+    padding: var(--space-3xl) var(--space-xl);
+    color: var(--color-text-muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+  }
+  .empty svg { width: 80px; height: 80px; }
+  .empty p { font-size: var(--text-md); font-weight: 500; color: var(--color-text-secondary); }
+  .empty-hint { font-size: var(--text-sm); color: var(--color-text-muted); }
 </style>
