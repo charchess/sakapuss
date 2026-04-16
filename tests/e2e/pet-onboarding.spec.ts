@@ -9,8 +9,12 @@ test.describe('Pet Onboarding', () => {
     // When: I access the dashboard
     await page.goto('/');
 
-    // Then: I should see both pets listed
-    await expect(page.getByText(pet1.name)).toBeVisible();
-    await expect(page.getByText(pet2.name)).toBeVisible();
+    // Then: I should see both pets — either as hero card text or avatar buttons (aria-label)
+    await expect(
+      page.getByRole('button', { name: pet1.name }).or(page.getByText(pet1.name)).first()
+    ).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: pet2.name }).or(page.getByText(pet2.name)).first()
+    ).toBeVisible();
   });
 });

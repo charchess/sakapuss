@@ -18,7 +18,7 @@ test.describe('Food Management UI (ATDD - Stories 7.1 & 7.2)', () => {
     await page.getByTestId('product-submit').click();
 
     await page.waitForURL('/food', { timeout: 5000 });
-    await expect(page.getByText('Quinoa Caille')).toBeVisible();
+    await expect(page.getByText('Quinoa Caille').first()).toBeVisible();
   });
 
   test('[P0] should add a bag and manage its lifecycle', async ({ request, page }) => {

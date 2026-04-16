@@ -1,7 +1,22 @@
 import { test as base } from '@playwright/test';
 import { createPet, type Pet } from '../factories';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 const API_URL = 'http://localhost:8000';
+const AUTH_FILE = path.join(__dirname, '../../.auth/test-user.json');
+
+/** Read the JWT token from the storageState file saved by globalSetup */
+function getStoredToken(): string | null {
+  try {
+    const state = JSON.parse(fs.readFileSync(AUTH_FILE, 'utf8'));
+    const origin = state.origins?.find((o: { origin: string }) => o.origin === 'http://localhost:5173');
+    const entry = origin?.localStorage?.find((e: { name: string }) => e.name === 'token');
+    return entry?.value ?? null;
+  } catch {
+    return null;
+  }
+}
 
 type SakapussFixtures = {
   seedPet: (overrides?: Partial<Pet>) => Promise<Pet>;
@@ -11,6 +26,8 @@ type SakapussFixtures = {
 export const test = base.extend<SakapussFixtures>({
   seedPet: async ({ request }, use) => {
     const createdPetIds: string[] = [];
+    const token = getStoredToken();
+    const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
 
     const seedPet = async (overrides?: Partial<Pet>) => {
       const petData = createPet(overrides);
@@ -20,6 +37,7 @@ export const test = base.extend<SakapussFixtures>({
           species: petData.species,
           birth_date: petData.birth_date,
         },
+        headers: authHeaders,
       });
       const created = await response.json();
       createdPetIds.push(created.id);
@@ -30,7 +48,7 @@ export const test = base.extend<SakapussFixtures>({
 
     // Cleanup: delete created pets
     for (const id of createdPetIds) {
-      await request.delete(`${API_URL}/pets/${id}`);
+      await request.delete(`${API_URL}/pets/${id}`, { headers: authHeaders });
     }
   },
 

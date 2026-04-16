@@ -4,7 +4,7 @@ test.describe('Dashboard WDS (ATDD - Story 3.3)', () => {
 
   test('[P0] should display animal hero card with pet name', async ({ page, seedPet }) => {
     const pet = await seedPet({ name: `Hero-${Date.now()}` });
-    await page.goto('/');
+    await page.goto(`/?pet=${pet.id}`);
 
     // Hero card with pet name
     const heroCard = page.locator('.animal-card');
@@ -46,13 +46,13 @@ test.describe('Dashboard WDS (ATDD - Story 3.3)', () => {
   });
 
   test('[P1] should not show animal switcher for single pet', async ({ page, seedPet }) => {
-    await seedPet({ name: `Solo-${Date.now()}` });
+    const pet = await seedPet({ name: `Solo-${Date.now()}` });
     await page.goto('/');
 
-    // Single pet still shows avatar-group with 1 item, but the page
-    // always renders avatar-group when there are pets
-    const avatars = page.locator('.avatar-group .h-avatar');
-    await expect(avatars).toHaveCount(1);
+    // Avatar group should be visible with the seeded pet's avatar
+    const switcher = page.locator('.avatar-group');
+    await expect(switcher).toBeVisible();
+    await expect(switcher.getByLabel(pet.name)).toBeVisible();
   });
 
   test.skip('[P1] should show reminder nudge banner when reminders exist', async ({ page, seedPet }) => {

@@ -1,6 +1,17 @@
 import { test, expect } from '../support/merged-fixtures';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 const API_URL = process.env.API_URL || 'http://localhost:8000';
+const AUTH_FILE = path.join(__dirname, '../.auth/test-user.json');
+
+function getStoredToken(): string | null {
+  try {
+    const state = JSON.parse(fs.readFileSync(AUTH_FILE, 'utf8'));
+    const origin = state.origins?.find((o: { origin: string }) => o.origin === 'http://localhost:5173');
+    return origin?.localStorage?.find((e: { name: string }) => e.name === 'token')?.value ?? null;
+  } catch { return null; }
+}
 
 test.describe('Pet Timeline Visualization (ATDD - Story 2.3)', () => {
 
@@ -10,6 +21,9 @@ test.describe('Pet Timeline Visualization (ATDD - Story 2.3)', () => {
     const pet = await seedPet({ name: 'TimelineViz' });
     petId = pet.id;
 
+    const token = getStoredToken();
+    const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+
     // Seed events of different types
     await request.post(`${API_URL}/pets/${petId}/events`, {
       data: {
@@ -17,6 +31,7 @@ test.describe('Pet Timeline Visualization (ATDD - Story 2.3)', () => {
         occurred_at: '2026-03-01T08:00:00Z',
         payload: { value: 4.0, unit: 'kg' },
       },
+      headers,
     });
     await request.post(`${API_URL}/pets/${petId}/events`, {
       data: {
@@ -24,6 +39,7 @@ test.describe('Pet Timeline Visualization (ATDD - Story 2.3)', () => {
         occurred_at: '2026-03-04T10:00:00Z',
         payload: { name: 'Rabies', next_due: '2027-03-04' },
       },
+      headers,
     });
     await request.post(`${API_URL}/pets/${petId}/events`, {
       data: {
@@ -31,6 +47,7 @@ test.describe('Pet Timeline Visualization (ATDD - Story 2.3)', () => {
         occurred_at: '2026-03-08T14:00:00Z',
         payload: { text: 'Appetite seems lower than usual' },
       },
+      headers,
     });
   });
 
