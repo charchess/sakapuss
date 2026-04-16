@@ -1,8 +1,21 @@
 import { test, expect } from '../support/merged-fixtures';
 
 const API_URL = process.env.API_URL || 'http://localhost:8000';
+const TEST_PRODUCT_NAMES = ['Quinoa Caille', 'BagTest Kibble', 'Croquettes Test'];
 
 test.describe('Food Management UI (ATDD - Stories 7.1 & 7.2)', () => {
+
+  test.afterEach(async ({ request, authHeaders }) => {
+    // Clean up food products created by this test suite
+    const res = await request.get(`${API_URL}/food/products`, { headers: authHeaders });
+    if (!res.ok()) return;
+    const products = await res.json();
+    for (const product of products) {
+      if (TEST_PRODUCT_NAMES.includes(product.name)) {
+        await request.delete(`${API_URL}/food/products/${product.id}`, { headers: authHeaders });
+      }
+    }
+  });
 
   test('[P0] should create a food product via UI', async ({ page }) => {
     await page.goto('/food', { waitUntil: 'networkidle' });
@@ -21,10 +34,11 @@ test.describe('Food Management UI (ATDD - Stories 7.1 & 7.2)', () => {
     await expect(page.getByText('Quinoa Caille').first()).toBeVisible();
   });
 
-  test('[P0] should add a bag and manage its lifecycle', async ({ request, page }) => {
+  test('[P0] should add a bag and manage its lifecycle', async ({ request, page, authHeaders }) => {
     // Create product via API
     const prodRes = await request.post(`${API_URL}/food/products`, {
       data: { name: 'BagTest Kibble', brand: 'BagBrand', food_type: 'kibble', food_category: 'main', default_bag_weight_g: 5000 },
+      headers: authHeaders,
     });
     const product = await prodRes.json();
 

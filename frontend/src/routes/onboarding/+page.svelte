@@ -123,7 +123,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9 12h6M12 9v6"/></svg>
           <h2>Rappels santé</h2>
         </div>
-        <p class="speech">"{petName}, tu veux qu'on s'occupe de mes rappels ?"</p>
+        <p class="speech">"{petName ? petName + ', tu' : 'Tu'} veux qu'on s'occupe de mes rappels ?"</p>
 
         <label class="toggle-row">
           <span>Vermifuge (tous les 3 mois)</span>
@@ -168,7 +168,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12a8 8 0 0016 0"/><path d="M3 12h18"/></svg>
           <h2>Alimentation</h2>
         </div>
-        <p class="speech">"Combien de fois par jour est-ce que je mange ?"</p>
+        <p class="speech">"{petName ? petName + ', combien' : 'Combien'} de fois par jour est-ce que je mange ?"</p>
 
         <div class="meals-section">
           <span class="meals-label">Repas par jour</span>

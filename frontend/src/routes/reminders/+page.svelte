@@ -26,13 +26,22 @@
   const overdue = $derived(reminders.filter(r => r.status === 'overdue'));
   const upcoming = $derived(reminders.filter(r => r.status === 'upcoming'));
 
+  function getToken(): string | null {
+    return typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
+  }
+
+  function authHeaders(): Record<string, string> {
+    const token = getToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
   onMount(loadReminders);
 
   async function loadReminders() {
-    const res = await fetch(`${getApiUrl()}/reminders/pending`);
+    const res = await fetch(`${getApiUrl()}/reminders/pending`, { headers: authHeaders() });
     if (res.ok) {
       const pending = await res.json();
-      const upRes = await fetch(`${getApiUrl()}/reminders/upcoming?days=90`);
+      const upRes = await fetch(`${getApiUrl()}/reminders/upcoming?days=90`, { headers: authHeaders() });
       const upcomingList = upRes.ok ? await upRes.json() : [];
       // Merge and dedupe
       const all = [...pending, ...upcomingList];
@@ -59,7 +68,7 @@
 
   async function complete() {
     if (!selectedReminder) return;
-    const res = await fetch(`${getApiUrl()}/reminders/${selectedReminder.id}/complete`, { method: 'POST' });
+    const res = await fetch(`${getApiUrl()}/reminders/${selectedReminder.id}/complete`, { method: 'POST', headers: authHeaders() });
     if (res.ok) {
       const updated = await res.json();
       showSuccess = true;
@@ -72,7 +81,7 @@
     if (!selectedReminder) return;
     const res = await fetch(`${getApiUrl()}/reminders/${selectedReminder.id}/postpone`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify({ delay_days: days }),
     });
     if (res.ok) {

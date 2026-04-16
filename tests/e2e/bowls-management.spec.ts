@@ -1,8 +1,21 @@
 import { test, expect } from '../support/merged-fixtures';
 
 const API_URL = process.env.API_URL || 'http://localhost:8000';
+const TEST_BOWL_NAMES = ['Salon A', 'FillBowl', 'Fontaine'];
 
 test.describe('Bowls Management UI (ATDD - Stories 8.1, 8.2, 8.3)', () => {
+
+  test.afterEach(async ({ request, authHeaders }) => {
+    // Clean up bowls created by this test suite
+    const res = await request.get(`${API_URL}/bowls`, { headers: authHeaders });
+    if (!res.ok()) return;
+    const bowls = await res.json();
+    for (const bowl of bowls) {
+      if (TEST_BOWL_NAMES.includes(bowl.name)) {
+        await request.delete(`${API_URL}/bowls/${bowl.id}`, { headers: authHeaders });
+      }
+    }
+  });
 
   test('[P0] should create a food bowl via UI', async ({ page }) => {
     await page.goto('/bowls', { waitUntil: 'networkidle' });
@@ -17,13 +30,14 @@ test.describe('Bowls Management UI (ATDD - Stories 8.1, 8.2, 8.3)', () => {
     await expect(page.getByText('Salon A')).toBeVisible();
   });
 
-  test('[P0] should fill a bowl and show serving', async ({ request, page, seedPet }) => {
+  test('[P0] should fill a bowl and show serving', async ({ request, page, seedPet, authHeaders }) => {
     // Create bowl via API
     const bowlRes = await request.post(`${API_URL}/bowls`, {
       data: { name: 'FillBowl', location: 'Cuisine', bowl_type: 'food' },
+      headers: authHeaders,
     });
     const bowl = await bowlRes.json();
-    const pet = await seedPet({ name: 'FillCat' });
+    await seedPet({ name: 'FillCat' });
 
     await page.goto('/bowls', { waitUntil: 'networkidle' });
 
