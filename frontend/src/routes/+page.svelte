@@ -120,6 +120,9 @@
               {:else}
                 {getSpeciesEmoji(pet.species)}
               {/if}
+              {#if i !== selectedPetIndex}
+                <span class="sr-only">{pet.name}</span>
+              {/if}
             </a>
           {/each}
         </div>
@@ -520,4 +523,5 @@
   .stream-content { flex: 1; display: flex; justify-content: space-between; }
   .stream-text { font-size: var(--text-sm); color: var(--color-text-primary); }
   .stream-when { font-size: var(--text-xs); color: var(--color-text-muted); }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 </style>
