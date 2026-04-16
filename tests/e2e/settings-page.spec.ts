@@ -7,7 +7,7 @@ test.describe('Settings Page (ATDD - Story 1.5)', () => {
 
     await expect(page.getByRole('heading', { name: 'Compte' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Langue' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Configuration des features' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Configuration' })).toBeVisible();
   });
 
   test.skip('[P0] should change language to French and verify UI switches', async ({ page }) => {
@@ -18,7 +18,7 @@ test.describe('Settings Page (ATDD - Story 1.5)', () => {
 
     await expect(page.getByRole('heading', { name: 'Compte' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Langue' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Configuration des features' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Configuration' })).toBeVisible();
   });
 
   test('[P1] should update display name and show success toast', async ({ page }) => {
