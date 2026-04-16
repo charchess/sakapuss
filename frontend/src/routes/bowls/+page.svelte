@@ -101,11 +101,11 @@
       </div>
       <div class="form-row">
         <div class="type-toggle">
-          <button type="button" class="type-btn" class:active={bowlType === 'food'} onclick={() => bowlType = 'food'}>
+          <button type="button" class="type-btn" class:active={bowlType === 'food'} data-testid="bowl-type-food" onclick={() => bowlType = 'food'}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12a8 8 0 0016 0"/><path d="M3 12h18"/></svg>
             Nourriture
           </button>
-          <button type="button" class="type-btn" class:active={bowlType === 'water'} onclick={() => bowlType = 'water'}>
+          <button type="button" class="type-btn" class:active={bowlType === 'water'} data-testid="bowl-type-water" onclick={() => bowlType = 'water'}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2c-4 6-6 9-6 12a6 6 0 0012 0c0-3-2-6-6-12z"/></svg>
             Eau
           </button>

@@ -1,5 +1,7 @@
 import { test, expect } from '../support/merged-fixtures';
 
+const API_URL = process.env.API_URL || 'http://localhost:8000';
+
 test.describe('Pet Onboarding CRUD (ATDD - Stories 6.2 & 6.3)', () => {
 
   test('[P0] should show add pet button on dashboard', async ({ page }) => {
@@ -7,7 +9,7 @@ test.describe('Pet Onboarding CRUD (ATDD - Stories 6.2 & 6.3)', () => {
     await expect(page.getByTestId('add-pet-btn')).toBeVisible();
   });
 
-  test('[P0] should create a pet via the form', async ({ page }) => {
+  test('[P0] should create a pet via the form', async ({ page, request, authHeaders }) => {
     const petName = `Moustache-${Date.now()}`;
     await page.goto('/pets/new', { waitUntil: 'networkidle' });
 
@@ -25,6 +27,14 @@ test.describe('Pet Onboarding CRUD (ATDD - Stories 6.2 & 6.3)', () => {
     // Should redirect to dashboard with new pet
     await page.waitForURL('/', { timeout: 5000 });
     await expect(page.getByText(petName)).toBeVisible();
+
+    // Cleanup: find and delete the created pet
+    const petsRes = await request.get(`${API_URL}/pets`, { headers: authHeaders });
+    if (petsRes.ok()) {
+      const pets = await petsRes.json();
+      const created = pets.find((p: any) => p.name === petName);
+      if (created) await request.delete(`${API_URL}/pets/${created.id}`, { headers: authHeaders });
+    }
   });
 
   test('[P0] should edit a pet via the form', async ({ page, seedPet }) => {
