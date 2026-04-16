@@ -7,6 +7,12 @@
   let saved = $state(false);
   let error = $state('');
 
+  function handleLogout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/login';
+  }
+
   function getToken(): string | null {
     return typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
   }
@@ -104,11 +110,6 @@
     </a>
   </section>
 
-  <section class="settings-section">
-    <h2>Notifications</h2>
-    <p class="placeholder">Les préférences de notification arrivent bientôt.</p>
-  </section>
-
   {#if error}
     <div class="error-msg">{error}</div>
   {/if}
@@ -118,11 +119,27 @@
   {/if}
 
   <button class="btn-primary" onclick={handleSave}>Enregistrer</button>
+  <button class="btn-logout" onclick={handleLogout}>Se déconnecter</button>
 </div>
 
 <style>
   .settings-page { max-width: 500px; margin: 0 auto; padding: var(--space-xl); }
-  h1 { font-family: var(--font-display); margin-bottom: var(--space-xl); }
+  h1 { font-family: var(--font-display); font-weight: 800; color: var(--color-primary); margin-bottom: var(--space-xl); }
+  .btn-logout {
+    width: 100%;
+    padding: var(--space-lg);
+    margin-top: var(--space-md);
+    background: none;
+    color: var(--color-error);
+    border: 1.5px solid var(--color-error);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-md);
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-default);
+    transition: background 0.2s, color 0.2s;
+  }
+  .btn-logout:hover { background: rgba(225,112,85,0.06); }
   .settings-section {
     background: var(--color-surface);
     border-radius: var(--radius-xl);

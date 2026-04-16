@@ -43,7 +43,34 @@
   function getSpeciesEmoji(species: string): string {
     if (species?.toLowerCase().includes('cat') || species?.toLowerCase().includes('chat')) return '🐱';
     if (species?.toLowerCase().includes('dog') || species?.toLowerCase().includes('chien')) return '🐶';
+    if (species?.toLowerCase().includes('rabbit') || species?.toLowerCase().includes('lapin')) return '🐰';
     return '🐾';
+  }
+
+  function getSpeciesLabel(species: string): string {
+    const s = species?.toLowerCase() || '';
+    if (s.includes('cat') || s.includes('chat')) return 'Chat';
+    if (s.includes('dog') || s.includes('chien')) return 'Chien';
+    if (s.includes('rabbit') || s.includes('lapin')) return 'Lapin';
+    return species;
+  }
+
+  function getEventLabel(type: string): string {
+    const labels: Record<string, string> = {
+      weight: 'Pesée',
+      litter_clean: 'Litière nettoyée',
+      litter: 'Litière',
+      food_serve: 'Gamelle remplie',
+      food: 'Alimentation',
+      health_note: 'Médicament',
+      behavior: 'Observation',
+      custom: 'Événement',
+      vaccine: 'Vaccin',
+      treatment: 'Traitement',
+      note: 'Note',
+      relation: 'Relation',
+    };
+    return labels[type] || type;
   }
 
   function getTimeAgo(dateStr: string): string {
@@ -107,7 +134,7 @@
         <div class="animal-speech">
           <div class="animal-name">{selectedPet.name}</div>
           <div class="animal-bubble">
-            <em>{selectedPet.species}</em>
+            <em>{getSpeciesLabel(selectedPet.species)}</em>
             {#if selectedPet.breed} · {selectedPet.breed}{/if}
           </div>
         </div>
@@ -179,7 +206,7 @@
           <div class="stream-item">
             <div class="stream-dot" style="background: var(--color-cat-{event.type === 'weight' ? 'weight' : event.type === 'litter_clean' ? 'litter' : 'event'})"></div>
             <div class="stream-content">
-              <span class="stream-text">{event.type}</span>
+              <span class="stream-text">{getEventLabel(event.type)}</span>
               <span class="stream-when">{getTimeAgo(event.occurred_at || event.created_at)}</span>
             </div>
           </div>
