@@ -53,7 +53,7 @@
 </svelte:head>
 
 <section class="product-form-page">
-  <a href="/food" class="back-link">← Retour</a>
+  <a href="/food" class="back-link">← Alimentation</a>
 
   <h1>Ajouter un produit alimentaire</h1>
 

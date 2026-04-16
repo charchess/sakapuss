@@ -78,6 +78,9 @@
     }
   }
 
+  const activeBags = $derived(bags.filter((b: any) => b.status !== 'depleted'));
+  const allDepleted = $derived(bags.length > 0 && activeBags.length === 0);
+
   const STATUS_LABELS: Record<string, string> = {
     stocked: 'En stock',
     opened: 'Ouvert',
@@ -172,6 +175,35 @@
         <p class="empty-title">Aucun sac en stock</p>
         <span class="empty-hint">Enregistre tes sacs de croquettes pour suivre le stock</span>
       </div>
+    {:else if allDepleted}
+      <div class="depleted-nudge">
+        <span class="depleted-nudge-icon">📦</span>
+        <div>
+          <p class="empty-title">Plus de stock actif</p>
+          <span class="empty-hint">Tous tes sacs sont épuisés — pense à en commander un nouveau !</span>
+        </div>
+        <button class="btn-add" onclick={() => { showBagForm = true; }}>+ Sac</button>
+      </div>
+      <div class="bag-list bag-list-depleted">
+        {#each bags as bag}
+          <div class="bag-card" class:depleted={bag.status === 'depleted'}>
+            <div class="bag-icon" class:opened={bag.status === 'opened'} class:depleted={bag.status === 'depleted'}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <path d="M4 12a8 8 0 0016 0"/><path d="M3 12h18"/>
+              </svg>
+            </div>
+            <div class="bag-info">
+              <strong class="bag-name">{productName(bag.product_id)}</strong>
+              <span class="bag-meta">{productBrand(bag.product_id)} · {(bag.weight_g / 1000).toFixed(1)} kg · {formatDate(bag.purchased_at)}</span>
+            </div>
+            <div class="bag-actions">
+              <span class="bag-status status-depleted" data-testid="bag-status-depleted">
+                {STATUS_LABELS[bag.status] || bag.status}
+              </span>
+            </div>
+          </div>
+        {/each}
+      </div>
     {:else}
       <div class="bag-list">
         {#each bags as bag}
@@ -229,7 +261,7 @@
     margin-bottom: var(--space-lg);
   }
   .subsection-header h2 {
-    font-size: var(--text-lg); font-weight: 700; color: var(--color-text-primary);
+    font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; color: var(--color-text-primary);
   }
 
   .btn-add {
@@ -274,6 +306,19 @@
     font-size: var(--text-sm); font-weight: 600; color: var(--color-text-secondary);
     flex-shrink: 0;
   }
+
+  /* Depleted nudge */
+  .depleted-nudge {
+    display: flex; align-items: center; gap: var(--space-md);
+    background: rgba(253, 203, 110, 0.12); border: 1.5px dashed rgba(253, 203, 110, 0.6);
+    border-radius: var(--radius-xl); padding: var(--space-lg) var(--space-xl);
+    margin-bottom: var(--space-lg);
+  }
+  .depleted-nudge-icon { font-size: 1.6rem; flex-shrink: 0; }
+  .depleted-nudge > div { flex: 1; }
+  .depleted-nudge .empty-title { font-size: var(--text-sm); margin: 0; text-align: left; }
+  .depleted-nudge .empty-hint { font-size: var(--text-xs); text-align: left; }
+  .bag-list-depleted { opacity: 0.55; }
 
   /* Bag list */
   .bag-list { display: flex; flex-direction: column; gap: var(--space-md); }
