@@ -4,11 +4,10 @@ const API_URL = process.env.API_URL || 'http://localhost:8000';
 test.describe('Initialisation Architecture E2E Tests (ATDD)', () => {
 
   test('[P1] should access OpenAPI documentation', async ({ page }) => {
-    await page.goto(`${API_URL}/docs`);
+    await page.goto(`${API_URL}/docs`, { waitUntil: 'domcontentloaded' });
 
-    await expect(page).toHaveTitle(/Swagger UI|FastAPI - Swagger UI/);
-
-    await expect(page.getByText('Sakapuss API')).toBeVisible();
+    // Title tag contains the API name (rendered server-side, no CDN dependency)
+    await expect(page).toHaveTitle(/Sakapuss API.*Swagger UI/);
   });
 
   test('[P2] should verify Alembic migrations readiness via health endpoint', async ({ request }) => {

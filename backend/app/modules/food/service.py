@@ -51,10 +51,15 @@ def delete_product(db: Session, product_id: str) -> bool:
     if product is None:
         return False
     # Detach bowls referencing this product
-    from backend.app.modules.food.models import Bowl
-    db.query(Bowl).filter(Bowl.current_product_id == product_id).update(
-        {"current_product_id": None}
-    )
+    from backend.app.modules.food.models import Bowl, FoodBag, Serving
+
+    db.query(Bowl).filter(Bowl.current_product_id == product_id).update({"current_product_id": None})
+    # Delete servings that reference bags of this product first
+    bag_ids = [b.id for b in db.query(FoodBag).filter(FoodBag.product_id == product_id).all()]
+    if bag_ids:
+        db.query(Serving).filter(Serving.bag_id.in_(bag_ids)).delete(synchronize_session=False)
+    # Delete bags referencing this product
+    db.query(FoodBag).filter(FoodBag.product_id == product_id).delete(synchronize_session=False)
     db.delete(product)
     db.commit()
     return True
@@ -153,6 +158,8 @@ def delete_bowl(db: Session, bowl_id: str) -> bool:
     bowl = get_bowl(db, bowl_id)
     if bowl is None:
         return False
+    # Delete dependent servings first (no cascade defined on FK)
+    db.query(Serving).filter(Serving.bowl_id == bowl_id).delete()
     db.delete(bowl)
     db.commit()
     return True

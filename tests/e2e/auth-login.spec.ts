@@ -21,6 +21,8 @@ test.describe('Auth Login (ATDD - Story 1.3)', () => {
   });
 
   test('[P0] should show error on invalid credentials', async ({ page }) => {
+    // Clear auth state — this test must run unauthenticated
+    await page.addInitScript(() => { localStorage.removeItem('token'); localStorage.removeItem('user'); });
     await page.goto('/login');
 
     await page.getByLabel('Email').fill('wrong@sakapuss.com');
