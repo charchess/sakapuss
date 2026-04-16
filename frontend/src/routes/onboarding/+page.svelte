@@ -36,7 +36,7 @@
 
   onMount(async () => {
     step = startStep;
-    const res = await fetch(`${getApiUrl()}/pets`);
+    const res = await fetch(`${getApiUrl()}/pets`, { headers: authHeaders() });
     if (res.ok) {
       const pets = await res.json();
       if (pets.length > 0) {
@@ -114,13 +114,13 @@
       {/each}
     </div>
 
-    <h1>Configurer {petName}</h1>
+    <h1>Configurer {petName || 'ton animal'}</h1>
 
     {#if step === 1}
       <!-- HEALTH REMINDERS -->
       <div class="wizard-card health" data-testid="wizard-health">
         <div class="card-header">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="9" width="14" height="6" rx="3" transform="rotate(-30 12 12)"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9 12h6M12 9v6"/></svg>
           <h2>Rappels santé</h2>
         </div>
         <p class="speech">"{petName}, tu veux qu'on s'occupe de mes rappels ?"</p>
