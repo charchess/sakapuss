@@ -7,6 +7,14 @@
 
   let bowls = $state(data.bowls);
   let servingCounts = $state(data.servingCounts);
+  let lastServedAt = $state(data.lastServedAt ?? {});
+
+  function needsRefill(bowlId: string): boolean {
+    const last = lastServedAt[bowlId];
+    if (!last) return false;
+    const hoursAgo = (Date.now() - new Date(last).getTime()) / (1000 * 60 * 60);
+    return hoursAgo > 24;
+  }
 
   // Bowl creation form
   let showBowlForm = $state(false);
@@ -140,7 +148,7 @@
   {:else}
     <div class="bowl-list">
       {#each bowls as bowl}
-        <div class="bowl-card" data-testid="bowl-card-{bowl.id}">
+        <div class="bowl-card" data-testid="bowl-card-{bowl.id}" class:needs-attention={bowl.bowl_type === 'water' && needsRefill(bowl.id)}>
           <div class="bowl-icon" class:water={bowl.bowl_type === 'water'}>
             {#if bowl.bowl_type === 'water'}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2c-4 6-6 9-6 12a6 6 0 0012 0c0-3-2-6-6-12z"/></svg>
@@ -159,6 +167,9 @@
             <span class="serving-count" data-testid="bowl-servings-{bowl.id}">
               {servingCounts[bowl.id] || 0} remplissages
             </span>
+            {#if bowl.bowl_type === 'water' && needsRefill(bowl.id)}
+              <span class="needs-refill-badge" data-testid="needs-refill-badge" title="Refill needed">!</span>
+            {/if}
             {#if bowl.bowl_type === 'water'}
               <button class="btn-quick-refill" data-testid="quick-refill-{bowl.id}" onclick={() => quickRefill(bowl.id)}>
                 Remplir
@@ -299,6 +310,19 @@
     font-family: var(--font-default); white-space: nowrap;
   }
   .btn-fill:hover { opacity: 0.9; }
+
+  .bowl-card.needs-attention {
+    border: 1.5px solid rgba(116, 185, 255, 0.5);
+    background: rgba(116, 185, 255, 0.04);
+  }
+
+  .needs-refill-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: #74b9ff; color: white;
+    font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+  }
 
   .btn-quick-refill {
     padding: var(--space-sm) var(--space-md); background: rgba(116, 185, 255, 0.15);
