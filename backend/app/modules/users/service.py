@@ -8,13 +8,19 @@ def get_user_by_email(db: Session, email: str) -> User | None:
 
 
 def create_user(
-    db: Session, email: str, hashed_password: str, display_name: str | None = None, language: str = "fr"
+    db: Session,
+    email: str,
+    hashed_password: str,
+    display_name: str | None = None,
+    language: str = "fr",
+    role: str = "admin",
 ) -> User:
     user = User(
         email=email,
         hashed_password=hashed_password,
         display_name=display_name,
         language=language,
+        role=role,
     )
     db.add(user)
     db.commit()

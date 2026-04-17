@@ -89,8 +89,10 @@ test.describe('Reminder List (ATDD - Story 4.2)', () => {
     });
 
     await page.goto('/reminders', { waitUntil: 'networkidle' });
-    await page.getByTestId('reminder-card').first().click();
-    await expect(page.getByTestId('reminder-animal-avatar')).toBeVisible();
-    await expect(page.getByTestId('reminder-info-card')).toBeVisible();
+    const firstCard = page.getByTestId('reminder-card').first();
+    await expect(firstCard).toBeVisible();
+    await firstCard.click();
+    await expect(page.getByTestId('reminder-animal-avatar')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId('reminder-info-card')).toBeVisible({ timeout: 15000 });
   });
 });

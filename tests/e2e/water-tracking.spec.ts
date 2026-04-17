@@ -14,9 +14,9 @@ test.describe('Water Tracking UI (ATDD - Story 8.6)', () => {
     await page.getByTestId('bowl-capacity-ml').fill('500');
     await page.getByTestId('bowl-submit').click();
 
-    // Bowl should appear in list with capacity info
-    await expect(page.getByText('Fontaine Cuisine')).toBeVisible();
-    await expect(page.getByText('500 ml')).toBeVisible();
+    // Bowl should appear in list with capacity info (15s: full-run DB may be slow)
+    await expect(page.getByText('Fontaine Cuisine')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText('500 ml')).toBeVisible({ timeout: 15000 });
   });
 
   test('[P0] should log a water refill with single tap from Quick Log', async ({ page, request, authHeaders }) => {

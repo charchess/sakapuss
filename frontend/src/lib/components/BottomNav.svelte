@@ -6,6 +6,8 @@
   let profileBadge = $state(false);
   let userRole = $state('admin');
 
+  const isVetPage = $derived($page.url.pathname.startsWith('/vet/'));
+
   const navItems = [
     { href: '/', label: 'Accueil', icon: 'home' },
     { href: '/timeline', label: 'Timeline', icon: 'timeline' },
@@ -53,7 +55,7 @@
 
   {#each navItems as item}
     {#if item.isCenter}
-      {#if userRole !== 'readonly'}
+      {#if userRole !== 'readonly' && !isVetPage}
         <a href={item.href} class="nav-center" aria-label="Quick Log" data-testid="fab-add-button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
             <line x1="12" y1="5" x2="12" y2="19"/>
