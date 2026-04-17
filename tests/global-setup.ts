@@ -18,6 +18,20 @@ async function globalSetup(_config: FullConfig) {
     body: JSON.stringify({ email: TEST_EMAIL, password: TEST_PASSWORD }),
   }).catch(() => null);
 
+  // Create saisie user (input role)
+  await fetch(`${API_URL}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: 'saisie-user@example.com', password: 'testpass123', role: 'input' }),
+  }).catch(() => null);
+
+  // Create consultation user (readonly role)
+  await fetch(`${API_URL}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: 'consultation-user@example.com', password: 'testpass123', role: 'readonly' }),
+  }).catch(() => null);
+
   // Login and store token
   const res = await fetch(`${API_URL}/auth/login`, {
     method: 'POST',

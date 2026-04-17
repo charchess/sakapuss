@@ -6,6 +6,7 @@ class UserCreate(BaseModel):
     password: str = Field(..., min_length=8, max_length=128)
     display_name: str | None = None
     language: str = "fr"
+    role: str = "admin"
 
 
 class LoginRequest(BaseModel):
@@ -18,6 +19,7 @@ class UserResponse(BaseModel):
     email: str
     display_name: str | None
     language: str
+    role: str
 
     model_config = {"from_attributes": True}
 
