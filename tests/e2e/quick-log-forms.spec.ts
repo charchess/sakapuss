@@ -25,8 +25,8 @@ test.describe('Quick Log Form Actions', () => {
     await page.getByTestId('action-weight').click();
 
     const dialog = page.getByRole('dialog');
-    await expect(dialog.getByText('Pesée')).toBeVisible();
     await maybeSelectPet(page);
+    await expect(dialog.getByText('Pesée')).toBeVisible();
 
     const weightInput = page.locator('.weight-input-lg');
     await expect(weightInput).toBeVisible({ timeout: 3000 });
@@ -42,8 +42,8 @@ test.describe('Quick Log Form Actions', () => {
     await page.getByTestId('action-behavior').click();
 
     const dialog = page.getByRole('dialog');
-    await expect(dialog.getByText('Observation')).toBeVisible();
     await maybeSelectPet(page);
+    await expect(dialog.getByText('Observation')).toBeVisible();
 
     await expect(page.getByText('Vomissement')).toBeVisible({ timeout: 3000 });
     await page.getByText('Vomissement').click();
@@ -58,8 +58,8 @@ test.describe('Quick Log Form Actions', () => {
     await page.getByTestId('action-health_note').click();
 
     const dialog = page.getByRole('dialog');
-    await expect(dialog.getByText('Médicament')).toBeVisible();
     await maybeSelectPet(page);
+    await expect(dialog.getByText('Médicament')).toBeVisible();
 
     const medInput = page.getByPlaceholder('Nom du médicament');
     await expect(medInput).toBeVisible();
@@ -75,8 +75,8 @@ test.describe('Quick Log Form Actions', () => {
     await page.getByTestId('action-custom').click();
 
     const dialog = page.getByRole('dialog');
-    await expect(dialog.getByText('Événement')).toBeVisible();
     await maybeSelectPet(page);
+    await expect(dialog.getByText('Événement')).toBeVisible();
 
     const noteInput = page.getByPlaceholder(/passé/);
     await expect(noteInput).toBeVisible({ timeout: 3000 });
