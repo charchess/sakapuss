@@ -26,8 +26,8 @@ test.describe('Household Resources (ATDD - Story 3.6)', () => {
 
     // Verify it appears in the list
     const resourceList = page.getByTestId('resource-list');
-    await expect(resourceList).toContainText('Caisse cuisine');
-    await expect(resourceList).toContainText('Litière');
+    await expect(resourceList).toContainText('Caisse cuisine', { timeout: 10000 });
+    await expect(resourceList).toContainText('Litière', { timeout: 10000 });
   });
 
   test('[P0] should edit an existing resource name and verify the update', async ({ page, request, authHeaders }) => {

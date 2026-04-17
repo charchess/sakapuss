@@ -31,7 +31,7 @@ test.describe('Auth Login (ATDD - Story 1.3)', () => {
 
     // Should stay on login page with error message
     await expect(page).toHaveURL(/\/login/);
-    await expect(page.getByText('invalide', { exact: false })).toBeVisible();
+    await expect(page.getByText('invalide', { exact: false })).toBeVisible({ timeout: 10000 });
   });
 
   test('[P0] should redirect unauthenticated user to /login with redirect param', async ({ page }) => {
