@@ -4,6 +4,7 @@
   import { onMount } from 'svelte';
 
   let profileBadge = $state(false);
+  let userRole = $state('admin');
 
   const navItems = [
     { href: '/', label: 'Accueil', icon: 'home' },
@@ -20,6 +21,12 @@
 
   // Check if features need configuration
   onMount(async () => {
+    // Read user role from localStorage
+    try {
+      const u = JSON.parse(localStorage.getItem('user') || '{}');
+      userRole = u.role || 'admin';
+    } catch { /* ignore */ }
+
     try {
       const [bowlsRes, resourcesRes, productsRes] = await Promise.all([
         fetch(`${getApiUrl()}/bowls`).catch(() => null),
@@ -34,7 +41,7 @@
   });
 </script>
 
-<nav class="bottom-nav" role="navigation" aria-label="Navigation principale">
+<nav class="bottom-nav" role="navigation" aria-label="Navigation principale" data-testid="bottom-nav">
   <div class="sidebar-header">
     <svg class="sidebar-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M16 28c-6 0-10-3-10-7s1.5-7 4-10l1.5-7 4 4h1l4-4 1.5 7c2.5 3 4 6 4 10s-4 7-10 7z" fill="var(--color-primary-light)" stroke="var(--color-primary)" stroke-width="1.5"/>
@@ -46,13 +53,17 @@
 
   {#each navItems as item}
     {#if item.isCenter}
-      <a href={item.href} class="nav-center" aria-label="Quick Log">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <line x1="12" y1="5" x2="12" y2="19"/>
-          <line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-        <span class="nav-center-label">Quick Log</span>
-      </a>
+      {#if userRole !== 'readonly'}
+        <a href={item.href} class="nav-center" aria-label="Quick Log" data-testid="fab-add-button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          <span class="nav-center-label">Quick Log</span>
+        </a>
+      {/if}
+    {:else if item.icon === 'bell' && userRole === 'input'}
+      <!-- Hide Reminders tab for input role -->
     {:else}
       <a
         href={item.href}

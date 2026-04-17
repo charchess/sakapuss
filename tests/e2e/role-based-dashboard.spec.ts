@@ -3,15 +3,19 @@ import { test, expect } from '../support/merged-fixtures';
 const API_URL = process.env.API_URL || 'http://localhost:8000';
 
 test.describe('Role-Based Dashboard (ATDD - Story 6.4)', () => {
-  // ALL SKIPPED: No role-based rendering is implemented in the dashboard.
-  // Expected data-testid values (action-grid, bottom-nav, fab-add-button) don't exist.
-  // No Saisie/Consultation role-specific users are seeded.
-
-  test.skip('[P0] should show reduced 2x2 action grid for Saisie role', async ({ page, request }) => {
-    // Login as user with Saisie role
-    await request.post(`${API_URL}/auth/login`, {
+  test('[P0] should show reduced 2x2 action grid for Saisie role', async ({ page, request }) => {
+    // Login as saisie user and get token
+    const loginRes = await request.post(`${API_URL}/auth/login`, {
       data: { email: 'saisie-user@example.com', password: 'testpass123' },
     });
+    const { access_token, user } = await loginRes.json();
+
+    // Set the token in the page context so role-based rendering works
+    await page.evaluate(({ token, userData }) => {
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('onboarding_done', 'true');
+    }, { token: access_token, userData: user });
 
     await page.goto('/');
 
@@ -23,10 +27,19 @@ test.describe('Role-Based Dashboard (ATDD - Story 6.4)', () => {
     await expect(actionButtons).toHaveCount(4);
   });
 
-  test.skip('[P0] should not show Reminders tab in bottom nav for Saisie role', async ({ page, request }) => {
-    await request.post(`${API_URL}/auth/login`, {
+  test('[P0] should not show Reminders tab in bottom nav for Saisie role', async ({ page, request }) => {
+    // Login as saisie user and get token
+    const loginRes = await request.post(`${API_URL}/auth/login`, {
       data: { email: 'saisie-user@example.com', password: 'testpass123' },
     });
+    const { access_token, user } = await loginRes.json();
+
+    // Set the token in the page context so role-based rendering works
+    await page.evaluate(({ token, userData }) => {
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('onboarding_done', 'true');
+    }, { token: access_token, userData: user });
 
     await page.goto('/');
 
@@ -37,11 +50,19 @@ test.describe('Role-Based Dashboard (ATDD - Story 6.4)', () => {
     await expect(bottomNav.getByRole('link', { name: 'Rappels' })).not.toBeVisible();
   });
 
-  test.skip('[P0] should show read-only view for Consultation role (no action grid, no + button)', async ({ page, request }) => {
+  test('[P0] should show read-only view for Consultation role (no action grid, no + button)', async ({ page, request }) => {
     // Login as user with Consultation role
-    await request.post(`${API_URL}/auth/login`, {
+    const loginRes = await request.post(`${API_URL}/auth/login`, {
       data: { email: 'consultation-user@example.com', password: 'testpass123' },
     });
+    const { access_token, user } = await loginRes.json();
+
+    // Set the token in the page context so role-based rendering works
+    await page.evaluate(({ token, userData }) => {
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('onboarding_done', 'true');
+    }, { token: access_token, userData: user });
 
     await page.goto('/');
 

@@ -114,6 +114,22 @@
     } catch { return ''; }
   })());
 
+  const userRole = $derived((() => {
+    if (typeof localStorage === 'undefined') return 'admin';
+    try {
+      const u = JSON.parse(localStorage.getItem('user') || '{}');
+      return u.role || 'admin';
+    } catch { return 'admin'; }
+  })());
+
+  const inputRoleTiles = ['weight', 'health_note', 'behavior', 'custom'];
+
+  const filteredActionTiles = $derived(
+    userRole === 'input'
+      ? actionTiles.filter(t => inputRoleTiles.includes(t.action))
+      : actionTiles
+  );
+
   function getEventLabel(type: string): string {
     const labels: Record<string, string> = {
       weight: 'Pesée',
@@ -225,38 +241,42 @@
     {/if}
 
     <!-- Action Garden -->
-    <div class="action-section">
-      <div class="section-label">Qu'est-ce que tu viens de faire ?</div>
-      <div class="action-garden" data-testid="action-garden">
-        {#each actionTiles as tile}
-          <button class="action-item {tile.class}" data-testid="action-{tile.action}" onclick={() => openQuickLog(tile.action)}>
-            <div class="action-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                {#if tile.action === 'litter_clean'}
-                  <path d="M12 3v5M8 5l1.5 3M16 5l-1.5 3"/>
-                  <path d="M7 10h10l-1.5 8a2 2 0 01-2 1.5h-3a2 2 0 01-2-1.5L7 10z"/>
-                {:else if tile.action === 'food_serve'}
-                  <path d="M4 12a8 8 0 0016 0"/><path d="M3 12h18"/>
-                {:else if tile.action === 'weight'}
-                  <rect x="4" y="8" width="16" height="12" rx="3"/>
-                  <circle cx="12" cy="14" r="3.5"/><path d="M12 12v2l1.5 1"/>
-                {:else if tile.action === 'health_note'}
-                  <rect x="5" y="9" width="14" height="6" rx="3" transform="rotate(-30 12 12)"/>
-                {:else if tile.action === 'behavior'}
-                  <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                {:else}
-                  <rect x="3" y="5" width="18" height="16" rx="2"/>
-                  <line x1="3" y1="10" x2="21" y2="10"/>
-                  <line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/>
-                {/if}
-              </svg>
-            </div>
-            <div class="action-label">{tile.label}</div>
-          </button>
-        {/each}
+    {#if userRole !== 'readonly'}
+      <div class="action-section">
+        <div class="section-label">Qu'est-ce que tu viens de faire ?</div>
+        <div data-testid="action-grid">
+          <div class="action-garden" data-testid="action-garden">
+            {#each filteredActionTiles as tile}
+              <button class="action-item {tile.class}" data-testid="action-{tile.action}" onclick={() => openQuickLog(tile.action)}>
+                <div class="action-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    {#if tile.action === 'litter_clean'}
+                      <path d="M12 3v5M8 5l1.5 3M16 5l-1.5 3"/>
+                      <path d="M7 10h10l-1.5 8a2 2 0 01-2 1.5h-3a2 2 0 01-2-1.5L7 10z"/>
+                    {:else if tile.action === 'food_serve'}
+                      <path d="M4 12a8 8 0 0016 0"/><path d="M3 12h18"/>
+                    {:else if tile.action === 'weight'}
+                      <rect x="4" y="8" width="16" height="12" rx="3"/>
+                      <circle cx="12" cy="14" r="3.5"/><path d="M12 12v2l1.5 1"/>
+                    {:else if tile.action === 'health_note'}
+                      <rect x="5" y="9" width="14" height="6" rx="3" transform="rotate(-30 12 12)"/>
+                    {:else if tile.action === 'behavior'}
+                      <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    {:else}
+                      <rect x="3" y="5" width="18" height="16" rx="2"/>
+                      <line x1="3" y1="10" x2="21" y2="10"/>
+                      <line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/>
+                    {/if}
+                  </svg>
+                </div>
+                <div class="action-label">{tile.label}</div>
+              </button>
+            {/each}
+          </div>
+        </div>
       </div>
-    </div>
+    {/if}
 
     <!-- Recent Activity -->
     <div class="recent-section" data-testid="recent-activity">
