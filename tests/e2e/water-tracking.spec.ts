@@ -4,7 +4,7 @@ const API_URL = process.env.API_URL || 'http://localhost:8000';
 
 test.describe('Water Tracking UI (ATDD - Story 8.6)', () => {
 
-  test.skip('[P0] should create a water bowl via UI with capacity field', async ({ page }) => {
+  test('[P0] should create a water bowl via UI with capacity field', async ({ page }) => {
     await page.goto('/bowls', { waitUntil: 'networkidle' });
 
     await page.getByTestId('add-bowl-btn').click();
@@ -19,15 +19,16 @@ test.describe('Water Tracking UI (ATDD - Story 8.6)', () => {
     await expect(page.getByText('500 ml')).toBeVisible();
   });
 
-  test.skip('[P0] should log a water refill with single tap from Quick Log', async ({ page, request }) => {
+  test('[P0] should log a water refill with single tap from Quick Log', async ({ page, request, authHeaders }) => {
     // Create water bowl via API
     const bowlRes = await request.post(`${API_URL}/bowls`, {
       data: {
-        name: 'QuickRefillBowl',
+        name: `QuickRefillBowl-${Date.now()}`,
         location: 'Salon',
         capacity_ml: 400,
         bowl_type: 'water',
       },
+      headers: authHeaders,
     });
     const bowl = await bowlRes.json();
 
@@ -40,7 +41,7 @@ test.describe('Water Tracking UI (ATDD - Story 8.6)', () => {
 
     // Confirmation toast should appear
     await expect(page.getByTestId('confirmation-toast')).toBeVisible();
-    await expect(page.getByTestId('confirmation-toast')).toContainText('Refill logged');
+    await expect(page.getByTestId('confirmation-toast')).toContainText('Remplissage enregistré');
 
     // Serving count should update
     await expect(page.getByTestId(`bowl-servings-${bowl.id}`)).toContainText('1');

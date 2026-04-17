@@ -18,6 +18,7 @@
   // Serving form
   let fillBowlId: string | null = $state(null);
   let servingAmount = $state('');
+  let quickFillToast = $state('');
 
   function getToken(): string | null {
     return typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
@@ -52,6 +53,19 @@
       bowlLocation = '';
       bowlType = 'food';
       bowlCapacity = '';
+    }
+  }
+
+  async function quickRefill(bowlId: string) {
+    const res = await fetch(`${API_URL}/bowls/${bowlId}/fill`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ served_at: new Date().toISOString() }),
+    });
+    if (res.ok) {
+      servingCounts = { ...servingCounts, [bowlId]: (servingCounts[bowlId] || 0) + 1 };
+      quickFillToast = 'Remplissage enregistré';
+      setTimeout(() => (quickFillToast = ''), 3000);
     }
   }
 
@@ -100,21 +114,11 @@
         <input data-testid="bowl-location" type="text" placeholder="Emplacement" bind:value={bowlLocation} required />
       </div>
       <div class="form-row">
-        <div class="type-toggle">
-          <button type="button" class="type-btn" class:active={bowlType === 'food'} data-testid="bowl-type-food" onclick={() => bowlType = 'food'}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12a8 8 0 0016 0"/><path d="M3 12h18"/></svg>
-            Nourriture
-          </button>
-          <button type="button" class="type-btn" class:active={bowlType === 'water'} data-testid="bowl-type-water" onclick={() => bowlType = 'water'}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2c-4 6-6 9-6 12a6 6 0 0012 0c0-3-2-6-6-12z"/></svg>
-            Eau
-          </button>
-        </div>
-        <input data-testid="bowl-capacity" type="number" placeholder="Capacité (g/ml)" bind:value={bowlCapacity} class="capacity-input" />
-        <select data-testid="bowl-type" bind:value={bowlType} class="hidden-select">
+        <select data-testid="bowl-type" bind:value={bowlType} class="type-select">
           <option value="food">Nourriture</option>
           <option value="water">Eau</option>
         </select>
+        <input data-testid="bowl-capacity-ml" type="number" placeholder="Capacité (g/ml)" bind:value={bowlCapacity} class="capacity-input" />
       </div>
       <button type="submit" class="btn-submit" data-testid="bowl-submit">Créer la gamelle</button>
     </form>
@@ -136,7 +140,7 @@
   {:else}
     <div class="bowl-list">
       {#each bowls as bowl}
-        <div class="bowl-card">
+        <div class="bowl-card" data-testid="bowl-card-{bowl.id}">
           <div class="bowl-icon" class:water={bowl.bowl_type === 'water'}>
             {#if bowl.bowl_type === 'water'}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2c-4 6-6 9-6 12a6 6 0 0012 0c0-3-2-6-6-12z"/></svg>
@@ -155,7 +159,11 @@
             <span class="serving-count" data-testid="bowl-servings-{bowl.id}">
               {servingCounts[bowl.id] || 0} remplissages
             </span>
-            {#if fillBowlId === bowl.id}
+            {#if bowl.bowl_type === 'water'}
+              <button class="btn-quick-refill" data-testid="quick-refill-{bowl.id}" onclick={() => quickRefill(bowl.id)}>
+                Remplir
+              </button>
+            {:else if fillBowlId === bowl.id}
               <form class="fill-form" onsubmit={handleFill}>
                 <input data-testid="serving-amount" type="number" placeholder="g" bind:value={servingAmount} />
                 <button type="submit" class="btn-fill-sm" data-testid="serving-submit">✓</button>
@@ -171,6 +179,10 @@
     </div>
   {/if}
 </section>
+
+{#if quickFillToast}
+  <div class="quick-toast" data-testid="confirmation-toast">{quickFillToast}</div>
+{/if}
 
 <style>
   .bowls-page { max-width: 600px; padding: 52px var(--space-lg) var(--space-lg); }
@@ -213,7 +225,14 @@
   }
   .form-row input:focus { outline: none; border-color: var(--color-primary-light); }
   .capacity-input { max-width: 160px; }
-  .hidden-select { display: none; }
+  .type-select-hidden { position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px; }
+  .type-select {
+    flex: 1; padding: var(--space-md); border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-lg); font-size: var(--text-md);
+    font-family: var(--font-default); background: var(--color-bg);
+    color: var(--color-text-primary); cursor: pointer;
+  }
+  .type-select:focus { outline: none; border-color: var(--color-primary-light); }
 
   .type-toggle { display: flex; gap: var(--space-sm); }
   .type-btn {
@@ -280,6 +299,22 @@
     font-family: var(--font-default); white-space: nowrap;
   }
   .btn-fill:hover { opacity: 0.9; }
+
+  .btn-quick-refill {
+    padding: var(--space-sm) var(--space-md); background: rgba(116, 185, 255, 0.15);
+    color: #74b9ff; border: 1.5px solid rgba(116, 185, 255, 0.4);
+    border-radius: var(--radius-lg); font-size: var(--text-sm); font-weight: 600;
+    cursor: pointer; font-family: var(--font-default); white-space: nowrap;
+  }
+  .btn-quick-refill:hover { background: rgba(116, 185, 255, 0.25); }
+
+  .quick-toast {
+    position: fixed; bottom: var(--space-xl); left: 50%; transform: translateX(-50%);
+    background: var(--color-primary); color: white;
+    padding: var(--space-sm) var(--space-xl); border-radius: var(--radius-full);
+    font-size: var(--text-sm); font-weight: 600; box-shadow: var(--elevation-md);
+    z-index: 100;
+  }
 
   .fill-form { display: flex; gap: var(--space-xs); align-items: center; }
   .fill-form input {
