@@ -1,8 +1,21 @@
 <script lang="ts">
   import QuickLogSheet from '$lib/components/QuickLogSheet.svelte';
   import ConfirmationToast from '$lib/components/ConfirmationToast.svelte';
+  import { getApiUrl } from '$lib/api';
+  import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
+  import { browser } from '$app/environment';
 
   let { data } = $props();
+
+  // Onboarding redirect: if user has at least one pet but hasn't completed onboarding, send them there
+  onMount(() => {
+    if (!browser) return;
+    const onboardingDone = localStorage.getItem('onboarding_done');
+    if (data.pets.length > 0 && !onboardingDone) {
+      goto('/onboarding');
+    }
+  });
 
   const initialIndex = data.selectedPetId
     ? Math.max(0, data.pets.findIndex((p: any) => p.id === data.selectedPetId))
@@ -16,7 +29,42 @@
   let toastVisible = $state(false);
   let loggedEvent = $state<any>(null);
 
+  /**
+   * For a single-pet household + instant actions (custom event),
+   * skip the sheet entirely and log directly, then show the toast.
+   */
+  async function autoLogSinglePet(action: string) {
+    const pet = data.pets[0];
+    if (!pet) return;
+
+    const token = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    try {
+      const res = await fetch(`${getApiUrl()}/pets/${pet.id}/events`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ type: action, payload: { status: 'ras' }, occurred_at: new Date().toISOString() }),
+      });
+      if (res.ok) {
+        const event = await res.json();
+        onEventLogged(event);
+      }
+    } catch {
+      // On error, fall back to opening the sheet
+      sheetAction = action;
+      sheetOpen = true;
+    }
+  }
+
   function openQuickLog(action: string) {
+    // Single-pet autoskip: for instant actions with no required form input,
+    // log directly without showing the animal picker sheet.
+    if (data.pets.length === 1 && action === 'custom') {
+      autoLogSinglePet(action);
+      return;
+    }
     sheetAction = action;
     sheetOpen = true;
   }
