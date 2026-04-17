@@ -11,29 +11,31 @@ test.describe('Pet Onboarding CRUD (ATDD - Stories 6.2 & 6.3)', () => {
 
   test('[P0] should create a pet via the form', async ({ page, request, authHeaders }) => {
     const petName = `Moustache-${Date.now()}`;
-    await page.goto('/pets/new', { waitUntil: 'networkidle' });
+    try {
+      await page.goto('/pets/new', { waitUntil: 'networkidle' });
 
-    await page.getByTestId('pet-name').fill(petName);
-    await page.getByTestId('pet-species').getByText('Chat').click();
-    await page.getByTestId('pet-birth-date').fill('2021-06-15');
-    await page.getByTestId('pet-breed').fill('Persan');
-    await page.getByTestId('pet-sterilized').check();
-    await page.getByTestId('pet-microchip').fill('250269812345678');
-    await page.getByTestId('pet-vet-name').fill('Dr. Dupont');
-    await page.getByTestId('pet-vet-phone').fill('01 23 45 67 89');
+      await page.getByTestId('pet-name').fill(petName);
+      await page.getByTestId('pet-species').getByText('Chat').click();
+      await page.getByTestId('pet-birth-date').fill('2021-06-15');
+      await page.getByTestId('pet-breed').fill('Persan');
+      await page.getByTestId('pet-sterilized').check();
+      await page.getByTestId('pet-microchip').fill('250269812345678');
+      await page.getByTestId('pet-vet-name').fill('Dr. Dupont');
+      await page.getByTestId('pet-vet-phone').fill('01 23 45 67 89');
 
-    await page.getByTestId('pet-submit').click();
+      await page.getByTestId('pet-submit').click();
 
-    // Should redirect to dashboard with new pet
-    await page.waitForURL('/', { timeout: 5000 });
-    await expect(page.getByText(petName)).toBeVisible();
-
-    // Cleanup: find and delete the created pet
-    const petsRes = await request.get(`${API_URL}/pets`, { headers: authHeaders });
-    if (petsRes.ok()) {
-      const pets = await petsRes.json();
-      const created = pets.find((p: any) => p.name === petName);
-      if (created) await request.delete(`${API_URL}/pets/${created.id}`, { headers: authHeaders });
+      // Should redirect to dashboard with new pet (use expect which polls with global timeout)
+      await expect(page).toHaveURL('/');
+      await expect(page.getByText(petName)).toBeVisible();
+    } finally {
+      // Always cleanup even if the test fails mid-way (prevents pet leak across test files)
+      const petsRes = await request.get(`${API_URL}/pets`, { headers: authHeaders });
+      if (petsRes.ok()) {
+        const pets = await petsRes.json();
+        const created = pets.find((p: any) => p.name === petName);
+        if (created) await request.delete(`${API_URL}/pets/${created.id}`, { headers: authHeaders });
+      }
     }
   });
 

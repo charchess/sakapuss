@@ -18,9 +18,9 @@ test.describe('Vet Cabinet / Dashboard (ATDD - Stories 7.4, 7.5)', () => {
     const pet = await petRes.json();
     sharedPetId = pet.id;
 
-    // Create vet share
+    // Create vet share — use the test user's own email so /vet/patients (auth-filtered) finds it
     await request.post(`${API_URL}/vet-shares`, {
-      data: { vet_email: 'dr.martin@vetclinic.com', pet_ids: [pet.id] },
+      data: { vet_email: 'playwright-e2e@test.sakapuss.local', pet_ids: [pet.id] },
       headers: authHeaders,
     });
 

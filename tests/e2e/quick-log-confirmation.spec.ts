@@ -19,6 +19,8 @@ test.describe('Quick Log Confirmation (ATDD - Story 3.5)', () => {
     } catch {
       // Single pet — form already visible
     }
+    // Wait for the form (and its submit button) to be visible after pet selection
+    await page.locator('.btn-log').waitFor({ state: 'visible', timeout: 5000 });
     await page.locator('.btn-log').click();
     // Wait for dialog to close
     await expect(dialog).not.toBeVisible({ timeout: 5000 });
