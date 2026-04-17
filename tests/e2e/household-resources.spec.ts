@@ -31,16 +31,18 @@ test.describe('Household Resources (ATDD - Story 3.6)', () => {
   });
 
   test('[P0] should edit an existing resource name and verify the update', async ({ page, request, authHeaders }) => {
-    // Seed a resource via API
+    // Use unique name to avoid strict mode violation with accumulated test data
+    const ts = Date.now();
+    const seedName = `CaisseEdit-${ts}`;
     await request.post(`${API_URL}/resources`, {
-      data: { name: `Caisse salon-${Date.now()}`, type: 'litter' },
+      data: { name: seedName, type: 'litter' },
       headers: authHeaders,
     });
 
     await page.goto('/settings/resources');
 
-    // Find and edit the resource
-    const resourceCard = page.getByTestId('resource-card').filter({ hasText: /Caisse salon/ });
+    // Find the exact seeded resource by name
+    const resourceCard = page.getByTestId('resource-card').filter({ hasText: seedName });
     await resourceCard.getByRole('button', { name: 'Modifier' }).click();
 
     await page.getByLabel('Nom').clear();
