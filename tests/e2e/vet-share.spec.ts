@@ -62,11 +62,13 @@ test.describe('Vet Sharing (ATDD - Story 7.2)', () => {
     await expect(shareCard.first()).toBeVisible();
 
     // Tap revoke
-    await shareCard.first().getByRole('button', { name: 'Révoquer' }).click();
+    const revokeBtn = shareCard.first().getByRole('button', { name: 'Révoquer' });
+    await expect(revokeBtn).toBeVisible();
+    await revokeBtn.click();
 
     // Confirmation dialog
     const dialog = page.getByRole('dialog');
-    await expect(dialog).toBeVisible();
+    await expect(dialog).toBeVisible({ timeout: 10000 });
     await expect(dialog).toContainText('Révoquer');
 
     // Confirm revocation

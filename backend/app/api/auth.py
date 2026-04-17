@@ -27,6 +27,7 @@ def register(payload: UserCreate, db: Session = Depends(get_db)) -> TokenRespons
         hashed_password=hashed,
         display_name=payload.display_name,
         language=payload.language,
+        role=payload.role,
     )
 
     token = create_access_token(user.id)

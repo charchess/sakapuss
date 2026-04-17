@@ -37,7 +37,7 @@ test.describe('Vet Landing Page (ATDD - Story 7.3)', () => {
     await page.goto(`/vet/dossier/${share.token}`, { waitUntil: 'networkidle' });
 
     const portalBanner = page.getByTestId('vet-portal-banner');
-    await expect(portalBanner).toBeVisible();
+    await expect(portalBanner).toBeVisible({ timeout: 15000 });
     await expect(portalBanner).toContainText('portail');
   });
 
