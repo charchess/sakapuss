@@ -127,7 +127,7 @@
   {#if !showDetail}
     <!-- LIST VIEW -->
     {#if overdue.length > 0}
-      <section class="segment overdue-segment">
+      <section class="segment overdue-segment" data-testid="overdue-section">
         <h2 class="segment-title">En retard</h2>
         {#each overdue as r}
           <button class="reminder-card" onclick={() => openDetail(r)} data-testid="reminder-card">

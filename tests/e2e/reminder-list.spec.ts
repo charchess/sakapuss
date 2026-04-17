@@ -66,15 +66,15 @@ test.describe('Reminder List (ATDD - Story 4.2)', () => {
     await expect(card).toContainText('Vaccin typhus');
   });
 
-  test.skip('[P1] should show overdue section expanded with red accent', async ({ page, seedPet, request }) => {
-    // SKIPPED: data-expanded attribute and border-color CSS assertions not implemented
+  test('[P1] should show overdue section expanded with red accent', async ({ page, seedPet, request, authHeaders }) => {
     const pet = await seedPet({ name: `ExpandCat-${Date.now()}` });
 
     await request.post(`${API_URL}/pets/${pet.id}/reminders`, {
       data: { type: 'vaccine', next_due_date: '2026-03-01', name: 'Vaccin retard', frequency_days: 365 },
+      headers: authHeaders,
     });
 
-    await page.goto('/reminders');
+    await page.goto('/reminders', { waitUntil: 'networkidle' });
 
     const overdueSection = page.getByTestId('overdue-section');
     await expect(overdueSection).toBeVisible();

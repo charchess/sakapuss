@@ -98,8 +98,7 @@ test.describe('Reminder Detail (ATDD - Story 4.3)', () => {
     await expect(page.getByRole('button', { name: '+2 semaines' })).toBeVisible();
   });
 
-  test.skip('[P1] should show confirmation toast and redirect after selecting delay chip', async ({ page, seedPet, request, authHeaders }) => {
-    // SKIPPED: No confirmation toast implemented after postpone — list view refreshes silently
+  test('[P1] should show confirmation toast and redirect after selecting delay chip', async ({ page, seedPet, request, authHeaders }) => {
     const pet = await seedPet({ name: `ChipCat-${Date.now()}` });
 
     await request.post(`${API_URL}/pets/${pet.id}/reminders`, {
