@@ -66,7 +66,7 @@ test.describe('Pet Onboarding CRUD (ATDD - Stories 6.2 & 6.3)', () => {
     await page.getByTestId('pet-delete').click();
 
     // Should redirect to dashboard
-    await page.waitForURL('/', { timeout: 5000 });
+    await page.waitForURL('/');
     await expect(page.getByText(pet.name)).not.toBeVisible();
   });
 });

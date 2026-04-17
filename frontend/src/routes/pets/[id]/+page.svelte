@@ -22,6 +22,19 @@
   let treeWeightValue = $state('');
   let treeSaving = $state(false);
 
+  // Reset UI state when navigating between pets (SvelteKit reuses this component)
+  let _lastPetId = data.pet?.id;
+  $effect(() => {
+    const newPetId = data.pet?.id;
+    if (newPetId !== _lastPetId) {
+      _lastPetId = newPetId;
+      activeTree = null;
+      treeSelections = [];
+      treeWeightValue = '';
+      showEventForm = false;
+    }
+  });
+
   function openTree(action: string) {
     activeTree = action;
     treeSelections = [];
@@ -330,7 +343,7 @@
   {#if activeTree !== null}
     <div class="tree-overlay" onclick={closeTree} role="dialog" aria-modal="true">
       <div class="tree-modal" data-testid="decision-tree" onclick={(e) => e.stopPropagation()}>
-        <button class="tree-close" onclick={closeTree} aria-label="Fermer">✕</button>
+        <button class="tree-close" data-testid="tree-close" onclick={closeTree} aria-label="Fermer">✕</button>
 
         {#if activeTree === 'litter'}
           <h3 class="tree-title">Litière</h3>

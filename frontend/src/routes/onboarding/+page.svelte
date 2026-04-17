@@ -4,8 +4,8 @@
   import { page } from '$app/stores';
   import { onMount } from 'svelte';
 
-  const startStep = $derived(parseInt($page.url.searchParams.get('step') || '1') || 1);
-  let step = $state(1);
+  const startStep = parseInt($page.url.searchParams.get('step') || '1') || 1;
+  let step = $state(startStep);
   let petId = $state('');
   let petName = $state('');
   let done = $state(false);
@@ -35,7 +35,6 @@
   }
 
   onMount(async () => {
-    step = startStep;
     const res = await fetch(`${getApiUrl()}/pets`, { headers: authHeaders() });
     if (res.ok) {
       const pets = await res.json();

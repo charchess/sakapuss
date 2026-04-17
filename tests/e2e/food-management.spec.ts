@@ -3,6 +3,9 @@ import { test, expect } from '../support/merged-fixtures';
 const API_URL = process.env.API_URL || 'http://localhost:8000';
 const TEST_PRODUCT_NAMES = ['Quinoa Caille', 'BagTest Kibble', 'Croquettes Test'];
 
+// Serial: shared DB (food products/bags have no per-user isolation), prevent parallel afterEach cleanup races
+test.describe.configure({ mode: 'serial' });
+
 test.describe('Food Management UI (ATDD - Stories 7.1 & 7.2)', () => {
 
   test.afterEach(async ({ request, authHeaders }) => {
