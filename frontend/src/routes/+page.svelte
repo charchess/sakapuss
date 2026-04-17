@@ -114,13 +114,13 @@
     } catch { return ''; }
   })());
 
-  const userRole = $derived((() => {
-    if (typeof localStorage === 'undefined') return 'admin';
+  let userRole = $state('admin');
+  onMount(() => {
     try {
       const u = JSON.parse(localStorage.getItem('user') || '{}');
-      return u.role || 'admin';
-    } catch { return 'admin'; }
-  })());
+      userRole = u.role || 'admin';
+    } catch { userRole = 'admin'; }
+  });
 
   const inputRoleTiles = ['weight', 'health_note', 'behavior', 'custom'];
 
