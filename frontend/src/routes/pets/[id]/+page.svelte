@@ -460,15 +460,18 @@
   {/if}
 
   {#if weightEventsChron.length > 0}
-    <section class="section">
+    <section class="section" data-testid="weight-summary">
       <div class="section-header">
         <h2>Poids</h2>
-        {#if latestWeight}
-          <span class="weight-badge">
-            {latestWeight} kg
-            {#if weightTrendDir === 'up'}↑{:else if weightTrendDir === 'down'}↓{:else if weightTrendDir === 'stable'}→{/if}
-          </span>
-        {/if}
+        <div class="weight-header-right">
+          {#if latestWeight}
+            <span class="weight-badge" data-testid="weight-trend">
+              {latestWeight} kg
+              {#if weightTrendDir === 'up'}↑{:else if weightTrendDir === 'down'}↓{:else if weightTrendDir === 'stable'}→{/if}
+            </span>
+          {/if}
+          <a href="/pets/{data.pet.id}/timeline" class="section-link" data-testid="weight-chart-link">Voir le graphique</a>
+        </div>
       </div>
 
       {#if weightChartData}
@@ -495,11 +498,11 @@
     </section>
   {/if}
 
-  <section class="section">
+  <section class="section" data-testid="active-reminders-section">
     <div class="section-header"><h2>Rappels</h2><a href="/reminders" class="section-link">Tous →</a></div>
     {#if data.reminders?.length > 0}
       {#each data.reminders.slice(0, 3) as r}
-        <div class="reminder-row">
+        <div class="reminder-row" data-testid="compact-reminder-card">
           <div class="reminder-dot" style="background: {statusColor(r.status)}"></div>
           <div class="reminder-info">
             <span class="reminder-name">{r.name}</span>
@@ -516,7 +519,7 @@
     <div class="section-header">
       <h2>Activité récente</h2>
       <div class="timeline-actions">
-        <a href="/timeline" class="section-link">Tout voir →</a>
+        <a href="/pets/{data.pet.id}/timeline" class="section-link" data-testid="history-link">Voir l'historique complet</a>
         <button class="add-event-btn" data-testid="add-event-btn" onclick={() => showEventForm = !showEventForm}>
           {showEventForm ? '✕' : '+ Ajouter'}
         </button>
@@ -863,6 +866,7 @@
 
   /* Weight chart */
   .weight-badge { font-size: var(--text-sm); font-weight: 700; color: var(--color-primary); }
+  .weight-header-right { display: flex; align-items: center; gap: var(--space-sm); }
   .weight-chart-wrap { margin-top: var(--space-sm); }
   .weight-chart-svg { width: 100%; height: auto; display: block; }
   .weight-insufficient { display: flex; flex-direction: column; gap: var(--space-xs); padding: var(--space-sm) 0; }
