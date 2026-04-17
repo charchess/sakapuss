@@ -101,10 +101,8 @@
       headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify({ delay_days: days }),
     });
-    if (res.ok) {
-      closeDetail();
-      await loadReminders();
-    }
+    closeDetail();
+    await loadReminders();
   }
 
   function statusColor(status: string): string {
