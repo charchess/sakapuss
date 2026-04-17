@@ -19,6 +19,7 @@
   // ── Fast-action decision tree ──────────────────────────────────────────
   let activeTree = $state<string | null>(null);   // 'litter' | 'food' | 'weight' | 'health'
   let treeSelections = $state<string[]>([]);
+  let treeResourceSelections = $state<string[]>([]);
   let treeWeightValue = $state('');
   let treeSaving = $state(false);
 
@@ -38,6 +39,7 @@
   function openTree(action: string) {
     activeTree = action;
     treeSelections = [];
+    treeResourceSelections = [];
     treeWeightValue = '';
   }
   function closeTree() { activeTree = null; }
@@ -63,11 +65,12 @@
     let payload: Record<string, any> = {};
 
     if (activeTree === 'litter') {
-      type = 'litter';
+      type = 'litter_clean';
+      const resources = treeResourceSelections.map(id => ({ id }));
       if (treeSelections.length === 0) {
-        payload = { anomalies: [], ras: true, status: 'RAS' };
+        payload = { resources, anomalies: [], ras: true, status: 'RAS' };
       } else {
-        payload = { anomalies: treeSelections };
+        payload = { resources, anomalies: treeSelections };
       }
     } else if (activeTree === 'food') {
       type = 'food';
@@ -347,6 +350,27 @@
 
         {#if activeTree === 'litter'}
           <h3 class="tree-title">Litière</h3>
+
+          {#if data.litterResources?.length > 0}
+            <p class="tree-subtitle">Quelle(s) caisse(s) ?</p>
+            <div class="tree-options">
+              {#each data.litterResources as lr}
+                <button
+                  class="tree-option"
+                  class:selected={treeResourceSelections.includes(lr.id)}
+                  data-testid="resource-chip"
+                  onclick={() => {
+                    if (treeResourceSelections.includes(lr.id)) {
+                      treeResourceSelections = treeResourceSelections.filter(id => id !== lr.id);
+                    } else {
+                      treeResourceSelections = [...treeResourceSelections, lr.id];
+                    }
+                  }}
+                >{lr.name}</button>
+              {/each}
+            </div>
+          {/if}
+
           <p class="tree-subtitle">Anomalies observées ?</p>
           <div class="tree-options">
             <button

@@ -70,8 +70,7 @@ test.describe('Household Resources (ATDD - Story 3.6)', () => {
     await expect(page.getByTestId('resource-list')).not.toContainText(`CaisseDelete-${ts}`);
   });
 
-  test.skip('[P1] should show resources as chips in Quick Log selection for litter action', async ({ page, seedPet, request, authHeaders }) => {
-    // SKIPPED: The litter action in QuickLogSheet shows resources as litter-items (not resource-chip testid)
+  test('[P1] should show resources as chips in Quick Log selection for litter action', async ({ page, seedPet, request, authHeaders }) => {
     const pet = await seedPet({ name: `LitterCat-${Date.now()}` });
 
     await request.post(`${API_URL}/resources`, {
@@ -85,7 +84,7 @@ test.describe('Household Resources (ATDD - Story 3.6)', () => {
     await page.getByRole('button', { name: /litière/i }).click();
 
     const resourceChips = page.getByTestId('resource-chip');
-    await expect(resourceChips).not.toHaveCount(0);
-    await expect(page.getByTestId('resource-chip').filter({ hasText: 'Caisse cuisine' })).toBeVisible();
+    await expect(resourceChips.first()).toBeVisible();
+    await expect(page.getByTestId('resource-chip').filter({ hasText: 'Caisse cuisine' }).first()).toBeVisible();
   });
 });

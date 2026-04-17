@@ -80,17 +80,17 @@ test.describe('Reminder List (ATDD - Story 4.2)', () => {
     await expect(overdueSection).toBeVisible();
   });
 
-  test.skip('[P1] should navigate to detail page when tapping a reminder card', async ({ page, seedPet, request }) => {
-    // SKIPPED: Reminder detail is an inline view on /reminders, not a separate /reminders/{id} route
+  test('[P1] should open inline detail when tapping a reminder card', async ({ page, seedPet, request, authHeaders }) => {
     const pet = await seedPet({ name: `NavCat-${Date.now()}` });
 
-    const response = await request.post(`${API_URL}/pets/${pet.id}/reminders`, {
+    await request.post(`${API_URL}/pets/${pet.id}/reminders`, {
       data: { type: 'vaccine', next_due_date: '2026-04-08', name: 'Vaccin click', frequency_days: 365 },
+      headers: authHeaders,
     });
-    const reminder = await response.json();
 
-    await page.goto('/reminders');
+    await page.goto('/reminders', { waitUntil: 'networkidle' });
     await page.getByTestId('reminder-card').first().click();
-    await expect(page).toHaveURL(new RegExp(`/reminders/${reminder.id}`));
+    await expect(page.getByTestId('reminder-animal-avatar')).toBeVisible();
+    await expect(page.getByTestId('reminder-info-card')).toBeVisible();
   });
 });
