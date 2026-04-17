@@ -35,6 +35,7 @@ async function globalSetup(_config: FullConfig) {
   await page.evaluate(({ token, userData }) => {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('onboarding_done', 'true');
   }, { token: access_token, userData: user });
 
   await context.storageState({ path: AUTH_FILE });
