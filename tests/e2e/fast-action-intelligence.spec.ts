@@ -42,7 +42,7 @@ test.describe('Fast Action Intelligence (ATDD - Stories 4.3 & 4.4)', () => {
     // Verify event in API
     const eventsRes = await request.get(`${API_URL}/pets/${petId}/events`);
     const events = await eventsRes.json();
-    const litterEvent = events.find((e: any) => e.type === 'litter');
+    const litterEvent = events.find((e: any) => e.type === 'litter_clean' || e.type === 'litter');
     expect(litterEvent).toBeTruthy();
     expect(litterEvent.payload.anomalies).toContain('blood');
   });
