@@ -55,6 +55,7 @@ def create_vet_share(payload: VetShareCreate, db: DbSession, current_user: User 
     # Return a single share object with all pet_ids
     return {
         "id": first_link.id,
+        "token": first_link.token,
         "share_url": f"/vet/dossier/{first_link.token}",
         "vet_email": first_link.vet_email,
         "pet_ids": payload.pet_ids,

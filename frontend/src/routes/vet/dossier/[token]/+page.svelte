@@ -17,9 +17,12 @@
 
 <div class="vet-dossier">
   {#if error}
-    <div class="error-page"><h1>{error}</h1></div>
+    <div class="error-page" data-testid="vet-error-page">
+      <h1>{error}</h1>
+      <p>Ce lien a peut-être expiré ou été révoqué.</p>
+    </div>
   {:else if dossier}
-    <div class="portal-banner">
+    <div class="portal-banner" data-testid="vet-portal-banner">
       <p>Créez votre portail cabinet pour centraliser tous vos patients</p>
       <a href="/vet/dashboard" class="banner-link">Créer mon portail</a>
     </div>
@@ -34,7 +37,7 @@
         </div>
       </div>
 
-      <section class="section">
+      <section class="section" data-testid="vet-reminders-section">
         <h2>Rappels actifs</h2>
         {#each dossier.reminders as r}
           <div class="reminder-row">{r.name} — {r.next_due_date}</div>
@@ -43,7 +46,7 @@
         {/each}
       </section>
 
-      <section class="section">
+      <section class="section" data-testid="vet-timeline-section">
         <h2>Historique médical</h2>
         {#each dossier.events as e}
           <div class="event-row">
@@ -56,7 +59,7 @@
       </section>
     </div>
 
-    <div class="disclaimer">Ce suivi est un outil d'aide. Consultez un vétérinaire pour toute décision médicale.</div>
+    <div class="disclaimer" data-testid="medical-disclaimer">Ce suivi est un outil d'aide. Ces informations ne remplacent pas une consultation vétérinaire professionnelle.</div>
   {:else}
     <p>Chargement...</p>
   {/if}
