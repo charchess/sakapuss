@@ -80,7 +80,13 @@
         }
       }
 
-      window.location.href = '/';
+      // If this is the first pet (no onboarding done yet), redirect to onboarding wizard
+      const onboardingDone = typeof localStorage !== 'undefined' ? localStorage.getItem('onboarding_done') : null;
+      if (!onboardingDone) {
+        window.location.href = '/onboarding';
+      } else {
+        window.location.href = '/';
+      }
     } catch (err) {
       error = 'Erreur réseau';
       submitting = false;

@@ -1,8 +1,20 @@
 <script lang="ts">
   import QuickLogSheet from '$lib/components/QuickLogSheet.svelte';
   import ConfirmationToast from '$lib/components/ConfirmationToast.svelte';
+  import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
+  import { browser } from '$app/environment';
 
   let { data } = $props();
+
+  // Onboarding redirect: if user has at least one pet but hasn't completed onboarding, redirect
+  onMount(() => {
+    if (!browser) return;
+    const onboardingDone = localStorage.getItem('onboarding_done');
+    if (data.pets.length > 0 && !onboardingDone) {
+      goto('/onboarding');
+    }
+  });
 
   const initialIndex = data.selectedPetId
     ? Math.max(0, data.pets.findIndex((p: any) => p.id === data.selectedPetId))

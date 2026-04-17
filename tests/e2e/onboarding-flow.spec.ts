@@ -3,8 +3,14 @@ import { test, expect } from '../support/merged-fixtures';
 test.describe('Onboarding Flow (ATDD - Story 2.6)', () => {
   test.describe.configure({ mode: 'serial' });
 
-  test.skip('[P0] should redirect to onboarding after adding first animal', async ({ page, seedPet }) => {
-    // SKIPPED: No automatic redirect to onboarding implemented in the app
+  // Remove onboarding_done so the redirect test (first in serial chain) starts fresh.
+  // The last test (returning user) relies on onboarding_done being set by wizard tests earlier in the chain.
+  test.beforeAll(async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => localStorage.removeItem('onboarding_done'));
+  });
+
+  test('[P0] should redirect to onboarding after adding first animal', async ({ page, seedPet }) => {
     await seedPet({ name: `Onboard-${Date.now()}` });
     await page.goto('/');
     await expect(page).toHaveURL(/\/onboarding/);
@@ -98,8 +104,10 @@ test.describe('Onboarding Flow (ATDD - Story 2.6)', () => {
     await expect(page.getByText('est prêt', { exact: false })).toBeVisible();
   });
 
-  test.skip('[P0] should not show onboarding for returning user', async ({ page, seedPet }) => {
-    // SKIPPED: No automatic redirect logic to/from onboarding implemented
+  test('[P0] should not show onboarding for returning user', async ({ page, seedPet }) => {
+    // onboarding_done is set in localStorage after completing/skipping onboarding wizard
+    // (set by the celebration screen's finish() in onboarding/+page.svelte)
+    // Since tests run serially and prior tests complete the wizard, onboarding_done is already set.
     await seedPet({ name: `Returning-${Date.now()}` });
     await page.goto('/');
     await expect(page).toHaveURL('/');
