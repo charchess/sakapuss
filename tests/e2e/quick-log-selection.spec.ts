@@ -24,8 +24,7 @@ test.describe('Quick Log Selection (ATDD - Story 3.4)', () => {
     await expect(sheet.getByText(pet2.name)).toBeVisible();
   });
 
-  test.skip('[P0] should auto-skip animal picker for single pet', async ({ page, seedPet }) => {
-    // SKIPPED: Single-pet auto-skip requires behavior change (form actions still show the sheet with inline form)
+  test('[P0] should auto-skip animal picker for single pet', async ({ page, seedPet }) => {
     await seedPet({ name: `Solo-${Date.now()}` });
     await page.goto('/');
 
