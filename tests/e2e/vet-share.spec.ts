@@ -40,10 +40,10 @@ test.describe('Vet Sharing (ATDD - Story 7.2)', () => {
     await expect(toast).toBeVisible();
     await expect(toast).toContainText('Lien envoyé');
 
-    // Active share card appears
-    const shareCard = page.getByTestId('active-share-card');
-    await expect(shareCard).toBeVisible();
-    await expect(shareCard).toContainText('dr.martin@vetclinic.com');
+    // Active share card appears (filter by email to avoid strict mode with accumulated shares)
+    const shareCard = page.getByTestId('active-share-card').filter({ hasText: 'dr.martin@vetclinic.com' });
+    await expect(shareCard.first()).toBeVisible();
+    await expect(shareCard.first()).toContainText('dr.martin@vetclinic.com');
   });
 
   test('[P1] should show confirmation dialog and update status when revoking', async ({ page, seedPet, request, authHeaders }) => {
@@ -57,11 +57,12 @@ test.describe('Vet Sharing (ATDD - Story 7.2)', () => {
 
     await page.goto('/settings/vet-sharing', { waitUntil: 'networkidle' });
 
-    const shareCard = page.getByTestId('active-share-card');
-    await expect(shareCard).toBeVisible();
+    // Filter to the specific revoke card to avoid strict mode with accumulated shares
+    const shareCard = page.getByTestId('active-share-card').filter({ hasText: 'dr.revoke@vetclinic.com' });
+    await expect(shareCard.first()).toBeVisible();
 
     // Tap revoke
-    await shareCard.getByRole('button', { name: 'Révoquer' }).click();
+    await shareCard.first().getByRole('button', { name: 'Révoquer' }).click();
 
     // Confirmation dialog
     const dialog = page.getByRole('dialog');
