@@ -1,6 +1,15 @@
 import { test, expect } from '../support/merged-fixtures';
 
-const API_URL = process.env.API_URL || 'http://localhost:8000';
+async function openEventForm(page: any) {
+  const form = page.getByTestId('event-form');
+  // Guard against SvelteKit state reuse — ensure form starts closed
+  if (await form.isVisible({ timeout: 500 }).catch(() => false)) {
+    await page.getByTestId('add-event-btn').click();
+    await form.waitFor({ state: 'hidden', timeout: 3000 });
+  }
+  await page.getByTestId('add-event-btn').click();
+  await expect(form).toBeVisible();
+}
 
 test.describe('Free-form Events (ATDD - Story 9.1)', () => {
 
@@ -14,8 +23,7 @@ test.describe('Free-form Events (ATDD - Story 9.1)', () => {
     const pet = await seedPet({ name: 'VaccineCat' });
     await page.goto(`/pets/${pet.id}`, { waitUntil: 'networkidle' });
 
-    await page.getByTestId('add-event-btn').click();
-    await expect(page.getByTestId('event-form')).toBeVisible();
+    await openEventForm(page);
 
     await page.getByTestId('event-type').selectOption('vaccine');
     await page.getByTestId('event-date').fill('2026-03-09T10:00');
@@ -31,7 +39,7 @@ test.describe('Free-form Events (ATDD - Story 9.1)', () => {
     const pet = await seedPet({ name: 'NoteCat' });
     await page.goto(`/pets/${pet.id}`, { waitUntil: 'networkidle' });
 
-    await page.getByTestId('add-event-btn').click();
+    await openEventForm(page);
     await page.getByTestId('event-type').selectOption('note');
     await page.getByTestId('event-date').fill('2026-03-09T14:00');
     await page.getByTestId('event-payload-text').fill('Semble fatigué ce matin');

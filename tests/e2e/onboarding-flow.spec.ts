@@ -4,7 +4,7 @@ test.describe('Onboarding Flow (ATDD - Story 2.6)', () => {
 
   test.skip('[P0] should redirect to onboarding after adding first animal', async ({ page, seedPet }) => {
     // SKIPPED: No automatic redirect to onboarding implemented in the app
-    const pet = await seedPet({ name: `Onboard-${Date.now()}` });
+    await seedPet({ name: `Onboard-${Date.now()}` });
     await page.goto('/');
     await expect(page).toHaveURL(/\/onboarding/);
   });
@@ -25,13 +25,16 @@ test.describe('Onboarding Flow (ATDD - Story 2.6)', () => {
     await seedPet({ name: `Skipper-${Date.now()}` });
     await page.goto('/onboarding');
 
-    // Step 1: Health Reminders - skip
+    // Step 1: Health Reminders - skip (wait for step 2 before proceeding)
+    await expect(page.getByTestId('wizard-health')).toBeVisible();
     await page.getByRole('button', { name: 'Passer' }).click();
 
-    // Step 2: Weight - skip
+    // Step 2: Weight - skip (wait for step 3 before proceeding)
+    await expect(page.getByTestId('wizard-weight')).toBeVisible();
     await page.getByRole('button', { name: 'Passer' }).click();
 
     // Step 3: Food - skip
+    await expect(page.getByTestId('wizard-food')).toBeVisible();
     await page.getByRole('button', { name: 'Passer' }).click();
 
     // Should see celebration screen
@@ -48,10 +51,11 @@ test.describe('Onboarding Flow (ATDD - Story 2.6)', () => {
     await page.goto('/onboarding');
 
     // Step 1: Health Reminders - checkboxes are on by default, toggle them
-    await expect(page.getByText('Rappels santé')).toBeVisible();
+    await expect(page.getByTestId('wizard-health')).toBeVisible();
     await page.getByRole('button', { name: 'Continuer' }).click();
 
     // Verify we moved to step 2
+    await expect(page.getByTestId('wizard-weight')).toBeVisible();
     await expect(page.getByText('Poids actuel')).toBeVisible();
   });
 
@@ -60,14 +64,16 @@ test.describe('Onboarding Flow (ATDD - Story 2.6)', () => {
     await page.goto('/onboarding');
 
     // Skip step 1
+    await expect(page.getByTestId('wizard-health')).toBeVisible();
     await page.getByRole('button', { name: 'Passer' }).click();
 
     // Step 2: Weight - enter a value
-    await expect(page.getByText('Poids actuel')).toBeVisible();
+    await expect(page.getByTestId('wizard-weight')).toBeVisible();
     await page.getByTestId('weight-input').fill('4.5');
     await page.getByRole('button', { name: 'Continuer' }).click();
 
     // Verify we moved to step 3
+    await expect(page.getByTestId('wizard-food')).toBeVisible();
     await expect(page.getByText('Alimentation')).toBeVisible();
   });
 
@@ -75,11 +81,14 @@ test.describe('Onboarding Flow (ATDD - Story 2.6)', () => {
     await seedPet({ name: `FoodPet-${Date.now()}` });
     await page.goto('/onboarding');
 
-    // Skip steps 1 and 2
+    // Skip steps 1 and 2 (wait for each transition)
+    await expect(page.getByTestId('wizard-health')).toBeVisible();
     await page.getByRole('button', { name: 'Passer' }).click();
+    await expect(page.getByTestId('wizard-weight')).toBeVisible();
     await page.getByRole('button', { name: 'Passer' }).click();
 
     // Step 3: Food - meal count pills visible
+    await expect(page.getByTestId('wizard-food')).toBeVisible();
     await expect(page.getByText('Alimentation')).toBeVisible();
     await expect(page.getByText('Repas par jour')).toBeVisible();
     await page.getByRole('button', { name: "C'est parti !" }).click();

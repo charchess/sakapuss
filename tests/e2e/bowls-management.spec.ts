@@ -3,6 +3,9 @@ import { test, expect } from '../support/merged-fixtures';
 const API_URL = process.env.API_URL || 'http://localhost:8000';
 const TEST_BOWL_NAMES = ['Salon A', 'FillBowl', 'Fontaine'];
 
+// Serial: shared DB (bowls have no per-user isolation), prevent parallel afterEach cleanup races
+test.describe.configure({ mode: 'serial' });
+
 test.describe('Bowls Management UI (ATDD - Stories 8.1, 8.2, 8.3)', () => {
 
   test.afterEach(async ({ request, authHeaders }) => {
@@ -17,10 +20,21 @@ test.describe('Bowls Management UI (ATDD - Stories 8.1, 8.2, 8.3)', () => {
     }
   });
 
+  async function openBowlForm(page: any) {
+    const nameInput = page.getByTestId('bowl-name');
+    // Ensure form starts closed (guard against SvelteKit state reuse)
+    if (await nameInput.isVisible({ timeout: 500 }).catch(() => false)) {
+      await page.getByTestId('add-bowl-btn').click();
+      await nameInput.waitFor({ state: 'hidden', timeout: 3000 });
+    }
+    await page.getByTestId('add-bowl-btn').click();
+    await nameInput.waitFor({ state: 'visible', timeout: 5000 });
+  }
+
   test('[P0] should create a food bowl via UI', async ({ page }) => {
     await page.goto('/bowls', { waitUntil: 'networkidle' });
 
-    await page.getByTestId('add-bowl-btn').click();
+    await openBowlForm(page);
     await page.getByTestId('bowl-name').fill('Salon A');
     await page.getByTestId('bowl-location').fill('Salon');
     await page.getByTestId('bowl-type-food').click(); // Nourriture toggle
@@ -61,7 +75,7 @@ test.describe('Bowls Management UI (ATDD - Stories 8.1, 8.2, 8.3)', () => {
   test('[P0] should create a water bowl', async ({ page }) => {
     await page.goto('/bowls', { waitUntil: 'networkidle' });
 
-    await page.getByTestId('add-bowl-btn').click();
+    await openBowlForm(page);
     await page.getByTestId('bowl-name').fill('Fontaine');
     await page.getByTestId('bowl-location').fill('Cuisine');
     await page.getByTestId('bowl-type-water').click(); // Eau toggle

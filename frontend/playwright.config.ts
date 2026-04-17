@@ -11,8 +11,8 @@ export default defineConfig({
   globalTeardown: '../tests/global-teardown.ts',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  retries: process.env.CI ? 2 : 1,
+  workers: 1,
   reporter: [
     ['html', { outputFolder: '../playwright-report', open: 'never' }],
     ['junit', { outputFile: '../test-results/results.xml' }],

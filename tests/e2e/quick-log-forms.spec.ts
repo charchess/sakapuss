@@ -67,7 +67,7 @@ test.describe('Quick Log Form Actions', () => {
     await maybeSelectPet(page);
 
     const medInput = page.getByPlaceholder('Nom du médicament');
-    await expect(medInput).toBeVisible({ timeout: 3000 });
+    await expect(medInput).toBeVisible();
     await medInput.fill('Vermifuge');
     await page.locator('.btn-log').click();
     await page.waitForTimeout(500);

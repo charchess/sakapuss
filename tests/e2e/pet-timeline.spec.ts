@@ -13,6 +13,9 @@ function getStoredToken(): string | null {
   } catch { return null; }
 }
 
+// Serial: shared petId variable across tests; sequential execution required
+test.describe.configure({ mode: 'serial' });
+
 test.describe('Pet Timeline Visualization (ATDD - Story 2.3)', () => {
 
   let petId: string;
