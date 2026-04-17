@@ -35,6 +35,21 @@
     return token ? { Authorization: `Bearer ${token}` } : {};
   }
 
+  function formatDate(dateStr: string): string {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function computeStatus(next_due_date: string): string {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(next_due_date);
+    due.setHours(0, 0, 0, 0);
+    if (due < today) return 'overdue';
+    if (due.getTime() === today.getTime()) return 'today';
+    return 'upcoming';
+  }
+
   onMount(loadReminders);
 
   async function loadReminders() {
@@ -43,14 +58,16 @@
       const pending = await res.json();
       const upRes = await fetch(`${getApiUrl()}/reminders/upcoming?days=90`, { headers: authHeaders() });
       const upcomingList = upRes.ok ? await upRes.json() : [];
-      // Merge and dedupe
+      // Merge and dedupe, compute status client-side (API doesn't return it)
       const all = [...pending, ...upcomingList];
       const seen = new Set<string>();
-      reminders = all.filter(r => {
-        if (seen.has(r.id)) return false;
-        seen.add(r.id);
-        return true;
-      });
+      reminders = all
+        .filter(r => {
+          if (seen.has(r.id)) return false;
+          seen.add(r.id);
+          return true;
+        })
+        .map(r => ({ ...r, status: r.status ?? computeStatus(r.next_due_date) }));
     }
   }
 
@@ -114,10 +131,10 @@
         <h2 class="segment-title">En retard</h2>
         {#each overdue as r}
           <button class="reminder-card" onclick={() => openDetail(r)} data-testid="reminder-card">
-            <div class="card-bar" style="background: var(--color-error)"></div>
+            <div class="card-bar" data-testid="reminder-color-bar" style="background: var(--color-error)"></div>
             <div class="card-content">
               <div class="card-title">{r.name}</div>
-              <div class="card-sub">{r.pet_name} · {r.next_due_date}</div>
+              <div class="card-sub">{r.pet_name} · <span data-testid="reminder-date">{formatDate(r.next_due_date)}</span></div>
             </div>
             <span class="chevron">›</span>
           </button>
@@ -130,10 +147,10 @@
         <h2 class="segment-title">Aujourd'hui</h2>
         {#each today as r}
           <button class="reminder-card" onclick={() => openDetail(r)} data-testid="reminder-card">
-            <div class="card-bar" style="background: var(--color-warning)"></div>
+            <div class="card-bar" data-testid="reminder-color-bar" style="background: var(--color-warning)"></div>
             <div class="card-content">
               <div class="card-title">{r.name}</div>
-              <div class="card-sub">{r.pet_name} · Aujourd'hui</div>
+              <div class="card-sub">{r.pet_name} · <span data-testid="reminder-date">Aujourd'hui</span></div>
             </div>
             <span class="chevron">›</span>
           </button>
@@ -146,10 +163,10 @@
         <h2 class="segment-title">À venir</h2>
         {#each upcoming as r}
           <button class="reminder-card" onclick={() => openDetail(r)} data-testid="reminder-card">
-            <div class="card-bar" style="background: var(--color-text-muted)"></div>
+            <div class="card-bar" data-testid="reminder-color-bar" style="background: var(--color-text-muted)"></div>
             <div class="card-content">
               <div class="card-title">{r.name}</div>
-              <div class="card-sub">{r.pet_name} · {r.next_due_date}</div>
+              <div class="card-sub">{r.pet_name} · <span data-testid="reminder-date">{formatDate(r.next_due_date)}</span></div>
             </div>
             <span class="chevron">›</span>
           </button>
@@ -191,7 +208,7 @@
 
         <div class="info-card">
           <div class="info-row"><span class="info-label">Type</span><span>{selectedReminder.type}</span></div>
-          <div class="info-row"><span class="info-label">Date</span><span style="color: {statusColor(selectedReminder.status)}">{selectedReminder.next_due_date}</span></div>
+          <div class="info-row"><span class="info-label">Date</span><span style="color: {statusColor(selectedReminder.status)}">{formatDate(selectedReminder.next_due_date)}</span></div>
           {#if selectedReminder.product}<div class="info-row"><span class="info-label">Produit</span><span>{selectedReminder.product}</span></div>{/if}
           {#if selectedReminder.last_done_date}<div class="info-row"><span class="info-label">Dernier</span><span>{selectedReminder.last_done_date}</span></div>{/if}
           {#if selectedReminder.frequency_days}<div class="info-row"><span class="info-label">Fréquence</span><span>Tous les {selectedReminder.frequency_days} jours</span></div>{/if}
