@@ -12,7 +12,7 @@ test.describe('Vet Cabinet / Dashboard (ATDD - Stories 7.4, 7.5)', () => {
     // Create a pet with vet share and weight events for alert detection
     const ts = Date.now();
     const petRes = await request.post(`${API_URL}/pets`, {
-      data: { name: `VetPatient-${ts}`, species: 'chat' },
+      data: { name: `VetPatient-${ts}`, species: 'Cat', birth_date: '2020-01-01' },
       headers: authHeaders,
     });
     const pet = await petRes.json();
@@ -44,8 +44,15 @@ test.describe('Vet Cabinet / Dashboard (ATDD - Stories 7.4, 7.5)', () => {
     });
   });
 
+  // Helper: navigate to vet dashboard and wait for data to fully load
+  // (networkidle may fire between /vet/patients response and anomaly requests)
+  async function gotoVetDashboard(page: any) {
+    await page.goto('/vet/dashboard', { waitUntil: 'load' });
+    await expect(page.locator('.loading')).not.toBeVisible({ timeout: 30000 });
+  }
+
   test('[P0] should display prominent auto-focused search bar on vet dashboard', async ({ page }) => {
-    await page.goto('/vet/dashboard', { waitUntil: 'networkidle' });
+    await gotoVetDashboard(page);
 
     const searchBar = page.getByRole('searchbox', { name: /rechercher/i });
     await expect(searchBar).toBeVisible();
@@ -53,7 +60,7 @@ test.describe('Vet Cabinet / Dashboard (ATDD - Stories 7.4, 7.5)', () => {
   });
 
   test('[P0] should display "Patients with alerts" section', async ({ page }) => {
-    await page.goto('/vet/dashboard', { waitUntil: 'networkidle' });
+    await gotoVetDashboard(page);
 
     const alertsSection = page.getByTestId('patients-with-alerts');
     await expect(alertsSection).toBeVisible();
@@ -61,7 +68,7 @@ test.describe('Vet Cabinet / Dashboard (ATDD - Stories 7.4, 7.5)', () => {
   });
 
   test('[P0] should display "Recent patients" cards', async ({ page }) => {
-    await page.goto('/vet/dashboard', { waitUntil: 'networkidle' });
+    await gotoVetDashboard(page);
 
     const recentSection = page.getByTestId('recent-patients');
     await expect(recentSection).toBeVisible();
@@ -72,10 +79,11 @@ test.describe('Vet Cabinet / Dashboard (ATDD - Stories 7.4, 7.5)', () => {
   });
 
   test('[P0] should navigate to two-column dossier layout when clicking a patient', async ({ page }) => {
-    await page.goto('/vet/dashboard', { waitUntil: 'networkidle' });
+    await gotoVetDashboard(page);
 
-    // Click first patient card
-    await page.getByTestId('recent-patients').getByTestId('patient-card').first().click();
+    const firstCard = page.getByTestId('recent-patients').getByTestId('patient-card').first();
+    await expect(firstCard).toBeVisible();
+    await firstCard.click();
 
     // Verify two-column layout
     await expect(page.getByTestId('vet-dossier-left-column')).toBeVisible();
@@ -83,10 +91,12 @@ test.describe('Vet Cabinet / Dashboard (ATDD - Stories 7.4, 7.5)', () => {
   });
 
   test('[P0] should show alert cards at top of vet dossier', async ({ page }) => {
-    await page.goto('/vet/dashboard', { waitUntil: 'networkidle' });
+    await gotoVetDashboard(page);
 
-    // Navigate to a patient with alerts
-    await page.getByTestId('patients-with-alerts').getByTestId('patient-card').first().click();
+    // Wait for alert patient cards to be rendered, then navigate
+    const alertCard = page.getByTestId('patients-with-alerts').getByTestId('patient-card').first();
+    await expect(alertCard).toBeVisible();
+    await alertCard.click();
 
     const alertCards = page.getByTestId('vet-alert-card');
     await expect(alertCards.first()).toBeVisible();
