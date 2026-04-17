@@ -192,21 +192,21 @@
 
     {#if showSuccess}
       <div class="success-state" data-testid="reminder-success">
-        <div class="success-icon">✓</div>
+        <div class="success-icon" data-testid="celebration-checkmark">✓</div>
         <div class="success-text">{successMessage}</div>
         <button class="btn-secondary" onclick={closeDetail}>Retour aux rappels</button>
       </div>
     {:else if selectedReminder}
       <div class="detail-card">
         <div class="animal-context">
-          <div class="animal-avatar">🐱</div>
-          <div class="animal-speech">
+          <div class="animal-avatar" data-testid="reminder-animal-avatar">🐱</div>
+          <div class="animal-speech" data-testid="reminder-speech-bubble">
             <strong>{selectedReminder.pet_name}</strong>
             <em>"{selectedReminder.name}, c'est le moment !"</em>
           </div>
         </div>
 
-        <div class="info-card">
+        <div class="info-card" data-testid="reminder-info-card">
           <div class="info-row"><span class="info-label">Type</span><span>{selectedReminder.type}</span></div>
           <div class="info-row"><span class="info-label">Date</span><span style="color: {statusColor(selectedReminder.status)}">{formatDate(selectedReminder.next_due_date)}</span></div>
           {#if selectedReminder.product}<div class="info-row"><span class="info-label">Produit</span><span>{selectedReminder.product}</span></div>{/if}

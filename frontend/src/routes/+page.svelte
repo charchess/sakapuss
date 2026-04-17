@@ -161,7 +161,7 @@
     <!-- Reminder Nudge -->
     {#if data.pendingReminders.length > 0}
       {@const r = data.pendingReminders[0]}
-      <a href="/reminders" class="reminder-nudge">
+      <a href="/reminders" class="reminder-nudge" data-testid="reminder-nudge">
         <svg viewBox="0 0 24 24" fill="none" stroke="var(--color-cat-health)" stroke-width="2" stroke-linecap="round" class="nudge-icon">
           <rect x="5" y="9" width="14" height="6" rx="3" transform="rotate(-30 12 12)"/>
         </svg>
@@ -211,7 +211,7 @@
     </div>
 
     <!-- Recent Activity -->
-    <div class="recent-section">
+    <div class="recent-section" data-testid="recent-activity">
       <div class="section-header">
         <span class="section-title">Aujourd'hui</span>
         <a href="/timeline" class="see-all">Tout voir</a>

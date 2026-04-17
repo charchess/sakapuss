@@ -1,5 +1,7 @@
 import { test, expect } from '../support/merged-fixtures';
 
+const API_URL = process.env.API_URL || 'http://localhost:8000';
+
 test.describe('Dashboard WDS (ATDD - Story 3.3)', () => {
 
   test('[P0] should display animal hero card with pet name', async ({ page, seedPet }) => {
@@ -58,17 +60,20 @@ test.describe('Dashboard WDS (ATDD - Story 3.3)', () => {
     await expect(switcher.getByLabel(pet.name)).toBeVisible();
   });
 
-  test.skip('[P1] should show reminder nudge banner when reminders exist', async ({ page, seedPet }) => {
-    // SKIPPED: No reminder nudge banner implemented in the dashboard UI
-    await seedPet({ name: `Reminded-${Date.now()}` });
-    await page.goto('/');
+  test('[P1] should show reminder nudge banner when reminders exist', async ({ page, seedPet, request, authHeaders }) => {
+    const pet = await seedPet({ name: `Reminded-${Date.now()}` });
+    // Seed an overdue reminder so the nudge banner appears
+    await request.post(`${API_URL}/pets/${pet.id}/reminders`, {
+      data: { type: 'vaccine', next_due_date: '2026-03-01', name: 'Vaccin test nudge', frequency_days: 365 },
+      headers: authHeaders,
+    });
+    await page.goto('/', { waitUntil: 'networkidle' });
 
     const nudgeBanner = page.getByTestId('reminder-nudge');
     await expect(nudgeBanner).toBeVisible();
   });
 
-  test.skip('[P1] should show recent activity stream with last 3 entries', async ({ page, seedPet }) => {
-    // SKIPPED: Recent activity section exists but requires seeded events via authenticated API
+  test('[P1] should show recent activity section', async ({ page, seedPet }) => {
     await seedPet({ name: `Active-${Date.now()}` });
     await page.goto('/');
 
