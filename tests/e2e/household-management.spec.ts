@@ -61,8 +61,7 @@ test.describe('Household Management (ATDD - Stories 6.2, 6.3)', () => {
     await expect(memberList).toContainText('En attente');
   });
 
-  test.skip('[P1] should show welcome page with role explanation when invitee opens link', async ({ page, request, authHeaders }) => {
-    // SKIPPED: /invite route exists but needs household_id in the API call
+  test('[P1] should show welcome page with role explanation when invitee opens link', async ({ page, request, authHeaders }) => {
     const hRes = await request.post(`${API_URL}/households`, {
       data: { name: 'Test household' },
       headers: authHeaders,
@@ -78,8 +77,7 @@ test.describe('Household Management (ATDD - Stories 6.2, 6.3)', () => {
     await expect(page.getByRole('heading', { name: 'Bienvenue' })).toBeVisible();
   });
 
-  test.skip('[P1] should redirect invitee to dashboard after accepting invitation', async ({ page, request, authHeaders }) => {
-    // SKIPPED: same as above — needs full invite accept flow implementation
+  test('[P1] should redirect invitee to dashboard after accepting invitation', async ({ page, request, authHeaders }) => {
     const hRes = await request.post(`${API_URL}/households`, {
       data: { name: 'Test household' },
       headers: authHeaders,
