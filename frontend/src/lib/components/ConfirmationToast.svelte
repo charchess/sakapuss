@@ -87,7 +87,7 @@
         <div class="toast-icon">✓</div>
         <div class="toast-body">
           <div class="toast-msg">{event?.type || 'Noté !'}</div>
-          <div class="toast-time">{formatTime()}</div>
+          <div class="toast-time" data-testid="toast-timestamp">{formatTime()}</div>
         </div>
       </div>
 
@@ -105,6 +105,7 @@
             class="toast-field"
             bind:value={noteValue}
             placeholder="Ajouter une note..."
+            aria-label="Note"
             data-testid="toast-note-input"
           />
           <button class="toast-save" onclick={saveNote}>Enregistrer</button>
@@ -119,6 +120,7 @@
             step="0.1"
             bind:value={weightValue}
             placeholder="0,0 kg"
+            aria-label="Poids"
             data-testid="toast-weight-input"
           />
           <button class="toast-save" onclick={saveWeight}>Enregistrer</button>
@@ -126,7 +128,7 @@
       {/if}
 
       {#if countdown}
-        <div class="toast-bar"></div>
+        <div class="toast-bar" role="progressbar" aria-label="Fermeture automatique" aria-valuemin={0} aria-valuemax={100}></div>
       {/if}
     </div>
   </div>
