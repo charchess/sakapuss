@@ -21,8 +21,7 @@ test.describe('Quick Log Form Actions', () => {
     }
   }
 
-  test('[P0] weight: should show weight input and submit', async ({ page, seedPet, loginAs }) => {
-    await loginAs();
+  test('[P0] weight: should show weight input and submit', async ({ page, seedPet }) => {
     await seedPet({ name: 'WeightCat' });
     await page.goto('/');
     await page.getByTestId('action-weight').click();
@@ -39,8 +38,7 @@ test.describe('Quick Log Form Actions', () => {
     await expect(dialog).toHaveCount(0);
   });
 
-  test('[P0] observation: should show tags and submit', async ({ page, seedPet, loginAs }) => {
-    await loginAs();
+  test('[P0] observation: should show tags and submit', async ({ page, seedPet }) => {
     await seedPet({ name: 'ObsCat' });
     await page.goto('/');
     await page.getByTestId('action-behavior').click();
@@ -56,8 +54,7 @@ test.describe('Quick Log Form Actions', () => {
     await expect(dialog).toHaveCount(0);
   });
 
-  test('[P0] medicine: should show name input and submit', async ({ page, seedPet, loginAs }) => {
-    await loginAs();
+  test('[P0] medicine: should show name input and submit', async ({ page, seedPet }) => {
     await seedPet({ name: 'MedCat' });
     await page.goto('/');
     await page.getByTestId('action-health_note').click();
@@ -74,8 +71,7 @@ test.describe('Quick Log Form Actions', () => {
     await expect(dialog).toHaveCount(0);
   });
 
-  test('[P0] event: should show note input and submit', async ({ page, seedPet, loginAs }) => {
-    await loginAs();
+  test('[P0] event: should show note input and submit', async ({ page, seedPet }) => {
     await seedPet({ name: 'EventCat' });
     await page.goto('/');
     await page.getByTestId('action-custom').click();
