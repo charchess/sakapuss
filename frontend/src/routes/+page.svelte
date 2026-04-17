@@ -180,7 +180,7 @@
       </div>
       <div class="header-right">
         <div class="avatar-group">
-          {#each data.pets as pet, i}
+          {#each data.pets.slice(0, 5) as pet, i}
             <a
               href="/pets/{pet.id}"
               class="h-avatar"
@@ -197,6 +197,9 @@
               {/if}
             </a>
           {/each}
+          {#if data.pets.length > 5}
+            <div class="h-avatar-more" aria-hidden="true">+{data.pets.length - 5}</div>
+          {/if}
         </div>
         <a href="/pets/new" class="h-avatar-add" data-testid="add-pet-btn" aria-label="Ajouter un animal">+</a>
       </div>
@@ -377,6 +380,10 @@
     font-family: var(--font-display);
     font-size: 22px;
     font-weight: 800;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .greeting span {
     font-size: var(--text-sm);
@@ -421,6 +428,20 @@
     transition: border-color 0.2s, color 0.2s;
   }
   .h-avatar-add:hover { border-color: var(--color-primary); color: var(--color-primary); }
+  .h-avatar-more {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    margin-left: -8px;
+    flex-shrink: 0;
+  }
 
   /* Animal hero card */
   .animal-card {

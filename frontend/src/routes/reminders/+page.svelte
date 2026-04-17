@@ -229,7 +229,7 @@
 </div>
 
 <style>
-  .reminders-page { padding: 52px var(--space-lg) var(--space-lg); max-width: 500px; margin: 0 auto; }
+  .reminders-page { padding: 52px var(--space-lg) var(--space-lg); max-width: 680px; margin: 0 auto; }
   .page-header { display: flex; align-items: center; gap: var(--space-sm); margin-bottom: var(--space-xl); }
   h1 { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 800; color: var(--color-primary); }
   .overdue-badge {

@@ -185,7 +185,8 @@
   .timeline-page { padding: 52px var(--space-lg) var(--space-lg); max-width: 600px; margin: 0 auto; }
   h1 { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: 800; color: var(--color-primary); margin-bottom: var(--space-lg); }
 
-  .pet-filters { display: flex; gap: var(--space-sm); margin-bottom: var(--space-md); overflow-x: auto; }
+  .pet-filters { display: flex; gap: var(--space-sm); margin-bottom: var(--space-md); overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+  .pet-filters::-webkit-scrollbar { display: none; }
   .pet-pill {
     padding: var(--space-xs) var(--space-md);
     border-radius: var(--radius-full);
@@ -204,7 +205,9 @@
     margin-bottom: var(--space-xl);
     overflow-x: auto;
     padding-bottom: var(--space-xs);
+    scrollbar-width: none;
   }
+  .category-filters::-webkit-scrollbar { display: none; }
   .cat-pill {
     padding: var(--space-xs) var(--space-md);
     border-radius: var(--radius-full);

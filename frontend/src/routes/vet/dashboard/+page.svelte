@@ -55,11 +55,11 @@
   });
 </script>
 
-<svelte:head><title>Dashboard Vétérinaire — Sakapuss</title></svelte:head>
+<svelte:head><title>Patients — Sakapuss Vétérinaire</title></svelte:head>
 
 <div class="vet-dashboard">
   <div class="dashboard-header">
-    <h1>Dashboard</h1>
+    <h1>Mes patients</h1>
   </div>
 
   <!-- Search bar -->
@@ -81,9 +81,12 @@
 
     <!-- Patients with alerts -->
     <section class="patients-section" data-testid="patients-with-alerts">
-      <h2>Patients avec alertes</h2>
+      <h2>Alertes actives</h2>
       {#if patientsWithAlerts.length === 0}
-        <div class="empty-section">Aucune alerte détectée</div>
+        <div class="empty-section">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="empty-icon"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span>Aucune alerte — tous les patients sont stables</span>
+        </div>
       {:else}
         <div class="patient-grid">
           {#each patientsWithAlerts as patient}
@@ -107,9 +110,12 @@
 
     <!-- Recent patients -->
     <section class="patients-section" data-testid="recent-patients">
-      <h2>Patients récents</h2>
+      <h2>Tous les patients</h2>
       {#if recentPatients.length === 0}
-        <div class="empty-section">Aucun patient pour le moment</div>
+        <div class="empty-section">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="empty-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span>Aucun patient pour le moment</span>
+        </div>
       {:else}
         <div class="patient-grid">
           {#each recentPatients as patient}
@@ -132,7 +138,7 @@
 </div>
 
 <style>
-  .vet-dashboard { padding: 52px var(--space-lg) var(--space-lg); max-width: 800px; }
+  .vet-dashboard { padding: 52px var(--space-lg) var(--space-lg); max-width: 960px; }
   .dashboard-header h1 {
     font-family: var(--font-display); font-size: var(--text-2xl);
     font-weight: 800; color: var(--color-primary); margin-bottom: var(--space-xl);
@@ -153,8 +159,8 @@
 
   .patients-section { margin-bottom: var(--space-2xl); }
   .patients-section h2 {
-    font-size: var(--text-sm); font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.5px; color: var(--color-text-muted); margin-bottom: var(--space-md);
+    font-family: var(--font-display); font-size: var(--text-md); font-weight: 700;
+    color: var(--color-text-primary); margin-bottom: var(--space-md);
   }
 
   .patient-grid { display: flex; flex-direction: column; gap: var(--space-sm); }
@@ -178,6 +184,12 @@
     border-radius: var(--radius-full); flex-shrink: 0;
   }
 
-  .empty-section { font-size: var(--text-sm); color: var(--color-text-muted); padding: var(--space-md) 0; }
+  .empty-section {
+    display: flex; align-items: center; gap: var(--space-sm);
+    font-size: var(--text-sm); color: var(--color-text-muted);
+    padding: var(--space-md) var(--space-sm);
+    background: var(--color-primary-soft); border-radius: var(--radius-lg);
+  }
+  .empty-icon { width: 18px; height: 18px; flex-shrink: 0; }
   .loading { text-align: center; padding: var(--space-3xl); color: var(--color-text-muted); }
 </style>
