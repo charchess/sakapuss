@@ -1,5 +1,7 @@
 import { test, expect } from '../support/merged-fixtures';
 
+const API_URL = process.env.API_URL || 'http://localhost:8000';
+
 // Serial: shared browser context, tests navigate to '/' and open the sheet
 test.describe.configure({ mode: 'serial' });
 
@@ -24,7 +26,13 @@ test.describe('Quick Log Selection (ATDD - Story 3.4)', () => {
     await expect(sheet.getByText(pet2.name)).toBeVisible();
   });
 
-  test('[P0] should auto-skip animal picker for single pet', async ({ page, seedPet }) => {
+  test('[P0] should auto-skip animal picker for single pet', async ({ page, seedPet, request, authHeaders }) => {
+    // Clean up pets from previous tests in this serial chain so exactly 1 pet exists
+    const petsRes = await request.get(`${API_URL}/pets`, { headers: authHeaders });
+    const existingPets = await petsRes.json();
+    for (const pet of existingPets) {
+      await request.delete(`${API_URL}/pets/${pet.id}`, { headers: authHeaders });
+    }
     await seedPet({ name: `Solo-${Date.now()}` });
     await page.goto('/');
 
