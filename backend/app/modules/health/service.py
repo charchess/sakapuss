@@ -70,7 +70,7 @@ def _maybe_create_reminder(db: Session, event: Event) -> None:
     if event.type not in ("vaccine", "treatment"):
         return
     period_months = event.payload.get("period_months")
-    if not period_months or not isinstance(period_months, (int, float)):
+    if not period_months or not isinstance(period_months, int | float):
         return
 
     occurred = event.occurred_at
@@ -92,8 +92,37 @@ def _maybe_create_reminder(db: Session, event: Event) -> None:
     db.commit()
 
 
+def _reminder_dict(reminder: Reminder, pet_name: str | None) -> dict:
+    """Serialize a Reminder to a dict with all fields the frontend needs."""
+    due = reminder.next_due_date
+    if isinstance(due, datetime):
+        due = due.date()
+    last = reminder.last_done_date
+    if isinstance(last, datetime):
+        last = last.date()
+    today = date.today()
+    if due < today:
+        status = "overdue"
+    elif due == today:
+        status = "today"
+    else:
+        status = "upcoming"
+    return {
+        "id": reminder.id,
+        "pet_id": reminder.pet_id,
+        "pet_name": pet_name,
+        "type": reminder.type,
+        "name": reminder.name,
+        "next_due_date": str(due),
+        "frequency_days": reminder.frequency_days,
+        "product": reminder.product,
+        "last_done_date": str(last) if last else None,
+        "status": status,
+    }
+
+
 def get_pending_reminders(db: Session) -> list[dict]:
-    """Get all future/current reminders with pet name, sorted by due date ASC."""
+    """Get all overdue/today reminders with pet name, sorted by due date ASC."""
     from backend.app.modules.pets.models import Pet
 
     stmt = (
@@ -102,21 +131,7 @@ def get_pending_reminders(db: Session) -> list[dict]:
         .order_by(Reminder.next_due_date.asc())
     )
     results = db.execute(stmt).all()
-    reminders = []
-    for reminder, pet_name in results:
-        reminders.append(
-            {
-                "id": reminder.id,
-                "pet_id": reminder.pet_id,
-                "pet_name": pet_name,
-                "event_id": reminder.event_id,
-                "type": reminder.type,
-                "name": reminder.name,
-                "next_due_date": reminder.next_due_date,
-                "created_at": reminder.created_at,
-            }
-        )
-    return reminders
+    return [_reminder_dict(r, pet_name) for r, pet_name in results]
 
 
 def get_upcoming_reminders(db: Session, days: int = 7) -> list[dict]:
@@ -134,21 +149,7 @@ def get_upcoming_reminders(db: Session, days: int = 7) -> list[dict]:
         .order_by(Reminder.next_due_date.asc())
     )
     results = db.execute(stmt).all()
-    reminders = []
-    for reminder, pet_name in results:
-        reminders.append(
-            {
-                "id": reminder.id,
-                "pet_id": reminder.pet_id,
-                "pet_name": pet_name,
-                "event_id": reminder.event_id,
-                "type": reminder.type,
-                "name": reminder.name,
-                "next_due_date": reminder.next_due_date,
-                "created_at": reminder.created_at,
-            }
-        )
-    return reminders
+    return [_reminder_dict(r, pet_name) for r, pet_name in results]
 
 
 def validate_reminder(db: Session, pet_id: str, reminder_id: str) -> Event | None:

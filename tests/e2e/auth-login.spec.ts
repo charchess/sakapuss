@@ -34,22 +34,24 @@ test.describe('Auth Login (ATDD - Story 1.3)', () => {
     await expect(page.getByText('invalide', { exact: false })).toBeVisible();
   });
 
-  test.skip('[P0] should redirect unauthenticated user to /login with redirect param', async ({ page }) => {
-    // Visit a protected page without being logged in
+  test('[P0] should redirect unauthenticated user to /login with redirect param', async ({ page }) => {
+    // Clear auth — visit protected page without being logged in
+    await page.addInitScript(() => { localStorage.removeItem('token'); localStorage.removeItem('user'); });
     await page.goto('/settings');
 
     // Should redirect to login with a redirect query parameter
     await expect(page).toHaveURL(/\/login\?redirect=%2Fsettings/);
   });
 
-  test.skip('[P1] should redirect back to original page after login', async ({ page }) => {
-    // Visit a protected page without being logged in
+  test('[P1] should redirect back to original page after login', async ({ page }) => {
+    // Clear auth — visit protected page without being logged in
+    await page.addInitScript(() => { localStorage.removeItem('token'); localStorage.removeItem('user'); });
     await page.goto('/settings');
     await expect(page).toHaveURL(/\/login\?redirect=/);
 
-    // Log in
-    await page.getByLabel('Email').fill('testuser@sakapuss.com');
-    await page.getByLabel('Mot de passe').fill('SecurePass123!');
+    // Log in with the E2E test user
+    await page.getByLabel('Email').fill('playwright-e2e@test.sakapuss.local');
+    await page.getByLabel('Mot de passe').fill('PlaywrightTest123!');
     await page.getByRole('button', { name: 'Se connecter' }).click();
 
     // Should redirect back to the originally requested page
