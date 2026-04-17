@@ -53,13 +53,13 @@
     if (antipuce) reminders.push({ name: 'Antipuce', type: 'health', frequency_days: 30 });
     if (vaccin) reminders.push({ name: 'Vaccin annuel', type: 'health', frequency_days: 365 });
 
-    for (const r of reminders) {
-      await fetch(`${getApiUrl()}/pets/${petId}/reminders`, {
+    await Promise.all(reminders.map(r =>
+      fetch(`${getApiUrl()}/pets/${petId}/reminders`, {
         method: 'POST',
         headers: authHeaders(),
         body: JSON.stringify(r),
-      });
-    }
+      })
+    ));
     step = 2;
   }
 

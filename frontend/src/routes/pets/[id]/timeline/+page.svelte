@@ -17,6 +17,26 @@
   let events = $state<TimelineEvent[]>([]);
   let activeFilter = $state('all');
   let petName = $state('');
+  let dismissedAnomaly = $state(false);
+
+  const weightAnomaly = $derived.by(() => {
+    const weightEvts = events
+      .filter(e => e.type === 'weight' && e.payload?.value != null)
+      .sort((a, b) => new Date(a.occurred_at || a.created_at).getTime() - new Date(b.occurred_at || b.created_at).getTime());
+    if (weightEvts.length < 2) return null;
+    const first = weightEvts[0];
+    const last = weightEvts[weightEvts.length - 1];
+    const firstVal = parseFloat(first.payload.value);
+    const lastVal = parseFloat(last.payload.value);
+    if (lastVal >= firstVal) return null;
+    const loss = parseFloat((firstVal - lastVal).toFixed(1));
+    const daysElapsed = Math.round(
+      (new Date(last.occurred_at || last.created_at).getTime() - new Date(first.occurred_at || first.created_at).getTime())
+      / (1000 * 60 * 60 * 24)
+    );
+    const duration = daysElapsed >= 30 ? `${Math.round(daysElapsed / 30)} mois` : `${daysElapsed} jours`;
+    return { loss, duration };
+  });
 
   const categories = [
     { key: 'all', label: 'Tout', color: null },
@@ -108,6 +128,15 @@
 <div class="timeline-page">
   <a href="/pets/{petId}" class="back-link">← {petName || 'Retour'}</a>
   <h1>Historique</h1>
+
+  {#if weightAnomaly && !dismissedAnomaly}
+    <div class="anomaly-banner" data-testid="anomaly-banner">
+      <a href="/pets/{petId}/weight" class="anomaly-text">
+        {petName} a perdu {weightAnomaly.loss} kg en {weightAnomaly.duration}
+      </a>
+      <button class="anomaly-close" onclick={() => dismissedAnomaly = true}>Fermer</button>
+    </div>
+  {/if}
 
   <!-- Category filter pills -->
   <div class="category-filter-row" data-testid="category-filter-row">
@@ -239,5 +268,25 @@
   .empty {
     text-align: center; padding: var(--space-3xl) var(--space-xl);
     color: var(--color-text-muted); font-size: var(--text-md);
+  }
+
+  .anomaly-banner {
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(225, 112, 85, 0.08);
+    border: 1.5px solid var(--color-error);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md) var(--space-lg);
+    margin-bottom: var(--space-lg);
+    gap: var(--space-md);
+  }
+  .anomaly-text {
+    flex: 1; font-size: var(--text-sm); font-weight: 600;
+    color: var(--color-error); text-decoration: none;
+  }
+  .anomaly-text:hover { text-decoration: underline; }
+  .anomaly-close {
+    background: none; border: none; color: var(--color-error);
+    font-size: var(--text-sm); cursor: pointer; font-family: var(--font-default);
+    padding: 0; flex-shrink: 0;
   }
 </style>

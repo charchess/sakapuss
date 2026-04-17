@@ -1,6 +1,7 @@
 import { test, expect } from '../support/merged-fixtures';
 
 test.describe('Onboarding Flow (ATDD - Story 2.6)', () => {
+  test.describe.configure({ mode: 'serial' });
 
   test.skip('[P0] should redirect to onboarding after adding first animal', async ({ page, seedPet }) => {
     // SKIPPED: No automatic redirect to onboarding implemented in the app
