@@ -7,15 +7,13 @@ test.describe('Quick Log Form Actions', () => {
 
   /** If the pet-picker is showing, select the first pet and wait for the form to appear. */
   async function maybeSelectPet(page: any) {
-    // Wait for the 350ms slideUp animation + some buffer
-    await page.waitForTimeout(500);
     const dialog = page.getByRole('dialog');
     const pick = dialog.locator('.animal-pick').first();
-    // Playwright's click waits for the element to be visible+stable, or throws
     try {
-      await pick.click({ timeout: 1000 });
-      // Wait for Svelte to re-render the form content
-      await page.waitForTimeout(500);
+      await pick.waitFor({ state: 'visible', timeout: 1500 });
+      await pick.click();
+      // Wait for Svelte to remove the picker and show the form
+      await pick.waitFor({ state: 'hidden', timeout: 3000 }).catch(() => {});
     } catch {
       // No pet picker → single-pet auto-select flow, form is already visible
     }
@@ -23,7 +21,7 @@ test.describe('Quick Log Form Actions', () => {
 
   test('[P0] weight: should show weight input and submit', async ({ page, seedPet }) => {
     await seedPet({ name: 'WeightCat' });
-    await page.goto('/');
+    await page.goto('/', { waitUntil: 'networkidle' });
     await page.getByTestId('action-weight').click();
 
     const dialog = page.getByRole('dialog');
@@ -40,7 +38,7 @@ test.describe('Quick Log Form Actions', () => {
 
   test('[P0] observation: should show tags and submit', async ({ page, seedPet }) => {
     await seedPet({ name: 'ObsCat' });
-    await page.goto('/');
+    await page.goto('/', { waitUntil: 'networkidle' });
     await page.getByTestId('action-behavior').click();
 
     const dialog = page.getByRole('dialog');
@@ -56,7 +54,7 @@ test.describe('Quick Log Form Actions', () => {
 
   test('[P0] medicine: should show name input and submit', async ({ page, seedPet }) => {
     await seedPet({ name: 'MedCat' });
-    await page.goto('/');
+    await page.goto('/', { waitUntil: 'networkidle' });
     await page.getByTestId('action-health_note').click();
 
     const dialog = page.getByRole('dialog');
@@ -73,7 +71,7 @@ test.describe('Quick Log Form Actions', () => {
 
   test('[P0] event: should show note input and submit', async ({ page, seedPet }) => {
     await seedPet({ name: 'EventCat' });
-    await page.goto('/');
+    await page.goto('/', { waitUntil: 'networkidle' });
     await page.getByTestId('action-custom').click();
 
     const dialog = page.getByRole('dialog');
