@@ -323,9 +323,9 @@
 </script>
 
 {#if open}
-  <div class="sheet-backdrop" onclick={close} role="presentation"></div>
+  <div class="sheet-backdrop" data-testid="sheet-backdrop" onclick={close} role="presentation"></div>
 
-  <div class="bottom-sheet" role="dialog" aria-label="Quick Log">
+  <div class="bottom-sheet" data-testid="quick-log-sheet" role="dialog" aria-label="Quick Log">
     <div class="sheet-handle"></div>
     <div class="sheet-content">
 

@@ -2,20 +2,20 @@ import { test, expect } from '../support/merged-fixtures';
 
 const API_URL = process.env.API_URL || 'http://localhost:8000';
 
-test.describe('Category Filters on Timeline (ATDD - Story 5.2)', () => {
-  // ALL SKIPPED: Timeline is at /timeline (not /pets/{id}/timeline). Tests use data-testid="category-filter-row"
-  // but actual UI uses data-testid="category-filters". Tests seed events via authenticated API.
-  // Filter pills don't have aria-pressed or data-category attributes.
+// Serial: share browser context for performance (each test navigates to a fresh pet URL)
+test.describe.configure({ mode: 'serial' });
 
-  test.skip('[P0] should display horizontal filter pills row with correct categories', async ({ page, seedPet, request }) => {
+test.describe('Category Filters on Timeline (ATDD - Story 5.2)', () => {
+
+  test('[P0] should display horizontal filter pills row with correct categories', async ({ page, seedPet, request, authHeaders }) => {
     const pet = await seedPet({ name: `FilterCat-${Date.now()}` });
 
-    // Seed events of different categories
     await request.post(`${API_URL}/pets/${pet.id}/events`, {
       data: { type: 'weight', occurred_at: '2026-03-01T10:00:00Z', payload: { value: 4.0, unit: 'kg' } },
+      headers: authHeaders,
     });
 
-    await page.goto(`/pets/${pet.id}/timeline`);
+    await page.goto(`/pets/${pet.id}/timeline`, { waitUntil: 'networkidle' });
 
     const filterRow = page.getByTestId('category-filter-row');
     await expect(filterRow).toBeVisible();
@@ -29,19 +29,19 @@ test.describe('Category Filters on Timeline (ATDD - Story 5.2)', () => {
     await expect(filterRow.getByRole('button', { name: 'Comportement' })).toBeVisible();
   });
 
-  test.skip('[P0] should have "Tout" pill active by default', async ({ page, seedPet }) => {
+  test('[P0] should have "Tout" pill active by default', async ({ page, seedPet }) => {
     const pet = await seedPet({ name: `DefaultCat-${Date.now()}` });
 
-    await page.goto(`/pets/${pet.id}/timeline`);
+    await page.goto(`/pets/${pet.id}/timeline`, { waitUntil: 'networkidle' });
 
     const toutPill = page.getByTestId('category-filter-row').getByRole('button', { name: 'Tout' });
     await expect(toutPill).toHaveAttribute('aria-pressed', 'true');
   });
 
-  test.skip('[P1] should show each pill with its category color', async ({ page, seedPet }) => {
+  test('[P1] should show each pill with its category color', async ({ page, seedPet }) => {
     const pet = await seedPet({ name: `ColorCat-${Date.now()}` });
 
-    await page.goto(`/pets/${pet.id}/timeline`);
+    await page.goto(`/pets/${pet.id}/timeline`, { waitUntil: 'networkidle' });
 
     const filterRow = page.getByTestId('category-filter-row');
 
@@ -53,20 +53,23 @@ test.describe('Category Filters on Timeline (ATDD - Story 5.2)', () => {
     await expect(filterRow.getByRole('button', { name: 'Comportement' })).toHaveAttribute('data-category', 'behavior');
   });
 
-  test.skip('[P0] should filter timeline to only weight entries when tapping "Poids"', async ({ page, seedPet, request }) => {
+  test('[P0] should filter timeline to only weight entries when tapping "Poids"', async ({ page, seedPet, request, authHeaders }) => {
     const pet = await seedPet({ name: `WeightFilterCat-${Date.now()}` });
 
     await request.post(`${API_URL}/pets/${pet.id}/events`, {
       data: { type: 'weight', occurred_at: '2026-03-01T10:00:00Z', payload: { value: 4.0, unit: 'kg' } },
+      headers: authHeaders,
     });
     await request.post(`${API_URL}/pets/${pet.id}/events`, {
       data: { type: 'vaccine', occurred_at: '2026-03-05T10:00:00Z', payload: { name: 'Typhus' } },
+      headers: authHeaders,
     });
     await request.post(`${API_URL}/pets/${pet.id}/events`, {
       data: { type: 'note', occurred_at: '2026-03-08T10:00:00Z', payload: { text: 'Mange bien' } },
+      headers: authHeaders,
     });
 
-    await page.goto(`/pets/${pet.id}/timeline`);
+    await page.goto(`/pets/${pet.id}/timeline`, { waitUntil: 'networkidle' });
 
     // Tap "Poids" filter
     await page.getByTestId('category-filter-row').getByRole('button', { name: 'Poids' }).click();
@@ -78,17 +81,19 @@ test.describe('Category Filters on Timeline (ATDD - Story 5.2)', () => {
     await expect(events.first()).toContainText('kg');
   });
 
-  test.skip('[P0] should show all entries again when tapping "Tout" after filtering', async ({ page, seedPet, request }) => {
+  test('[P0] should show all entries again when tapping "Tout" after filtering', async ({ page, seedPet, request, authHeaders }) => {
     const pet = await seedPet({ name: `ResetCat-${Date.now()}` });
 
     await request.post(`${API_URL}/pets/${pet.id}/events`, {
       data: { type: 'weight', occurred_at: '2026-03-01T10:00:00Z', payload: { value: 4.0, unit: 'kg' } },
+      headers: authHeaders,
     });
     await request.post(`${API_URL}/pets/${pet.id}/events`, {
       data: { type: 'vaccine', occurred_at: '2026-03-05T10:00:00Z', payload: { name: 'Typhus' } },
+      headers: authHeaders,
     });
 
-    await page.goto(`/pets/${pet.id}/timeline`);
+    await page.goto(`/pets/${pet.id}/timeline`, { waitUntil: 'networkidle' });
 
     // Filter to Poids
     await page.getByTestId('category-filter-row').getByRole('button', { name: 'Poids' }).click();

@@ -179,7 +179,7 @@
     <!-- Action Garden -->
     <div class="action-section">
       <div class="section-label">Qu'est-ce que tu viens de faire ?</div>
-      <div class="action-garden">
+      <div class="action-garden" data-testid="action-garden">
         {#each actionTiles as tile}
           <button class="action-item {tile.class}" data-testid="action-{tile.action}" onclick={() => openQuickLog(tile.action)}>
             <div class="action-icon">
