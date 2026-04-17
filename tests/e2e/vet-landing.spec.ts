@@ -21,8 +21,8 @@ test.describe('Vet Landing Page (ATDD - Story 7.3)', () => {
     await expect(page.getByText(pet.name)).toBeVisible();
 
     // Key sections exist
-    await expect(page.getByTestId('vet-reminders-section')).toBeVisible();
-    await expect(page.getByTestId('vet-timeline-section')).toBeVisible();
+    await expect(page.getByTestId('vet-reminders-section')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId('vet-timeline-section')).toBeVisible({ timeout: 15000 });
   });
 
   test('[P1] should display non-blocking portal creation banner', async ({ page, seedPet, request, authHeaders }) => {

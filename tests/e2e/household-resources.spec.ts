@@ -65,8 +65,10 @@ test.describe('Household Resources (ATDD - Story 3.6)', () => {
     const resourceCard = page.getByTestId('resource-card').filter({ hasText: `CaisseDelete-${ts}` });
     await resourceCard.getByRole('button', { name: 'Supprimer' }).click();
 
-    // Confirm deletion
-    await page.getByRole('dialog').getByRole('button', { name: 'Confirmer' }).click();
+    // Wait for confirmation dialog before clicking
+    const dialog = page.getByRole('dialog');
+    await dialog.waitFor({ state: 'visible', timeout: 5000 });
+    await dialog.getByRole('button', { name: 'Confirmer' }).click();
 
     // Verify removal
     await expect(page.getByTestId('resource-list')).not.toContainText(`CaisseDelete-${ts}`);

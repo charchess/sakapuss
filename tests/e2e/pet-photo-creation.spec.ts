@@ -45,7 +45,7 @@ test.describe('Pet Photo Upload — Story 10.1 & 10.2', () => {
 
       // Submit
       await page.getByTestId('pet-submit').click();
-      await page.waitForURL('/', { timeout: 5000 });
+      await expect(page).toHaveURL('/');
 
       // Dashboard should show the pet
       await expect(page.getByText(petName)).toBeVisible();
@@ -74,7 +74,7 @@ test.describe('Pet Photo Upload — Story 10.1 & 10.2', () => {
 
       // No photo selected
       await page.getByTestId('pet-submit').click();
-      await page.waitForURL('/', { timeout: 5000 });
+      await expect(page).toHaveURL('/');
       await expect(page.getByText(petName)).toBeVisible();
 
       // Verify photo_url is null

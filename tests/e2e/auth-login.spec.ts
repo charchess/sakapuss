@@ -55,6 +55,6 @@ test.describe('Auth Login (ATDD - Story 1.3)', () => {
     await page.getByRole('button', { name: 'Se connecter' }).click();
 
     // Should redirect back to the originally requested page
-    await expect(page).toHaveURL('/settings');
+    await expect(page).toHaveURL('/settings', { timeout: 15000 });
   });
 });

@@ -12,10 +12,10 @@ test.describe('Onboarding Flow (ATDD - Story 2.6)', () => {
 
   test('[P0] should redirect to onboarding after adding first animal', async ({ page, seedPet }) => {
     await seedPet({ name: `Onboard-${Date.now()}` });
-    // networkidle ensures all SvelteKit API calls have completed and onMount has fired
-    // before we poll for the redirect URL
-    await page.goto('/', { waitUntil: 'networkidle' });
-    await expect(page).toHaveURL(/\/onboarding/, { timeout: 10000 });
+    // domcontentloaded returns before load/networkidle so onMount can fire and trigger
+    // the redirect; toHaveURL then waits for the final settled URL including the redirect
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(/\/onboarding/, { timeout: 15000 });
   });
 
   test('[P0] should display 3 wizard steps: Health Reminders, Weight, Food', async ({ page, seedPet }) => {

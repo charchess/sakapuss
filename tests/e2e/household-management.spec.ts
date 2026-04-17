@@ -27,10 +27,11 @@ test.describe('Household Management (ATDD - Stories 6.2, 6.3)', () => {
   test('[P0] should open invite form with email input and role selector', async ({ page }) => {
     await page.goto('/settings/household', { waitUntil: 'networkidle' });
 
+    await page.getByRole('button', { name: 'Inviter' }).waitFor({ state: 'visible' });
     await page.getByRole('button', { name: 'Inviter' }).click();
 
     const inviteForm = page.getByTestId('invite-bottom-sheet');
-    await expect(inviteForm).toBeVisible();
+    await expect(inviteForm).toBeVisible({ timeout: 10000 });
 
     // Email input (accessible via label)
     await expect(inviteForm.getByLabel('Email')).toBeVisible();

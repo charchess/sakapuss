@@ -44,6 +44,20 @@ test.describe('Vet Cabinet / Dashboard (ATDD - Stories 7.4, 7.5)', () => {
     });
   });
 
+  test.afterAll(async ({ request, authHeaders }) => {
+    if (sharedPetId) {
+      await request.delete(`${API_URL}/pets/${sharedPetId}`, { headers: authHeaders }).catch(() => null);
+    }
+    // Also clean up vet-shares for this email to prevent accumulation
+    const sharesRes = await request.get(`${API_URL}/vet-shares`, { headers: authHeaders }).catch(() => null);
+    if (sharesRes?.ok()) {
+      const shares = await sharesRes.json();
+      for (const share of shares) {
+        await request.delete(`${API_URL}/vet-shares/${share.id}`, { headers: authHeaders }).catch(() => null);
+      }
+    }
+  });
+
   // Helper: navigate to vet dashboard and wait for data to fully load
   // (networkidle may fire between /vet/patients response and anomaly requests)
   async function gotoVetDashboard(page: any) {
