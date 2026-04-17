@@ -15,6 +15,7 @@ test.describe('Quick Log Selection (ATDD - Story 3.4)', () => {
 
     // Tap the Événement action tile (no resource dependency, always visible)
     const actionGarden = page.getByTestId('action-garden');
+    await expect(actionGarden).toBeVisible();
     await actionGarden.getByTestId('action-custom').click();
 
     // Bottom sheet should open with animal picker (multi-pet)
@@ -34,9 +35,10 @@ test.describe('Quick Log Selection (ATDD - Story 3.4)', () => {
       await request.delete(`${API_URL}/pets/${pet.id}`, { headers: authHeaders });
     }
     await seedPet({ name: `Solo-${Date.now()}` });
-    await page.goto('/');
+    await page.goto('/', { waitUntil: 'networkidle' });
 
     const actionGarden = page.getByTestId('action-garden');
+    await expect(actionGarden).toBeVisible();
     await actionGarden.getByTestId('action-custom').click();
 
     await expect(page.getByTestId('quick-log-sheet')).not.toBeVisible();
@@ -51,6 +53,7 @@ test.describe('Quick Log Selection (ATDD - Story 3.4)', () => {
 
     // Tap the Événement action tile
     const actionGarden = page.getByTestId('action-garden');
+    await expect(actionGarden).toBeVisible();
     await actionGarden.getByTestId('action-custom').click();
 
     // Select the first pet from the picker
@@ -66,9 +69,10 @@ test.describe('Quick Log Selection (ATDD - Story 3.4)', () => {
     const ts = Date.now();
     await seedPet({ name: `Res1-${ts}` });
     await seedPet({ name: `Res2-${ts}` });
-    await page.goto('/');
+    await page.goto('/', { waitUntil: 'networkidle' });
 
     const actionGarden = page.getByTestId('action-garden');
+    await expect(actionGarden).toBeVisible();
     await actionGarden.getByTestId('action-litter_clean').click();
 
     const sheet = page.getByTestId('quick-log-sheet');
@@ -85,6 +89,7 @@ test.describe('Quick Log Selection (ATDD - Story 3.4)', () => {
 
     // Open the action sheet
     const actionGarden = page.getByTestId('action-garden');
+    await expect(actionGarden).toBeVisible();
     await actionGarden.getByTestId('action-custom').click();
 
     const sheet = page.getByTestId('quick-log-sheet');

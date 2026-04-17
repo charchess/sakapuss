@@ -11,7 +11,7 @@ test.describe('Role-Based Dashboard (ATDD - Story 6.4)', () => {
     const { access_token, user } = await loginRes.json();
 
     // Set the token in the page context so role-based rendering works
-    await page.evaluate(({ token, userData }) => {
+    await page.addInitScript(({ token, userData }) => {
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('onboarding_done', 'true');
@@ -35,7 +35,7 @@ test.describe('Role-Based Dashboard (ATDD - Story 6.4)', () => {
     const { access_token, user } = await loginRes.json();
 
     // Set the token in the page context so role-based rendering works
-    await page.evaluate(({ token, userData }) => {
+    await page.addInitScript(({ token, userData }) => {
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('onboarding_done', 'true');
@@ -58,7 +58,7 @@ test.describe('Role-Based Dashboard (ATDD - Story 6.4)', () => {
     const { access_token, user } = await loginRes.json();
 
     // Set the token in the page context so role-based rendering works
-    await page.evaluate(({ token, userData }) => {
+    await page.addInitScript(({ token, userData }) => {
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('onboarding_done', 'true');
