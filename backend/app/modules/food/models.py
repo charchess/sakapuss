@@ -41,6 +41,7 @@ class Bowl(Base):
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     location: Mapped[str] = mapped_column(String(100), nullable=False)
     capacity_g: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    capacity_ml: Mapped[int | None] = mapped_column(Integer, nullable=True)
     bowl_type: Mapped[str] = mapped_column(String(20), nullable=False)  # food or water
     current_product_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("food_products.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
@@ -56,6 +57,9 @@ class Serving(Base):
     pet_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("pets.id"), nullable=True)
     served_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     amount_g: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    amount_ml: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    remaining_ml: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    serving_type: Mapped[str | None] = mapped_column(String(20), nullable=True)
     notes: Mapped[str | None] = mapped_column(String(500), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
