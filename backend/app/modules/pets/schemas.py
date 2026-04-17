@@ -15,6 +15,22 @@ ALLOWED_SPECIES = [
     "Other",
 ]
 
+SPECIES_FR_TO_EN = {
+    "chat": "Cat",
+    "chatte": "Cat",
+    "chien": "Dog",
+    "chienne": "Dog",
+    "lapin": "Rabbit",
+    "lapine": "Rabbit",
+    "oiseau": "Bird",
+    "poisson": "Fish",
+    "hamster": "Hamster",
+    "cochon d'inde": "Guinea Pig",
+    "cobaye": "Guinea Pig",
+    "tortue": "Turtle",
+    "autre": "Other",
+}
+
 
 class PetCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
@@ -29,6 +45,9 @@ class PetCreate(BaseModel):
     @field_validator("species")
     @classmethod
     def validate_species(cls, v: str) -> str:
+        normalized = SPECIES_FR_TO_EN.get(v.lower().strip())
+        if normalized:
+            v = normalized
         if v not in ALLOWED_SPECIES:
             raise ValueError(f"Species must be one of: {', '.join(ALLOWED_SPECIES)}")
         return v
@@ -54,8 +73,12 @@ class PetUpdate(BaseModel):
     @field_validator("species")
     @classmethod
     def validate_species(cls, v: str | None) -> str | None:
-        if v is not None and v not in ALLOWED_SPECIES:
-            raise ValueError(f"Species must be one of: {', '.join(ALLOWED_SPECIES)}")
+        if v is not None:
+            normalized = SPECIES_FR_TO_EN.get(v.lower().strip())
+            if normalized:
+                v = normalized
+            if v not in ALLOWED_SPECIES:
+                raise ValueError(f"Species must be one of: {', '.join(ALLOWED_SPECIES)}")
         return v
 
     @field_validator("birth_date")
