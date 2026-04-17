@@ -8,21 +8,31 @@
   let inviteRole = $state('input');
   let showInvite = $state(false);
 
+  const statusLabels: Record<string, string> = { pending: 'En attente', active: 'Actif', revoked: 'Révoqué' };
+  const roleLabels: Record<string, string> = { admin: 'Total', input: 'Saisie', readonly: 'Consultation' };
+
+  function authHeaders(): Record<string, string> {
+    const token = localStorage.getItem('token');
+    return token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+  }
+
   onMount(async () => {
+    const headers = authHeaders();
     // For MVP: create household if none exists, list members
-    const res = await fetch(`${getApiUrl()}/households`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: 'Mon foyer' }) });
+    const res = await fetch(`${getApiUrl()}/households`, { method: 'POST', headers, body: JSON.stringify({ name: 'Mon foyer' }) });
     if (res.ok) {
       const h = await res.json();
       householdId = h.id;
-      const mRes = await fetch(`${getApiUrl()}/households/${h.id}/members`);
+      const mRes = await fetch(`${getApiUrl()}/households/${h.id}/members`, { headers });
       if (mRes.ok) members = await mRes.json();
     }
   });
 
   async function sendInvite() {
     if (!inviteEmail || !householdId) return;
+    const headers = authHeaders();
     const res = await fetch(`${getApiUrl()}/households/${householdId}/invitations`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers,
       body: JSON.stringify({ email: inviteEmail, role: inviteRole }),
     });
     if (res.ok) {
@@ -32,8 +42,6 @@
       showInvite = false;
     }
   }
-
-  const roleLabels: Record<string, string> = { admin: 'Total', input: 'Saisie', readonly: 'Consultation' };
 </script>
 
 <svelte:head><title>Foyer — Sakapuss</title></svelte:head>
@@ -41,18 +49,18 @@
 <div class="household-page">
   <h1>Mon foyer</h1>
 
-  <section class="members">
+  <section class="members" data-testid="household-member-list">
     <h2>Membres</h2>
     {#if members.length === 0}
       <p class="empty">Aucun membre invité</p>
     {:else}
       {#each members as m}
-        <div class="member-card">
-          <div class="member-avatar">{m.email[0].toUpperCase()}</div>
+        <div class="member-card" data-testid="member-card">
+          <div class="member-avatar" data-testid="member-avatar">{m.email[0].toUpperCase()}</div>
           <div class="member-info">
             <div class="member-email">{m.email}</div>
-            <span class="member-role">{roleLabels[m.role] || m.role}</span>
-            <span class="member-status" class:pending={m.status === 'pending'} class:active={m.status === 'active'}>{m.status}</span>
+            <span class="member-role" data-testid="member-role">{roleLabels[m.role] || m.role}</span>
+            <span class="member-status" data-testid="member-status" class:pending={m.status === 'pending'} class:active={m.status === 'active'}>{statusLabels[m.status] || m.status}</span>
           </div>
         </div>
       {/each}
@@ -60,19 +68,20 @@
   </section>
 
   {#if !showInvite}
-    <button class="btn-primary" onclick={() => showInvite = true}>+ Inviter un membre</button>
+    <button class="btn-primary" onclick={() => showInvite = true}>Inviter</button>
   {:else}
-    <section class="invite-form">
-      <h2>Inviter</h2>
-      <input type="email" bind:value={inviteEmail} placeholder="email@exemple.fr" />
+    <section class="invite-form" data-testid="invite-bottom-sheet">
+      <h2>Inviter un membre</h2>
+      <label for="invite-email">Email</label>
+      <input id="invite-email" type="email" bind:value={inviteEmail} placeholder="email@exemple.fr" />
       <div class="role-selector">
         {#each ['admin', 'input', 'readonly'] as role}
           <label class="role-option" class:active={inviteRole === role}>
-            <input type="radio" name="role" value={role} bind:group={inviteRole} />
             <strong>{roleLabels[role]}</strong>
             <span class="role-desc">
               {role === 'admin' ? 'Accès complet' : role === 'input' ? 'Saisie uniquement' : 'Lecture seule'}
             </span>
+            <input type="radio" name="role" value={role} bind:group={inviteRole} aria-label={roleLabels[role]} class="role-radio" />
           </label>
         {/each}
       </div>
@@ -95,13 +104,14 @@
   .member-status.pending { background: rgba(253,203,110,0.2); color: #b8860b; }
   .member-status.active { background: rgba(0,184,148,0.15); color: var(--color-success); }
   .invite-form { background: var(--color-surface); border-radius: var(--radius-xl); padding: var(--space-xl); box-shadow: var(--elevation-sm); }
-  .invite-form input[type="email"] { width: 100%; padding: var(--space-md); border: 1.5px solid var(--color-border); border-radius: var(--radius-lg); font-size: var(--text-md); margin-bottom: var(--space-lg); font-family: var(--font-default); }
+  .invite-form label[for="invite-email"] { display: block; font-size: var(--text-sm); font-weight: 600; color: var(--color-text-secondary); margin-bottom: var(--space-xs); }
+  .invite-form input[type="email"] { width: 100%; padding: var(--space-md); border: 1.5px solid var(--color-border); border-radius: var(--radius-lg); font-size: var(--text-md); margin-bottom: var(--space-lg); font-family: var(--font-default); box-sizing: border-box; }
   .invite-form input[type="email"]:focus { outline: none; border-color: var(--color-primary-light); }
   .role-selector { display: flex; flex-direction: column; gap: var(--space-sm); margin-bottom: var(--space-lg); }
-  .role-option { padding: var(--space-md); border: 1.5px solid var(--color-border); border-radius: var(--radius-lg); cursor: pointer; transition: all 0.2s; }
+  .role-option { position: relative; padding: var(--space-md); border: 1.5px solid var(--color-border); border-radius: var(--radius-lg); cursor: pointer; transition: all 0.2s; }
   .role-option.active { border-color: var(--color-primary); background: var(--color-primary-soft); }
-  .role-option input { display: none; }
-  .role-option strong { display: block; }
+  .role-radio { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; margin: 0; }
+  .role-option strong { display: block; pointer-events: none; }
   .role-desc { font-size: var(--text-xs); color: var(--color-text-muted); }
   .btn-primary { width: 100%; padding: var(--space-md); background: var(--color-primary); color: white; border: none; border-radius: var(--radius-lg); font-size: var(--text-md); font-weight: 600; cursor: pointer; font-family: var(--font-default); }
   .btn-primary:disabled { opacity: 0.5; }

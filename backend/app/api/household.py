@@ -33,6 +33,16 @@ def create_household(
 ):
     household = Household(name=payload.name)
     db.add(household)
+    db.flush()
+    # Add creator as admin member
+    admin_member = HouseholdMember(
+        household_id=household.id,
+        user_id=current_user.id,
+        email=current_user.email,
+        role="admin",
+        status="active",
+    )
+    db.add(admin_member)
     db.commit()
     db.refresh(household)
     return {"id": household.id, "name": household.name}
