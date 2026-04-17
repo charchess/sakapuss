@@ -47,7 +47,7 @@ test.describe('Water Tracking UI (ATDD - Story 8.6)', () => {
     await expect(page.getByTestId(`bowl-servings-${bowl.id}`)).toContainText('1');
   });
 
-  test.skip('[P1] should show water consumption history on bowl detail', async ({ page, request }) => {
+  test('[P1] should show water consumption history on bowl detail', async ({ page, request, authHeaders }) => {
     // Create water bowl and log refills via API
     const bowlRes = await request.post(`${API_URL}/bowls`, {
       data: {
@@ -56,14 +56,17 @@ test.describe('Water Tracking UI (ATDD - Story 8.6)', () => {
         capacity_ml: 500,
         bowl_type: 'water',
       },
+      headers: authHeaders,
     });
     const bowl = await bowlRes.json();
 
     await request.post(`${API_URL}/bowls/${bowl.id}/fill`, {
       data: { served_at: '2026-04-08T08:00:00', amount_ml: 500, serving_type: 'water' },
+      headers: authHeaders,
     });
     await request.post(`${API_URL}/bowls/${bowl.id}/fill`, {
       data: { served_at: '2026-04-08T14:00:00', amount_ml: 500, serving_type: 'water', remaining_ml: 100 },
+      headers: authHeaders,
     });
 
     await page.goto(`/bowls/${bowl.id}`, { waitUntil: 'networkidle' });

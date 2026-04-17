@@ -70,6 +70,7 @@ class BowlCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     location: str = Field(..., min_length=1, max_length=100)
     capacity_g: int | None = None
+    capacity_ml: int | None = None
     bowl_type: str = Field(..., pattern="^(food|water)$")
     current_product_id: str | None = None
 
@@ -78,6 +79,7 @@ class BowlUpdate(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=100)
     location: str | None = Field(None, min_length=1, max_length=100)
     capacity_g: int | None = None
+    capacity_ml: int | None = None
     bowl_type: str | None = Field(None, pattern="^(food|water)$")
     current_product_id: str | None = None
 
@@ -87,6 +89,7 @@ class BowlResponse(BaseModel):
     name: str
     location: str
     capacity_g: int | None = None
+    capacity_ml: int | None = None
     bowl_type: str
     current_product_id: str | None = None
     created_at: datetime
@@ -103,6 +106,9 @@ class ServingCreate(BaseModel):
     pet_id: str | None = None
     served_at: datetime
     amount_g: int | None = None
+    amount_ml: int | None = None
+    remaining_ml: int | None = None
+    serving_type: str | None = None
     notes: str | None = None
 
 
@@ -113,6 +119,9 @@ class ServingResponse(BaseModel):
     pet_id: str | None = None
     served_at: datetime
     amount_g: int | None = None
+    amount_ml: int | None = None
+    remaining_ml: int | None = None
+    serving_type: str | None = None
     notes: str | None = None
     created_at: datetime
     updated_at: datetime

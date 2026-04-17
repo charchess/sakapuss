@@ -44,7 +44,13 @@
       location: bowlLocation,
       bowl_type: bowlType,
     };
-    if (bowlCapacity) body.capacity_g = parseInt(bowlCapacity);
+    if (bowlCapacity) {
+      if (bowlType === 'water') {
+        body.capacity_ml = parseInt(bowlCapacity);
+      } else {
+        body.capacity_g = parseInt(bowlCapacity);
+      }
+    }
 
     const res = await fetch(`${API_URL}/bowls`, {
       method: 'POST',
@@ -160,7 +166,7 @@
             <strong class="bowl-name">{bowl.name}</strong>
             <span class="bowl-meta">
               {bowl.location}
-              {#if bowl.capacity_g}· {bowl.capacity_g}{bowl.bowl_type === 'water' ? ' ml' : ' g'}{/if}
+              {#if bowl.capacity_ml || bowl.capacity_g}· {bowl.capacity_ml || bowl.capacity_g}{bowl.bowl_type === 'water' ? ' ml' : ' g'}{/if}
             </span>
           </div>
           <div class="bowl-actions">
