@@ -179,13 +179,13 @@ def create_vet_account(payload: VetAccountCreate, db: DbSession, current_user: U
 @router.get("/vet/patients")
 def list_vet_patients(
     db: DbSession,
-    current_user: User | None = Depends(get_optional_user),
+    current_user: User = Depends(get_current_user),
     email: str | None = None,
     search: str | None = None,
 ):
     query = db.query(VetAccessLink).filter(VetAccessLink.revoked_at.is_(None))
-    if email:
-        query = query.filter(VetAccessLink.vet_email == email)
+    effective_email = email if email else current_user.email
+    query = query.filter(VetAccessLink.vet_email == effective_email)
 
     links = query.all()
     patients = []
