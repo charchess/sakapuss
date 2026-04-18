@@ -1,0 +1,28 @@
+appId: com.sakapuss.mobile
+---
+- launchApp
+- assertVisible: "Se connecter"
+- tapOn: "votre@email.com"
+- inputText: "playwright-e2e@test.sakapuss.local"
+- tapOn: "••••••••"
+- inputText: "PlaywrightTest123!"
+- tapOn: "Se connecter"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+
+# Navigate to AddPet via "+ Ajouter" link in pet strip header
+- tapOn:
+    text: "+ Ajouter"
+    optional: false
+- assertVisible: "Nouvel animal"
+
+# Fill in the form
+- tapOn:
+    text: "Nom de l'animal"
+- inputText: "Caramel"
+- tapOn: "Chat"
+- tapOn: "YYYY-MM-DD"
+- inputText: "2022-06-15"
+
+# Submit
+- tapOn: "Ajouter"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
