@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
 const TOKEN_KEY = 'sakapuss_token';
 const USER_KEY = 'sakapuss_user';
@@ -36,7 +37,9 @@ export const AuthStore = {
 
   async getBaseUrl(): Promise<string> {
     const saved = await AsyncStorage.getItem(BASE_URL_KEY);
-    return saved ?? 'http://localhost:8000';
+    if (saved) return saved;
+    // Android emulator accesses WSL2 host via 10.0.2.2; other platforms use localhost
+    return Platform.OS === 'android' ? 'http://10.0.2.2:8000' : 'http://localhost:8000';
   },
 
   async setBaseUrl(url: string): Promise<void> {

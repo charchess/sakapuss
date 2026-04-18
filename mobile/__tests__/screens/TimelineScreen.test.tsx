@@ -1,22 +1,10 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, waitFor, fireEvent } from '@testing-library/react-native';
 import { TimelineScreen } from '../../src/screens/TimelineScreen';
+import { server } from '../mocks/server';
+import { http, HttpResponse } from 'msw';
 
-jest.mock('../../src/api/client', () => ({
-  api: {
-    getAllEvents: jest.fn(),
-  },
-  apiClient: {
-    get: jest.fn(),
-  },
-}));
-
-jest.mock('../../src/store/auth', () => ({
-  AuthStore: {
-    getToken: jest.fn(() => Promise.resolve('test-token')),
-    getBaseUrl: jest.fn(() => Promise.resolve('http://localhost:8000')),
-  },
-}));
+const BASE = 'http://localhost:8000';
 
 jest.mock('@react-navigation/native', () => {
   const { useEffect } = require('react');
@@ -34,44 +22,23 @@ jest.mock('../../src/components/SyncBadge', () => ({
 
 jest.mock('expo-status-bar', () => ({ StatusBar: () => null }));
 
-import { api } from '../../src/api/client';
+test('affiche les événements après chargement', async () => {
+  const { findByText } = render(<TimelineScreen />);
+  await findByText('Pesée');
+  await findByText('Litière nettoyée');
+});
 
-const sampleEvents = [
-  { id: 'e1', pet_id: 'p1', type: 'weight', occurred_at: '2026-04-18T10:00:00Z', payload: { grams: 4200 } },
-  { id: 'e2', pet_id: 'p1', type: 'litter_clean', occurred_at: '2026-04-18T09:00:00Z', payload: {} },
-];
-
-describe('TimelineScreen', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    (api.getAllEvents as jest.Mock).mockResolvedValue(sampleEvents);
+test('le filtre Pesée masque Litière nettoyée', async () => {
+  const { findByText, queryByText, getByText } = render(<TimelineScreen />);
+  await findByText('Pesée');
+  fireEvent.press(getByText('⚖️ Pesée'));
+  await waitFor(() => {
+    expect(queryByText('Litière nettoyée')).toBeNull();
   });
+});
 
-  it("shows 'Pesée' in the event list after load", async () => {
-    const { findByText } = render(<TimelineScreen />);
-    expect(await findByText('Pesée')).toBeTruthy();
-  });
-
-  it("shows 'Litière nettoyée' in the event list", async () => {
-    const { findByText } = render(<TimelineScreen />);
-    expect(await findByText('Litière nettoyée')).toBeTruthy();
-  });
-
-  it("filter pills are rendered ('Tout', '⚖️ Pesée', etc.)", async () => {
-    const { findByText } = render(<TimelineScreen />);
-    expect(await findByText('Tout')).toBeTruthy();
-    expect(await findByText('⚖️ Pesée')).toBeTruthy();
-  });
-
-  it('pressing a filter pill filters the events list', async () => {
-    const { findByText, queryByText } = render(<TimelineScreen />);
-    // Wait for events to load
-    await findByText('Pesée');
-    // Press the weight filter pill
-    const pill = await findByText('⚖️ Pesée');
-    fireEvent.press(pill);
-    await waitFor(() => {
-      expect(queryByText('Litière nettoyée')).toBeNull();
-    });
-  });
+test('affiche error-box si API échoue', async () => {
+  server.use(http.get(`${BASE}/events`, () => HttpResponse.error()));
+  const { findByTestId } = render(<TimelineScreen />);
+  await findByTestId('error-box');
 });

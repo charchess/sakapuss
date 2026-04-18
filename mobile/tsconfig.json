@@ -10,6 +10,7 @@
       "@/*": ["src/*"]
     },
     "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "types": ["jest", "node"]
   }
 }
