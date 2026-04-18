@@ -1,4 +1,5 @@
 import { apiClient } from '../../src/api/client';
+import { server } from '../mocks/server';
 
 jest.mock('../../src/store/auth', () => ({
   AuthStore: {
@@ -8,7 +9,16 @@ jest.mock('../../src/store/auth', () => ({
 }));
 
 const mockFetch = jest.fn();
-global.fetch = mockFetch;
+
+beforeAll(() => {
+  // Disable MSW for these tests — we mock fetch directly
+  server.close();
+  global.fetch = mockFetch;
+});
+
+afterAll(() => {
+  server.listen({ onUnhandledRequest: 'warn' });
+});
 
 beforeEach(() => {
   jest.clearAllMocks();

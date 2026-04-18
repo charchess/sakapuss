@@ -1,22 +1,10 @@
 import React from 'react';
-import { render, waitFor } from '@testing-library/react-native';
+import { render } from '@testing-library/react-native';
 import { RemindersScreen } from '../../src/screens/RemindersScreen';
+import { server } from '../mocks/server';
+import { http, HttpResponse } from 'msw';
 
-jest.mock('../../src/api/client', () => ({
-  api: {
-    getPendingReminders: jest.fn(),
-  },
-  apiClient: {
-    get: jest.fn(),
-  },
-}));
-
-jest.mock('../../src/store/auth', () => ({
-  AuthStore: {
-    getToken: jest.fn(() => Promise.resolve('test-token')),
-    getBaseUrl: jest.fn(() => Promise.resolve('http://localhost:8000')),
-  },
-}));
+const BASE = 'http://localhost:8000';
 
 jest.mock('@react-navigation/native', () => {
   const { useEffect } = require('react');
@@ -30,39 +18,27 @@ jest.mock('@react-navigation/native', () => {
 
 jest.mock('expo-status-bar', () => ({ StatusBar: () => null }));
 
-import { api } from '../../src/api/client';
+test('affiche les rappels en retard et à venir', async () => {
+  const { findByText } = render(<RemindersScreen />);
+  await findByText('Vaccin rage');
+  await findByText('Bilan annuel');
+  await findByText('En retard');
+  await findByText('À venir');
+});
 
-const sampleReminders = [
-  { id: 'r1', pet_id: 'p1', pet_name: 'Luna', name: 'Vaccin rage', type: 'vaccine', next_due_date: '2020-01-01', status: 'overdue' },
-  { id: 'r2', pet_id: 'p1', pet_name: 'Luna', name: 'Bilan annuel', type: 'vet', next_due_date: '2099-12-31', status: 'upcoming' },
-];
+test('affiche le badge "1 en retard" dans le header', async () => {
+  const { findByText } = render(<RemindersScreen />);
+  await findByText('1 en retard');
+});
 
-describe('RemindersScreen', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+test('état vide quand aucun rappel', async () => {
+  server.use(http.get(`${BASE}/reminders/pending`, () => HttpResponse.json([])));
+  const { findByText } = render(<RemindersScreen />);
+  await findByText('Tout est à jour !');
+});
 
-  it("shows 'En retard' badge for overdue reminder", async () => {
-    (api.getPendingReminders as jest.Mock).mockResolvedValue(sampleReminders);
-    const { findByText } = render(<RemindersScreen />);
-    expect(await findByText('En retard')).toBeTruthy();
-  });
-
-  it("shows 'À venir' for future reminder", async () => {
-    (api.getPendingReminders as jest.Mock).mockResolvedValue(sampleReminders);
-    const { findByText } = render(<RemindersScreen />);
-    expect(await findByText('À venir')).toBeTruthy();
-  });
-
-  it("shows overdueCount badge in header when there are overdue reminders", async () => {
-    (api.getPendingReminders as jest.Mock).mockResolvedValue(sampleReminders);
-    const { findByText } = render(<RemindersScreen />);
-    expect(await findByText('1 en retard')).toBeTruthy();
-  });
-
-  it('shows empty state when reminders list is empty', async () => {
-    (api.getPendingReminders as jest.Mock).mockResolvedValue([]);
-    const { findByText } = render(<RemindersScreen />);
-    expect(await findByText('Tout est à jour !')).toBeTruthy();
-  });
+test('affiche le message d\'erreur si API échoue', async () => {
+  server.use(http.get(`${BASE}/reminders/pending`, () => HttpResponse.error()));
+  const { findByTestId } = render(<RemindersScreen />);
+  await findByTestId('error-box');
 });
