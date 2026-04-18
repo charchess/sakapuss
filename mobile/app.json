@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Sakapuss",
+    "slug": "sakapuss",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#F8F6FF"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#6C5CE7"
+      },
+      "package": "com.sakapuss.mobile"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.sakapuss.mobile"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "@react-native-async-storage/async-storage"
+    ]
+  }
+}
