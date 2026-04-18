@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -187,6 +187,23 @@ export function DashboardScreen({ navigation }: Props) {
                 </TouchableOpacity>
               ))}
             </ScrollView>
+            {selectedPet && (
+              <TouchableOpacity
+                style={styles.profileLink}
+                onPress={() =>
+                  navigation.navigate('PetProfile', {
+                    petId: selectedPet.id,
+                    petName: selectedPet.name,
+                    species: selectedPet.species,
+                    breed: selectedPet.breed,
+                    birthDate: selectedPet.birth_date,
+                  })
+                }
+                activeOpacity={0.7}
+              >
+                <Text style={styles.profileLinkText}>Fiche de {selectedPet.name} ›</Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
 
@@ -384,5 +401,16 @@ const styles = StyleSheet.create({
   retryText: {
     color: 'white',
     fontWeight: '700' as const,
+  },
+  profileLink: {
+    alignSelf: 'flex-end',
+    marginTop: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 2,
+  },
+  profileLinkText: {
+    fontSize: 12,
+    color: Colors.primary,
+    fontWeight: '600',
   },
 });

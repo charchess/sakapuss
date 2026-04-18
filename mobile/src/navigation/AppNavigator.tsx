@@ -8,6 +8,7 @@ import { TimelineScreen } from '../screens/TimelineScreen';
 import { RemindersScreen } from '../screens/RemindersScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { QuickLogScreen } from '../screens/QuickLogScreen';
+import { PetProfileScreen } from '../screens/PetProfileScreen';
 
 export type HomeStackParamList = {
   Dashboard: undefined;
@@ -17,6 +18,13 @@ export type HomeStackParamList = {
     icon: string;
     petId: string | null;
     petName: string;
+  };
+  PetProfile: {
+    petId: string;
+    petName: string;
+    species: string;
+    breed?: string;
+    birthDate?: string;
   };
 };
 
@@ -76,6 +84,15 @@ function HomeStackNavigator() {
         options={({ route }) => ({
           title: route.params.label,
           headerBackTitle: 'Retour',
+          headerTintColor: Colors.primary,
+        })}
+      />
+      <HomeStack.Screen
+        name="PetProfile"
+        component={PetProfileScreen}
+        options={({ route }) => ({
+          title: route.params.petName,
+          headerBackTitle: 'Accueil',
           headerTintColor: Colors.primary,
         })}
       />
