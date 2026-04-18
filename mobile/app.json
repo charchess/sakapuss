@@ -22,8 +22,6 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "@react-native-async-storage/async-storage"
-    ]
+    "plugins": []
   }
 }

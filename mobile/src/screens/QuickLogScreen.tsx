@@ -116,6 +116,7 @@ export function QuickLogScreen({ navigation, route }: Props) {
                 keyboardType="numeric"
                 value={grams}
                 onChangeText={setGrams}
+                testID="weight-input"
               />
             </View>
             <View style={styles.field}>
