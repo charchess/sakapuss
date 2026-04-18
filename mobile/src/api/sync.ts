@@ -35,17 +35,13 @@ export async function flushQueue(): Promise<void> {
 }
 
 async function syncEvent(event: QueuedEvent): Promise<void> {
-  try {
-    const created = await api.createPetEvent(
-      event.petId,
-      event.type,
-      event.payload,
-      event.occurredAt
-    );
-    await SyncQueue.markSynced(event.localId, created.id);
-  } catch (err) {
-    throw err;
-  }
+  const created = await api.createPetEvent(
+    event.petId,
+    event.type,
+    event.payload,
+    event.occurredAt
+  );
+  await SyncQueue.markSynced(event.localId, created.id);
 }
 
 /**

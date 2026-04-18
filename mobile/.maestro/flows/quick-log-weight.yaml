@@ -1,0 +1,10 @@
+appId: com.sakapuss.mobile
+---
+- launchApp
+- tapOn: "⚖️"
+- assertVisible: "Pesée"
+- tapOn:
+    id: "weight-input"
+- inputText: "4200"
+- tapOn: "Enregistrer"
+- assertVisible: "Tableau de bord"

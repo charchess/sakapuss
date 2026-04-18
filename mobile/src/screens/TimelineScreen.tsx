@@ -68,18 +68,22 @@ export function TimelineScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all');
+  const [error, setError] = useState<string | null>(null);
+  const [limit, setLimit] = useState(50);
 
   const loadEvents = useCallback(async () => {
+    setError(null);
     try {
-      const data = await api.getAllEvents(100);
+      const data = await api.getAllEvents(limit);
       setEvents(data);
     } catch (err) {
       console.warn('[Timeline] load error:', err);
+      setError('Impossible de charger les données. Vérifiez votre connexion.');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [limit]);
 
   useFocusEffect(
     useCallback(() => {
@@ -116,6 +120,15 @@ export function TimelineScreen() {
   return (
     <View style={styles.root}>
       <StatusBar style="dark" backgroundColor={Colors.background} />
+
+      {error && (
+        <View style={styles.errorBox} testID="error-box">
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity onPress={() => { setError(null); loadEvents(); }} style={styles.retryBtn} testID="retry-btn">
+            <Text style={styles.retryText}>Réessayer</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Header */}
       <View style={styles.header}>
@@ -177,6 +190,17 @@ export function TimelineScreen() {
               }}
               tintColor={Colors.primary}
             />
+          }
+          ListFooterComponent={
+            events.length === limit ? (
+              <TouchableOpacity
+                style={styles.loadMoreBtn}
+                onPress={() => setLimit((l) => l + 50)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.loadMoreText}>Charger plus</Text>
+              </TouchableOpacity>
+            ) : null
           }
         />
       )}
@@ -264,5 +288,36 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     textAlign: 'center',
     lineHeight: 22,
+  },
+  errorBox: {
+    backgroundColor: 'rgba(225,112,85,0.1)',
+    borderRadius: 12,
+    padding: 16,
+    margin: 16,
+  },
+  errorText: {
+    color: '#E17055',
+    fontSize: 14,
+  },
+  retryBtn: {
+    marginTop: 8,
+    backgroundColor: '#E17055',
+    borderRadius: 8,
+    padding: 10,
+    alignItems: 'center' as const,
+  },
+  retryText: {
+    color: 'white',
+    fontWeight: '700' as const,
+  },
+  loadMoreBtn: {
+    alignItems: 'center',
+    padding: 16,
+    marginTop: 8,
+  },
+  loadMoreText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.primary,
   },
 });

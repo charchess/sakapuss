@@ -1,0 +1,9 @@
+appId: com.sakapuss.mobile
+---
+- launchApp
+- tapOn: "📋"
+- assertVisible: "Timeline"
+- tapOn: "⚖️ Pesée"
+- assertNotVisible: "Litière nettoyée"
+- tapOn: "Tout"
+- assertVisible: "Tout"

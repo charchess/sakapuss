@@ -3,6 +3,7 @@ import {
   View,
   Text,
   FlatList,
+  TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
@@ -27,8 +28,10 @@ export function RemindersScreen() {
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const loadReminders = useCallback(async () => {
+    setError(null);
     try {
       const data = await api.getPendingReminders();
       const sorted = [...data].sort((a, b) => {
@@ -40,6 +43,7 @@ export function RemindersScreen() {
       setReminders(sorted);
     } catch (err) {
       console.warn('[Reminders] load error:', err);
+      setError('Impossible de charger les données. Vérifiez votre connexion.');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -71,6 +75,15 @@ export function RemindersScreen() {
   return (
     <View style={styles.root}>
       <StatusBar style="dark" backgroundColor={Colors.background} />
+
+      {error && (
+        <View style={styles.errorBox} testID="error-box">
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity onPress={() => { setError(null); loadReminders(); }} style={styles.retryBtn} testID="retry-btn">
+            <Text style={styles.retryText}>Réessayer</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       <View style={styles.header}>
         <Text style={styles.title}>Rappels</Text>
@@ -184,5 +197,26 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
     textAlign: 'center',
     lineHeight: 22,
+  },
+  errorBox: {
+    backgroundColor: 'rgba(225,112,85,0.1)',
+    borderRadius: 12,
+    padding: 16,
+    margin: 16,
+  },
+  errorText: {
+    color: '#E17055',
+    fontSize: 14,
+  },
+  retryBtn: {
+    marginTop: 8,
+    backgroundColor: '#E17055',
+    borderRadius: 8,
+    padding: 10,
+    alignItems: 'center' as const,
+  },
+  retryText: {
+    color: 'white',
+    fontWeight: '700' as const,
   },
 });
