@@ -167,9 +167,34 @@ export function DashboardScreen({ navigation }: Props) {
         }
         showsVerticalScrollIndicator={false}
       >
+        {/* No pets empty state */}
+        {pets.length === 0 && !loading && (
+          <View style={styles.noPetsBox}>
+            <Text style={styles.noPetsIcon}>🐾</Text>
+            <Text style={styles.noPetsText}>Aucun animal enregistré</Text>
+            <TouchableOpacity
+              style={styles.addPetBtn}
+              onPress={() => navigation.navigate('AddPet')}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.addPetBtnText}>+ Ajouter un animal</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* Pet selector */}
         {pets.length > 0 && (
           <View style={styles.section}>
+            <View style={styles.sectionHeaderRow}>
+              <Text style={styles.sectionLabel}>Mes animaux</Text>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('AddPet')}
+                style={styles.addPetMini}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.addPetMiniText}>+ Ajouter</Text>
+              </TouchableOpacity>
+            </View>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.petStrip}>
               {pets.map((pet) => (
                 <TouchableOpacity
@@ -412,5 +437,53 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.primary,
     fontWeight: '600',
+  },
+  noPetsBox: {
+    alignItems: 'center',
+    paddingVertical: Spacing.xxl,
+    paddingHorizontal: Spacing.xl,
+  },
+  noPetsIcon: {
+    fontSize: 48,
+    marginBottom: Spacing.md,
+  },
+  noPetsText: {
+    fontSize: 15,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.lg,
+  },
+  addPetBtn: {
+    backgroundColor: Colors.primary,
+    borderRadius: Radius.md,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: 12,
+    ...Shadow.card,
+  },
+  addPetBtnText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+  },
+  sectionLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: Colors.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  addPetMini: {
+    paddingVertical: 4,
+    paddingHorizontal: 2,
+  },
+  addPetMiniText: {
+    fontSize: 12,
+    color: Colors.primary,
+    fontWeight: '700',
   },
 });

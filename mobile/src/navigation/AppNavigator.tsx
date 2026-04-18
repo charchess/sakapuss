@@ -9,6 +9,7 @@ import { RemindersScreen } from '../screens/RemindersScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { QuickLogScreen } from '../screens/QuickLogScreen';
 import { PetProfileScreen } from '../screens/PetProfileScreen';
+import { AddPetScreen } from '../screens/AddPetScreen';
 
 export type HomeStackParamList = {
   Dashboard: undefined;
@@ -26,6 +27,7 @@ export type HomeStackParamList = {
     breed?: string;
     birthDate?: string;
   };
+  AddPet: Record<string, never>;
 };
 
 export type AppTabParamList = {
@@ -95,6 +97,15 @@ function HomeStackNavigator() {
           headerBackTitle: 'Accueil',
           headerTintColor: Colors.primary,
         })}
+      />
+      <HomeStack.Screen
+        name="AddPet"
+        component={AddPetScreen}
+        options={{
+          title: 'Nouvel animal',
+          headerBackTitle: 'Accueil',
+          headerTintColor: Colors.primary,
+        }}
       />
     </HomeStack.Navigator>
   );
