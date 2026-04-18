@@ -108,7 +108,17 @@ export function RemindersScreen() {
         <FlatList
           data={reminders}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <ReminderCard reminder={item} />}
+          renderItem={({ item }) => (
+            <ReminderCard
+              reminder={item}
+              onComplete={async (id) => {
+                try { await api.completeReminder(id); loadReminders(); } catch { /* ignore */ }
+              }}
+              onPostpone={async (id, days) => {
+                try { await api.postponeReminder(id, days); loadReminders(); } catch { /* ignore */ }
+              }}
+            />
+          )}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           refreshControl={

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
+import { render, fireEvent } from '@testing-library/react-native';
 import { ReminderCard } from '../../src/components/ReminderCard';
 
 const pastReminder = {
@@ -56,5 +56,37 @@ describe('ReminderCard', () => {
   it('renders the pet name', () => {
     const { getByText } = render(<ReminderCard reminder={pastReminder} />);
     expect(getByText('Luna')).toBeTruthy();
+  });
+
+  it('shows action buttons when onComplete and onPostpone are provided', () => {
+    const { getByText } = render(
+      <ReminderCard reminder={pastReminder} onComplete={jest.fn()} onPostpone={jest.fn()} />
+    );
+    expect(getByText('✅ Fait')).toBeTruthy();
+    expect(getByText('⏭️ +7j')).toBeTruthy();
+  });
+
+  it('calls onComplete when Fait is pressed', () => {
+    const onComplete = jest.fn();
+    const { getByText } = render(
+      <ReminderCard reminder={pastReminder} onComplete={onComplete} onPostpone={jest.fn()} />
+    );
+    fireEvent.press(getByText('✅ Fait'));
+    expect(onComplete).toHaveBeenCalledWith('r1');
+  });
+
+  it('calls onPostpone when +7j is pressed', () => {
+    const onPostpone = jest.fn();
+    const { getByText } = render(
+      <ReminderCard reminder={pastReminder} onComplete={jest.fn()} onPostpone={onPostpone} />
+    );
+    fireEvent.press(getByText('⏭️ +7j'));
+    expect(onPostpone).toHaveBeenCalledWith('r1', 7);
+  });
+
+  it('does not show action buttons when callbacks are not provided', () => {
+    const { queryByText } = render(<ReminderCard reminder={pastReminder} />);
+    expect(queryByText('✅ Fait')).toBeNull();
+    expect(queryByText('⏭️ +7j')).toBeNull();
   });
 });
