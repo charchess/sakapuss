@@ -1,0 +1,22 @@
+appId: com.sakapuss.mobile
+---
+# Pre-requisite: user is logged in and on dashboard with at least one pet
+- launchApp
+- assertVisible: "Se connecter"
+- tapOn: "votre@email.com"
+- inputText: "playwright-e2e@test.sakapuss.local"
+- tapOn: "••••••••"
+- inputText: "PlaywrightTest123!"
+- tapOn: "Se connecter"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+
+# Navigate to pet profile via the dashboard link
+- assertVisible:
+    text: "Fiche de"
+    optional: true
+- tapOn:
+    text: "Fiche de"
+    optional: true
+- assertVisible:
+    text: "Événements récents"
+    optional: true

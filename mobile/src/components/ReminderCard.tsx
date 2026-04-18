@@ -1,10 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Colors, Radius, Shadow, Spacing } from '../constants/theme';
 import { Reminder } from '../api/client';
 
 interface Props {
   reminder: Reminder;
+  onComplete?: (reminderId: string) => void;
+  onPostpone?: (reminderId: string, days: number) => void;
 }
 
 type Urgency = 'overdue' | 'today' | 'upcoming';
@@ -55,9 +57,10 @@ function reminderTypeIcon(type: string): string {
   return '🔔';
 }
 
-export function ReminderCard({ reminder }: Props) {
+export function ReminderCard({ reminder, onComplete, onPostpone }: Props) {
   const urgency = getUrgency(reminder.next_due_date);
   const color = urgencyColor(urgency);
+  const showActions = !!(onComplete && onPostpone);
 
   return (
     <View style={[styles.card, { borderLeftColor: color, borderLeftWidth: 4 }]}>
@@ -66,6 +69,24 @@ export function ReminderCard({ reminder }: Props) {
         <Text style={styles.name}>{reminder.name}</Text>
         <Text style={styles.petName}>{reminder.pet_name}</Text>
         <Text style={styles.date}>{formatDate(reminder.next_due_date)}</Text>
+        {showActions && (
+          <View style={styles.actions}>
+            <TouchableOpacity
+              style={[styles.actionBtn, styles.actionBtnDone]}
+              onPress={() => onComplete!(reminder.id)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.actionBtnText}>✅ Fait</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.actionBtn, styles.actionBtnPostpone]}
+              onPress={() => onPostpone!(reminder.id, 7)}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.actionBtnText, { color: Colors.textSecondary }]}>⏭️ +7j</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
       <View style={[styles.badge, { backgroundColor: `${color}1A` }]}>
         <Text style={[styles.badgeText, { color }]}>{urgencyLabel(urgency)}</Text>
@@ -112,9 +133,34 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: Radius.full,
     marginLeft: Spacing.sm,
+    alignSelf: 'flex-start',
   },
   badgeText: {
     fontSize: 11,
     fontWeight: '700',
+  },
+  actions: {
+    flexDirection: 'row',
+    marginTop: Spacing.sm,
+    gap: 8,
+  },
+  actionBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: Radius.full,
+    borderWidth: 1,
+  },
+  actionBtnDone: {
+    backgroundColor: `${Colors.success}14`,
+    borderColor: `${Colors.success}40`,
+  },
+  actionBtnPostpone: {
+    backgroundColor: Colors.primaryLight,
+    borderColor: Colors.border,
+  },
+  actionBtnText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.success,
   },
 });

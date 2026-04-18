@@ -144,4 +144,12 @@ export const api = {
   getPendingReminders(): Promise<Reminder[]> {
     return apiClient.get<Reminder[]>(Endpoints.reminders);
   },
+
+  completeReminder(reminderId: string): Promise<Reminder> {
+    return apiClient.post<Reminder>(`/reminders/${reminderId}/complete`, {});
+  },
+
+  postponeReminder(reminderId: string, delayDays: number): Promise<Reminder> {
+    return apiClient.post<Reminder>(`/reminders/${reminderId}/postpone`, { delay_days: delayDays });
+  },
 };
