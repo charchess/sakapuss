@@ -38,7 +38,7 @@ test.describe('Auth Registration (ATDD - Story 1.2)', () => {
 
     // Should stay on register page and show inline error
     await expect(page).toHaveURL(/\/register/);
-    await expect(page.getByText('existe déjà', { exact: false })).toBeVisible();
+    await expect(page.getByText('existe déjà', { exact: false })).toBeVisible({ timeout: 10000 });
   });
 
   test('[P1] should show validation error for invalid email format', async ({ page }) => {

@@ -202,7 +202,7 @@
 {/if}
 
 <style>
-  .bowls-page { max-width: 600px; padding: 52px var(--space-lg) var(--space-lg); }
+  .bowls-page { max-width: 800px; padding: 52px var(--space-lg) var(--space-lg); }
 
   .back-link {
     display: inline-block; color: var(--color-primary);

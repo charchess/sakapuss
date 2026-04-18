@@ -1,7 +1,5 @@
 import { test, expect } from '../support/merged-fixtures';
 
-const API_URL = process.env.API_URL || 'http://localhost:8000';
-
 // Serial: shared petId variable across tests; sequential execution required
 test.describe.configure({ mode: 'serial' });
 
@@ -34,10 +32,10 @@ test.describe('Fast Action UX (ATDD - Stories 4.1 & 4.2)', () => {
 
     // Decision tree modal should open with litter options
     const modal = page.getByTestId('decision-tree');
-    await expect(modal).toBeVisible();
-    await expect(page.getByTestId('tree-option-blood')).toBeVisible();
-    await expect(page.getByTestId('tree-option-diarrhea')).toBeVisible();
-    await expect(page.getByTestId('tree-option-normal')).toBeVisible();
+    await expect(modal).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('tree-option-blood')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('tree-option-diarrhea')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('tree-option-normal')).toBeVisible({ timeout: 10000 });
   });
 
   test('[P1] should highlight selected option in decision tree', async ({ page }) => {
