@@ -1,6 +1,7 @@
 appId: com.sakapuss.mobile
 ---
-- launchApp
+- launchApp:
+    clearState: true
 - assertVisible: "Se connecter"
 - tapOn: "votre@email.com"
 - inputText: "playwright-e2e@test.sakapuss.local"
@@ -9,19 +10,29 @@ appId: com.sakapuss.mobile
 - tapOn: "Se connecter"
 - assertVisible: "Que se passe-t-il aujourd'hui ?"
 
-# Navigate to AddPet via "+ Ajouter" link in pet strip header
+# Navigate to AddPet via "+ Ajouter" link
 - tapOn:
     text: "+ Ajouter"
-    optional: false
 - assertVisible: "Nouvel animal"
 
-# Fill in the form
+# Fill name, dismiss keyboard before scrolling further
 - tapOn:
-    text: "Nom de l'animal"
+    id: "pet-name-input"
 - inputText: "Caramel"
+- hideKeyboard
+
+# Pick species via pill (no keyboard interaction needed)
 - tapOn: "Chat"
-- tapOn: "YYYY-MM-DD"
+
+# Tap birth date input — scroll into view if needed
+- scrollUntilVisible:
+    element:
+      id: "pet-birthdate-input"
+    direction: DOWN
+- tapOn:
+    id: "pet-birthdate-input"
 - inputText: "2022-06-15"
+- hideKeyboard
 
 # Submit
 - tapOn: "Ajouter"

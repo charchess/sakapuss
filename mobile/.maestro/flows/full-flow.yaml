@@ -1,6 +1,7 @@
 appId: com.sakapuss.mobile
 ---
-- launchApp
+- launchApp:
+    clearState: true
 - assertVisible: "Se connecter"
 - tapOn: "votre@email.com"
 - inputText: "playwright-e2e@test.sakapuss.local"

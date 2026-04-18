@@ -1,7 +1,8 @@
 appId: com.sakapuss.mobile
 ---
 # Pre-requisite: user is logged in and on dashboard with at least one pet
-- launchApp
+- launchApp:
+    clearState: true
 - assertVisible: "Se connecter"
 - tapOn: "votre@email.com"
 - inputText: "playwright-e2e@test.sakapuss.local"

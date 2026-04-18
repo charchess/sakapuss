@@ -87,6 +87,7 @@ export function AddPetScreen({ navigation }: Props) {
               value={name}
               onChangeText={setName}
               autoCapitalize="words"
+              testID="pet-name-input"
             />
           </View>
 
@@ -124,6 +125,7 @@ export function AddPetScreen({ navigation }: Props) {
               value={birthDate}
               onChangeText={setBirthDate}
               keyboardType="numbers-and-punctuation"
+              testID="pet-birthdate-input"
             />
           </View>
 

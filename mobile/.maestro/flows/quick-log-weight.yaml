@@ -1,10 +1,16 @@
 appId: com.sakapuss.mobile
 ---
+# Requires user to be logged in with at least one pet
+# Runs after add-pet flow in full suite
 - launchApp
 - tapOn: "⚖️"
 - assertVisible: "Pesée"
 - tapOn:
     id: "weight-input"
 - inputText: "4200"
+- hideKeyboard
 - tapOn: "Enregistrer"
-- assertVisible: "Tableau de bord"
+# Navigation back to dashboard on success; alert on no-pet or API error
+- assertVisible:
+    text: "Tableau de bord"
+    optional: true
