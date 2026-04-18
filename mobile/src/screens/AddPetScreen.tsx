@@ -40,7 +40,6 @@ export function AddPetScreen({ navigation }: Props) {
   const handleSubmit = async () => {
     const error = validate();
     if (error) {
-      const field = error.includes('nom') ? 'nom' : error.includes("espèce") ? 'espèce' : 'date de naissance';
       Alert.alert('Champ requis', error);
       return;
     }
