@@ -48,10 +48,12 @@ export function DashboardScreen({ navigation }: Props) {
   const [remindersCount, setRemindersCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const selectedPet = pets.find((p) => p.id === selectedPetId) ?? null;
 
   const loadData = useCallback(async () => {
+    setError(null);
     try {
       const [u, fetchedPets] = await Promise.all([
         AuthStore.getUser(),
@@ -75,6 +77,7 @@ export function DashboardScreen({ navigation }: Props) {
       setRemindersCount(reminders.length);
     } catch (err) {
       console.warn('[Dashboard] loadData error:', err);
+      setError('Impossible de charger les données. Vérifiez votre connexion.');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -131,6 +134,15 @@ export function DashboardScreen({ navigation }: Props) {
   return (
     <View style={styles.root}>
       <StatusBar style="dark" backgroundColor={Colors.background} />
+
+      {error && (
+        <View style={styles.errorBox} testID="error-box">
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity onPress={() => { setError(null); loadData(); }} style={styles.retryBtn} testID="retry-btn">
+            <Text style={styles.retryText}>Réessayer</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Header */}
       <View style={styles.header}>
@@ -351,5 +363,26 @@ const styles = StyleSheet.create({
   emptyText: {
     ...Typography.body,
     color: Colors.textMuted,
+  },
+  errorBox: {
+    backgroundColor: 'rgba(225,112,85,0.1)',
+    borderRadius: 12,
+    padding: 16,
+    margin: 16,
+  },
+  errorText: {
+    color: '#E17055',
+    fontSize: 14,
+  },
+  retryBtn: {
+    marginTop: 8,
+    backgroundColor: '#E17055',
+    borderRadius: 8,
+    padding: 10,
+    alignItems: 'center' as const,
+  },
+  retryText: {
+    color: 'white',
+    fontWeight: '700' as const,
   },
 });

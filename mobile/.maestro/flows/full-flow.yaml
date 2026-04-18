@@ -1,0 +1,18 @@
+appId: com.sakapuss.mobile
+---
+- launchApp
+- assertVisible: "Se connecter"
+- tapOn: "votre@email.com"
+- inputText: "playwright-e2e@test.sakapuss.local"
+- tapOn: "••••••••"
+- inputText: "PlaywrightTest123!"
+- tapOn: "Se connecter"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+- tapOn: "📋"
+- assertVisible: "Timeline"
+- tapOn: "🔔"
+- assertVisible: "Rappels"
+- tapOn: "⚙️"
+- assertVisible: "Paramètres"
+- tapOn: "🏠"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
