@@ -120,6 +120,10 @@ export const api = {
     return apiClient.get<Pet[]>(Endpoints.pets);
   },
 
+  createPet(pet: { name: string; species: string; birth_date: string; breed?: string }): Promise<Pet> {
+    return apiClient.post<Pet>(Endpoints.pets, pet);
+  },
+
   getPetEvents(petId: string): Promise<PetEvent[]> {
     return apiClient.get<PetEvent[]>(Endpoints.petEvents(petId));
   },
