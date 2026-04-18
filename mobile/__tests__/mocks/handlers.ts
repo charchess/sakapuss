@@ -31,6 +31,19 @@ export const handlers = [
     ])
   ),
 
+  http.post(`${BASE}/pets`, () =>
+    HttpResponse.json(
+      { id: 'p_new', name: 'Nouveau', species: 'Cat', birth_date: '2023-01-01', breed: null, photo_url: null },
+      { status: 201 }
+    )
+  ),
+
+  http.get(`${BASE}/pets/p2/events`, () =>
+    HttpResponse.json([
+      { id: 'e3', pet_id: 'p2', pet_name: 'Milo', type: 'food_serve', occurred_at: '2026-04-18T08:00:00Z', payload: {} },
+    ])
+  ),
+
   http.post(`${BASE}/pets/p1/events`, () =>
     HttpResponse.json({ id: 'e_new', pet_id: 'p1', type: 'weight', occurred_at: new Date().toISOString(), payload: { grams: 4200 } })
   ),
