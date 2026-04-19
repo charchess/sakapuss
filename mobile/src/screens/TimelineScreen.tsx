@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
-import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme';
+import { Colors, Radius, Spacing, Typography } from '../constants/theme';
 import { api, PetEvent } from '../api/client';
 import { AuthStore } from '../store/auth';
 import { EventCard } from '../components/EventCard';
@@ -26,12 +26,12 @@ interface FilterPill {
 
 const FILTERS: FilterPill[] = [
   { key: 'all', label: 'Tout', types: [], color: Colors.primary },
-  { key: 'weight', label: '⚖️ Pesée', types: ['weight'], color: '#6C5CE7' },
-  { key: 'sante', label: '💊 Santé', types: ['health_note'], color: '#E17055' },
-  { key: 'alimentation', label: '🥣 Alim.', types: ['food_serve'], color: '#FDCB6E' },
-  { key: 'litiere', label: '🚽 Litière', types: ['litter_clean'], color: '#00B894' },
-  { key: 'comportement', label: '👁️ Comport.', types: ['behavior'], color: '#0984E3' },
-  { key: 'evenement', label: '📅 Événement', types: ['custom'], color: '#A29BFE' },
+  { key: 'weight', label: '⚖️ Pesée', types: ['weight'], color: Colors.primary },
+  { key: 'sante', label: '💊 Santé', types: ['health_note'], color: Colors.error },
+  { key: 'alimentation', label: '🥣 Alim.', types: ['food_serve'], color: Colors.accent },
+  { key: 'litiere', label: '🚽 Litière', types: ['litter_clean'], color: Colors.success },
+  { key: 'comportement', label: '👁️ Comport.', types: ['behavior'], color: Colors.info },
+  { key: 'evenement', label: '📅 Évén.', types: ['custom'], color: Colors.secondary },
 ];
 
 interface DayGroup {
@@ -141,7 +141,7 @@ export function TimelineScreen() {
       {/* Filter pills */}
       <ScrollView
         horizontal
-        showsHorizontalScrollIndicator={false}
+        showsHorizontalScrollIndicator={true}
         style={styles.filterBar}
         contentContainerStyle={styles.filterContent}
       >

@@ -28,12 +28,12 @@ interface QuickAction {
 }
 
 const QUICK_ACTIONS: QuickAction[] = [
-  { key: 'litter', icon: '🚽', label: 'Litière', color: '#00B894', type: 'litter_clean' },
-  { key: 'food', icon: '🥣', label: 'Gamelle', color: '#FDCB6E', type: 'food_serve' },
-  { key: 'weight', icon: '⚖️', label: 'Pesée', color: '#6C5CE7', type: 'weight' },
-  { key: 'medicine', icon: '💊', label: 'Médicament', color: '#E17055', type: 'health_note' },
-  { key: 'observation', icon: '👁️', label: 'Observation', color: '#0984E3', type: 'behavior' },
-  { key: 'event', icon: '📅', label: 'Événement', color: '#A29BFE', type: 'custom' },
+  { key: 'litter', icon: '🚽', label: 'Litière', color: Colors.success, type: 'litter_clean' },
+  { key: 'food', icon: '🥣', label: 'Gamelle', color: Colors.accent, type: 'food_serve' },
+  { key: 'weight', icon: '⚖️', label: 'Pesée', color: Colors.primary, type: 'weight' },
+  { key: 'medicine', icon: '💊', label: 'Médic.', color: Colors.error, type: 'health_note' },
+  { key: 'observation', icon: '👁️', label: 'Obs.', color: Colors.info, type: 'behavior' },
+  { key: 'event', icon: '📅', label: 'Évén.', color: Colors.secondary, type: 'custom' },
 ];
 
 interface Props {
@@ -49,6 +49,7 @@ export function DashboardScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isGuest, setIsGuest] = useState(false);
 
   const selectedPet = pets.find((p) => p.id === selectedPetId) ?? null;
 
@@ -77,8 +78,9 @@ export function DashboardScreen({ navigation }: Props) {
       setRemindersCount(reminders.length);
     } catch (err) {
       console.warn('[Dashboard] loadData error:', err);
-      const isGuest = await AuthStore.isGuestMode();
-      if (!isGuest) {
+      const guest = await AuthStore.isGuestMode();
+      setIsGuest(guest);
+      if (!guest) {
         setError('Impossible de charger les données. Vérifiez votre connexion.');
       }
     } finally {
@@ -99,8 +101,8 @@ export function DashboardScreen({ navigation }: Props) {
     try {
       const events = await api.getPetEvents(petId);
       setRecentEvents(events.slice(0, 10));
-    } catch {
-      // ignore
+    } catch (err) {
+      console.warn('[Dashboard] handleSelectPet error:', err);
     }
   };
 
@@ -157,6 +159,16 @@ export function DashboardScreen({ navigation }: Props) {
         </View>
         <SyncBadge />
       </View>
+
+      {/* Guest banner */}
+      {isGuest && (
+        <View style={styles.guestBanner}>
+          <Text style={styles.guestBannerText}>🌐 Mode hors-ligne</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Settings' as never)}>
+            <Text style={styles.guestBannerLink}>Créer un compte →</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       <ScrollView
         style={styles.scroll}
@@ -486,6 +498,26 @@ const styles = StyleSheet.create({
   },
   addPetMiniText: {
     fontSize: 12,
+    color: Colors.primary,
+    fontWeight: '700',
+  },
+  guestBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: Colors.primaryLight,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.primaryBorder,
+  },
+  guestBannerText: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    fontWeight: '500',
+  },
+  guestBannerLink: {
+    fontSize: 13,
     color: Colors.primary,
     fontWeight: '700',
   },

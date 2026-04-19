@@ -29,6 +29,8 @@ export async function flushQueue(): Promise<void> {
         console.warn(`[sync] Failed to sync event ${pending[i].localId}:`, result.reason);
       }
     });
+
+    await SyncQueue.clearSynced();
   } finally {
     isFlushing = false;
   }

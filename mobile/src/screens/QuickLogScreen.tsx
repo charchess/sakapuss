@@ -210,7 +210,6 @@ export function QuickLogScreen({ navigation, route }: Props) {
       case 'litter_clean':
         return (
           <View style={styles.confirmBox}>
-            <Text style={styles.confirmIcon}>🚽</Text>
             <Text style={styles.confirmText}>
               Confirmer que la litière a été nettoyée ?
             </Text>
@@ -341,10 +340,6 @@ const styles = StyleSheet.create({
   confirmBox: {
     alignItems: 'center',
     paddingVertical: Spacing.xl,
-  },
-  confirmIcon: {
-    fontSize: 48,
-    marginBottom: 12,
   },
   confirmText: {
     ...Typography.body,

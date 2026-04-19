@@ -11,7 +11,9 @@ import { useFocusEffect } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme';
 import { api, PetEvent } from '../api/client';
+import { AuthStore } from '../store/auth';
 import { EventCard } from '../components/EventCard';
+import { speciesEmoji } from '../utils/petUtils';
 
 interface RouteParams {
   petId: string;
@@ -24,16 +26,6 @@ interface RouteParams {
 interface Props {
   navigation: any;
   route: { params: RouteParams };
-}
-
-function speciesEmoji(species: string): string {
-  const s = species.toLowerCase();
-  if (s === 'cat' || s === 'chat') return '🐱';
-  if (s === 'dog' || s === 'chien') return '🐶';
-  if (s === 'rabbit' || s === 'lapin') return '🐰';
-  if (s === 'bird' || s === 'oiseau') return '🐦';
-  if (s === 'hamster') return '🐹';
-  return '🐾';
 }
 
 function computeAge(birthDate: string): string {
@@ -61,10 +53,18 @@ export function PetProfileScreen({ navigation, route }: Props) {
     useCallback(() => {
       let active = true;
       setError(null);
-      api.getPetEvents(petId)
-        .then((data) => { if (active) setEvents(data.slice(0, 20)); })
-        .catch(() => { if (active) setError('Impossible de charger les événements.'); })
-        .finally(() => { if (active) setLoading(false); });
+      (async () => {
+        try {
+          const data = await api.getPetEvents(petId);
+          if (active) setEvents(data.slice(0, 20));
+        } catch (err) {
+          console.warn('[PetProfile] load error:', err);
+          const isGuest = await AuthStore.isGuestMode();
+          if (active && !isGuest) setError('Impossible de charger les événements.');
+        } finally {
+          if (active) setLoading(false);
+        }
+      })();
       return () => { active = false; };
     }, [petId])
   );
@@ -86,6 +86,15 @@ export function PetProfileScreen({ navigation, route }: Props) {
               <Text style={styles.ageText}>🎂 {computeAge(birthDate)}</Text>
             </View>
           ) : null}
+          <View style={styles.heroStats}>
+            <Text style={styles.heroStatText}>{speciesEmoji(species)} {species.charAt(0).toUpperCase() + species.slice(1)}</Text>
+            {!loading && (
+              <Text style={styles.heroStatSep}>·</Text>
+            )}
+            {!loading && (
+              <Text style={styles.heroStatText}>{events.length} événement{events.length !== 1 ? 's' : ''}</Text>
+            )}
+          </View>
         </View>
 
         {/* Events section */}
@@ -185,6 +194,21 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: Colors.primary,
+  },
+  heroStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: Spacing.sm,
+    gap: 6,
+  },
+  heroStatText: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    fontWeight: '500',
+  },
+  heroStatSep: {
+    fontSize: 13,
+    color: Colors.textMuted,
   },
   section: {
     paddingHorizontal: Spacing.xl,

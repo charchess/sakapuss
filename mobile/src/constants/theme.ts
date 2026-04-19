@@ -9,6 +9,8 @@ export const Colors = {
   success: '#00B894',
   error: '#E17055',
   accent: '#FDCB6E',
+  info: '#0984E3',
+  secondary: '#A29BFE',
 
   // Derived
   primaryLight: 'rgba(108, 92, 231, 0.06)',
