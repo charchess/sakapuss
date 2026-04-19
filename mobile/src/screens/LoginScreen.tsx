@@ -155,6 +155,13 @@ export function LoginScreen({ onLoginSuccess }: Props) {
           </TouchableOpacity>
         </View>
 
+        {/* Separator */}
+        <View style={styles.separator}>
+          <View style={styles.separatorLine} />
+          <Text style={styles.separatorText}>ou</Text>
+          <View style={styles.separatorLine} />
+        </View>
+
         <TouchableOpacity style={styles.guestButton} onPress={handleGuestMode}>
           <Text style={styles.guestText}>Continuer sans compte</Text>
         </TouchableOpacity>
@@ -246,8 +253,24 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     fontWeight: '600',
   },
-  guestButton: {
+  separator: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: Spacing.xl,
+    marginBottom: Spacing.sm,
+  },
+  separatorLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.border,
+  },
+  separatorText: {
+    marginHorizontal: Spacing.md,
+    fontSize: 12,
+    color: Colors.textMuted,
+    fontWeight: '500',
+  },
+  guestButton: {
     alignItems: 'center',
     paddingVertical: 12,
   },
@@ -255,6 +278,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textSecondary,
     fontWeight: '500',
-    textDecorationLine: 'underline',
   },
 });

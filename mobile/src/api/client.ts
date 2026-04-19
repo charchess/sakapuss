@@ -27,12 +27,15 @@ async function request<T>(
     }
   }
 
-  const options: RequestInit = { method, headers };
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+
+  const options: RequestInit = { method, headers, signal: controller.signal };
   if (body !== undefined) {
     options.body = JSON.stringify(body);
   }
 
-  const response = await fetch(url, options);
+  const response = await fetch(url, options).finally(() => clearTimeout(timeout));
 
   if (!response.ok) {
     let message = `HTTP ${response.status}`;

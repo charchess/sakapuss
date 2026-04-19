@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { Colors, Radius } from '../constants/theme';
+import { speciesEmoji } from '../utils/petUtils';
 
 interface Props {
   name: string;
@@ -8,16 +9,6 @@ interface Props {
   photoUrl?: string;
   size?: number;
   selected?: boolean;
-}
-
-function speciesEmoji(species: string): string {
-  const s = species.toLowerCase();
-  if (s === 'cat' || s === 'chat') return '🐱';
-  if (s === 'dog' || s === 'chien') return '🐶';
-  if (s === 'rabbit' || s === 'lapin') return '🐰';
-  if (s === 'bird' || s === 'oiseau') return '🐦';
-  if (s === 'hamster') return '🐹';
-  return '🐾';
 }
 
 export function PetAvatar({ name, species, photoUrl, size = 56, selected = false }: Props) {

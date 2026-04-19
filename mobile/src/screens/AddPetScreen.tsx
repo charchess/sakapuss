@@ -14,6 +14,7 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme';
 import { api } from '../api/client';
+import { AuthStore } from '../store/auth';
 
 interface Props {
   navigation: any;
@@ -38,6 +39,11 @@ export function AddPetScreen({ navigation }: Props) {
   };
 
   const handleSubmit = async () => {
+    const guest = await AuthStore.isGuestMode();
+    if (guest) {
+      Alert.alert('Mode invité', 'Créez un compte pour ajouter des animaux.');
+      return;
+    }
     const error = validate();
     if (error) {
       Alert.alert('Champ requis', error);
@@ -93,13 +99,6 @@ export function AddPetScreen({ navigation }: Props) {
 
           <View style={styles.field}>
             <Text style={styles.fieldLabel}>Espèce *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Espèce (Chat, Chien...)"
-              placeholderTextColor={Colors.textMuted}
-              value={species}
-              onChangeText={setSpecies}
-            />
             <View style={styles.speciesRow}>
               {SPECIES_OPTIONS.map((s) => (
                 <TouchableOpacity
@@ -211,7 +210,6 @@ const styles = StyleSheet.create({
   speciesRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginTop: Spacing.sm,
     gap: 8,
   },
   speciesPill: {

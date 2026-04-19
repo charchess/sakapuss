@@ -114,10 +114,10 @@ export function RemindersScreen() {
             <ReminderCard
               reminder={item}
               onComplete={async (id) => {
-                try { await api.completeReminder(id); loadReminders(); } catch { /* ignore */ }
+                try { await api.completeReminder(id); loadReminders(); } catch (err) { console.warn('[Reminders] complete error:', err); }
               }}
               onPostpone={async (id, days) => {
-                try { await api.postponeReminder(id, days); loadReminders(); } catch { /* ignore */ }
+                try { await api.postponeReminder(id, days); loadReminders(); } catch (err) { console.warn('[Reminders] postpone error:', err); }
               }}
             />
           )}
@@ -193,7 +193,8 @@ const styles = StyleSheet.create({
   emptyState: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
+    paddingTop: '30%',
     padding: Spacing.xxl,
   },
   emptyIcon: {

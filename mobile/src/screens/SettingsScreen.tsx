@@ -26,18 +26,21 @@ export function SettingsScreen({ onLogout }: Props) {
   const [editingUrl, setEditingUrl] = useState(false);
   const [urlDraft, setUrlDraft] = useState('');
   const [pendingCount, setPendingCount] = useState(0);
+  const [isGuest, setIsGuest] = useState(false);
 
   useEffect(() => {
     const load = async () => {
-      const [u, url, count] = await Promise.all([
+      const [u, url, count, guest] = await Promise.all([
         AuthStore.getUser(),
         AuthStore.getBaseUrl(),
         SyncQueue.getPendingCount(),
+        AuthStore.isGuestMode(),
       ]);
       setUser(u);
       setBaseUrl(url);
       setUrlDraft(url);
       setPendingCount(count);
+      setIsGuest(guest);
     };
     load();
     const unsub = SyncQueue.subscribe(async () => {
@@ -59,21 +62,22 @@ export function SettingsScreen({ onLogout }: Props) {
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      'Déconnexion',
-      'Êtes-vous sûr de vouloir vous déconnecter ?',
-      [
-        { text: 'Annuler', style: 'cancel' },
-        {
-          text: 'Déconnecter',
-          style: 'destructive',
-          onPress: async () => {
-            await AuthStore.logout();
-            onLogout();
-          },
+    const title = isGuest ? 'Quitter le mode invité' : 'Déconnexion';
+    const message = isGuest
+      ? 'Retourner à l\'écran de connexion ?'
+      : 'Êtes-vous sûr de vouloir vous déconnecter ?';
+    const confirmLabel = isGuest ? 'Quitter' : 'Déconnecter';
+    Alert.alert(title, message, [
+      { text: 'Annuler', style: 'cancel' },
+      {
+        text: confirmLabel,
+        style: 'destructive',
+        onPress: async () => {
+          await AuthStore.logout();
+          onLogout();
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleClearQueue = () => {
@@ -103,34 +107,49 @@ export function SettingsScreen({ onLogout }: Props) {
       >
         <Text style={styles.title}>Paramètres</Text>
 
-        {/* User info */}
+        {/* User info / Guest banner */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Compte</Text>
-          <View style={styles.card}>
-            <View style={styles.row}>
-              <Text style={styles.rowIcon}>👤</Text>
-              <View style={styles.rowBody}>
-                <Text style={styles.rowLabel}>Nom</Text>
-                <Text style={styles.rowValue}>{user?.display_name ?? '—'}</Text>
+          {isGuest ? (
+            <View style={styles.guestBanner}>
+              <Text style={styles.guestBannerIcon}>🐾</Text>
+              <View style={styles.guestBannerBody}>
+                <Text style={styles.guestBannerTitle}>Mode invité</Text>
+                <Text style={styles.guestBannerText}>
+                  Créez un compte pour synchroniser vos données.
+                </Text>
+              </View>
+              <TouchableOpacity onPress={handleLogout} style={styles.guestBannerBtn}>
+                <Text style={styles.guestBannerBtnText}>Créer →</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.card}>
+              <View style={styles.row}>
+                <Text style={styles.rowIcon}>👤</Text>
+                <View style={styles.rowBody}>
+                  <Text style={styles.rowLabel}>Nom</Text>
+                  <Text style={styles.rowValue}>{user?.display_name ?? '—'}</Text>
+                </View>
+              </View>
+              <View style={styles.divider} />
+              <View style={styles.row}>
+                <Text style={styles.rowIcon}>📧</Text>
+                <View style={styles.rowBody}>
+                  <Text style={styles.rowLabel}>Email</Text>
+                  <Text style={styles.rowValue}>{user?.email ?? '—'}</Text>
+                </View>
+              </View>
+              <View style={styles.divider} />
+              <View style={styles.row}>
+                <Text style={styles.rowIcon}>🔑</Text>
+                <View style={styles.rowBody}>
+                  <Text style={styles.rowLabel}>Rôle</Text>
+                  <Text style={styles.rowValue}>{user?.role ?? '—'}</Text>
+                </View>
               </View>
             </View>
-            <View style={styles.divider} />
-            <View style={styles.row}>
-              <Text style={styles.rowIcon}>📧</Text>
-              <View style={styles.rowBody}>
-                <Text style={styles.rowLabel}>Email</Text>
-                <Text style={styles.rowValue}>{user?.email ?? '—'}</Text>
-              </View>
-            </View>
-            <View style={styles.divider} />
-            <View style={styles.row}>
-              <Text style={styles.rowIcon}>🔑</Text>
-              <View style={styles.rowBody}>
-                <Text style={styles.rowLabel}>Rôle</Text>
-                <Text style={styles.rowValue}>{user?.role ?? '—'}</Text>
-              </View>
-            </View>
-          </View>
+          )}
         </View>
 
         {/* Server URL */}
@@ -223,7 +242,7 @@ export function SettingsScreen({ onLogout }: Props) {
             activeOpacity={0.8}
           >
             <Text style={styles.logoutIcon}>🚪</Text>
-            <Text style={styles.logoutText}>Se déconnecter</Text>
+            <Text style={styles.logoutText}>{isGuest ? 'Quitter le mode invité' : 'Se déconnecter'}</Text>
           </TouchableOpacity>
         </View>
 
@@ -349,6 +368,43 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     fontWeight: '600',
     fontSize: 14,
+  },
+  guestBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.primaryLight,
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.primaryBorder,
+    gap: 10,
+  },
+  guestBannerIcon: {
+    fontSize: 24,
+  },
+  guestBannerBody: {
+    flex: 1,
+  },
+  guestBannerTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: Colors.primary,
+  },
+  guestBannerText: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
+  guestBannerBtn: {
+    backgroundColor: Colors.primary,
+    borderRadius: Radius.md,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  guestBannerBtnText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
   },
   logoutBtn: {
     flexDirection: 'row',

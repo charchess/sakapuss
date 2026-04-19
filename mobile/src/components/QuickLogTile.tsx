@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
-import { Colors, Radius, Shadow } from '../constants/theme';
+import { Radius, Shadow } from '../constants/theme';
 
 interface Props {
   icon: string;
@@ -19,7 +19,7 @@ export function QuickLogTile({ icon, label, color, onPress }: Props) {
       <View style={[styles.iconCircle, { backgroundColor: `${color}22` }]}>
         <Text style={styles.icon}>{icon}</Text>
       </View>
-      <Text style={[styles.label, { color }]}>{label}</Text>
+      <Text style={[styles.label, { color }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>{label}</Text>
     </TouchableOpacity>
   );
 }
@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
   },
   label: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
     textAlign: 'center',
   },
