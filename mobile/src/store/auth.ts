@@ -4,6 +4,7 @@ import { Platform } from 'react-native';
 const TOKEN_KEY = 'sakapuss_token';
 const USER_KEY = 'sakapuss_user';
 const BASE_URL_KEY = 'sakapuss_base_url';
+const GUEST_KEY = 'sakapuss_guest';
 
 export interface User {
   id: string;
@@ -46,12 +47,27 @@ export const AuthStore = {
     await AsyncStorage.setItem(BASE_URL_KEY, url);
   },
 
+  async setGuestMode(): Promise<void> {
+    await AsyncStorage.setItem(GUEST_KEY, '1');
+  },
+
+  async isGuestMode(): Promise<boolean> {
+    const val = await AsyncStorage.getItem(GUEST_KEY);
+    return val === '1';
+  },
+
   async logout(): Promise<void> {
-    await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]);
+    await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY, GUEST_KEY]);
   },
 
   async isLoggedIn(): Promise<boolean> {
     const token = await AsyncStorage.getItem(TOKEN_KEY);
     return token !== null && token.length > 0;
+  },
+
+  async isAuthenticated(): Promise<boolean> {
+    const loggedIn = await AuthStore.isLoggedIn();
+    const guest = await AuthStore.isGuestMode();
+    return loggedIn || guest;
   },
 };

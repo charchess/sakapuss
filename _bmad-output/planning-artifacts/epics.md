@@ -1207,3 +1207,175 @@ So that HA automations can remind me to reorder.
 **Given** no bags below threshold
 **When** the task runs
 **Then** binary_sensor state remains "ok"
+
+---
+
+## Sprint 6 — Mobile Autonome (Local-First)
+
+**Date d'ajout :** 2026-04-19
+**Input documents :** `planning-artifacts/architecture-sprint6-mobile.md`, `planning-artifacts/prd.md` (Sprint 6 section)
+
+---
+
+## Epic 11: Mobile Local-First — Onboarding & Data Layer
+
+**Epic Goal:** Rendre l'app mobile entièrement autonome — stockage local SQLite, compte optionnel, wizard de configuration. Le backend devient un serveur de sync optionnel, pas un prérequis.
+
+### Story 11.1: Onboarding — Welcome Screen & Auth Optionnel
+
+As a new user installing the app,
+I want to start using Sakapuss without creating an account,
+So that I can track my pets immediately without friction.
+
+**Acceptance Criteria:**
+
+**Given** the app is launched for the first time (no local DB)
+**When** the welcome screen is shown
+**Then** two CTAs are visible: "Continuer sans compte" and "Créer un compte / Se connecter"
+
+**Given** user taps "Continuer sans compte"
+**When** the wizard is completed
+**Then** the app navigates to the dashboard in local-only mode (no auth token stored)
+
+**Given** user taps "Créer un compte"
+**When** registration succeeds
+**Then** auth token stored in expo-secure-store and sync mode is activated
+
+**Given** the app is launched after first setup (local DB exists)
+**When** the app starts
+**Then** onboarding is skipped and the user lands directly on the dashboard
+
+---
+
+### Story 11.2: Configuration Wizard — Tracking Setup
+
+As a new user,
+I want to choose what I want to track before using the app,
+So that the dashboard only shows relevant actions for my use case.
+
+**Acceptance Criteria:**
+
+**Given** onboarding is complete
+**When** the config wizard is shown
+**Then** toggles for: Poids, Alimentation, Litière, Médicaments/Rappels, Comportement are visible, all ON by default
+
+**Given** a tracking category is toggled ON
+**When** the user taps the expand icon
+**Then** a configuration panel is shown with category-specific settings (e.g., frequency for weight, units)
+
+**Given** user taps "Commencer"
+**When** the wizard is completed
+**Then** tracking_config is saved to local SQLite and dashboard buttons reflect the selection
+
+**Given** user navigates to Settings
+**When** they access "Configuration du suivi"
+**Then** the same wizard is accessible again to modify the configuration
+
+---
+
+### Story 11.3: Local SQLite Database — Schema & Migrations
+
+As a developer,
+I want a local SQLite database with Drizzle ORM,
+So that all app data is stored persistently on-device.
+
+**Acceptance Criteria:**
+
+**Given** the app is launched
+**When** the DB is initialized
+**Then** tables `pets`, `events`, `reminders`, `tracking_config` are created with proper schema including `sync_status` and `server_id` columns
+
+**Given** a schema migration is needed (app update)
+**When** the app launches with a new schema version
+**Then** Drizzle migrations run automatically without data loss
+
+**Given** the app is used with no network
+**When** any CRUD operation is performed
+**Then** data is persisted locally and `sync_status` is set to `pending`
+
+---
+
+### Story 11.4: Repository Layer — Data Abstraction
+
+As a developer,
+I want a Repository pattern abstracting the data source,
+So that screens never call the API directly and the data layer can evolve independently.
+
+**Acceptance Criteria:**
+
+**Given** any screen performing a read operation (getPets, getEvents, etc.)
+**When** the call is made
+**Then** it reads from the local SQLite database, not from the API
+
+**Given** any screen performing a write operation
+**When** data is created/updated/deleted
+**Then** it is written to local SQLite first, then `SyncQueue.enqueue()` is called if authenticated
+
+**Given** a repository method throws
+**When** it's a network error (sync)
+**Then** the error is silent and data remains `sync_status = 'pending'`; UI is not impacted
+
+---
+
+### Story 11.5: Sync Engine — Push/Pull
+
+As a logged-in user,
+I want my local data to synchronize with the backend automatically,
+So that I can access my data on the web portal and across devices.
+
+**Acceptance Criteria:**
+
+**Given** user is authenticated and has `pending` records
+**When** the device reconnects to the internet
+**Then** SyncEngine.push() runs and uploads all pending records to the backend
+
+**Given** push succeeds for a record
+**When** the server returns the created/updated resource
+**Then** local record's `sync_status` is set to `synced` and `server_id` is updated
+
+**Given** user is authenticated
+**When** the app comes to the foreground
+**Then** SyncEngine.pull() fetches updates from the server and merges them locally (server-wins on conflict)
+
+**Given** user is NOT authenticated
+**When** any sync method is called
+**Then** it returns immediately without making any network request
+
+---
+
+## Epic 12: Mobile Local-First — Pet & Event Management Offline
+
+**Epic Goal:** Adapter les écrans existants pour utiliser le Repository layer au lieu des appels API directs.
+
+### Story 12.1: Gestion des Animaux Offline
+
+As a user without an account,
+I want to create and manage my pets locally,
+So that I have full pet management without needing the backend.
+
+**Acceptance Criteria:**
+
+**Given** user is in local-only mode
+**When** they add a pet via AddPetScreen
+**Then** pet is saved to local SQLite with `sync_status = 'pending'`
+**And** pet appears on the dashboard immediately
+
+**Given** user creates a pet while authenticated
+**When** the pet is saved
+**Then** sync is triggered and pet is pushed to the backend
+
+### Story 12.2: Quick Log Offline
+
+As a user without network access,
+I want to log events (weight, food, litter, etc.) offline,
+So that no data is lost when I'm without internet.
+
+**Acceptance Criteria:**
+
+**Given** user logs an event while offline
+**When** they tap "Enregistrer"
+**Then** event is saved locally with `sync_status = 'pending'` and the user sees a success state (no error)
+
+**Given** network is restored later
+**When** SyncEngine runs
+**Then** all pending events are pushed to the backend

@@ -17,8 +17,8 @@ export default function App() {
   const [appState, setAppState] = useState<AppState>('loading');
 
   const checkAuth = useCallback(async () => {
-    const loggedIn = await AuthStore.isLoggedIn();
-    setAppState(loggedIn ? 'app' : 'auth');
+    const ready = await AuthStore.isAuthenticated();
+    setAppState(ready ? 'app' : 'auth');
   }, []);
 
   useEffect(() => {

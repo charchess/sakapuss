@@ -27,6 +27,11 @@ export function LoginScreen({ onLoginSuccess }: Props) {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [displayName, setDisplayName] = useState('');
 
+  const handleGuestMode = async () => {
+    await AuthStore.setGuestMode();
+    onLoginSuccess();
+  };
+
   const handleSubmit = async () => {
     if (!email.trim() || !password.trim()) {
       Alert.alert('Champs requis', 'Veuillez saisir votre email et mot de passe.');
@@ -149,6 +154,10 @@ export function LoginScreen({ onLoginSuccess }: Props) {
             </Text>
           </TouchableOpacity>
         </View>
+
+        <TouchableOpacity style={styles.guestButton} onPress={handleGuestMode}>
+          <Text style={styles.guestText}>Continuer sans compte</Text>
+        </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -236,5 +245,16 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.primary,
     fontWeight: '600',
+  },
+  guestButton: {
+    marginTop: Spacing.xl,
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  guestText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    fontWeight: '500',
+    textDecorationLine: 'underline',
   },
 });

@@ -13,6 +13,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme';
 import { api, PetEvent } from '../api/client';
+import { AuthStore } from '../store/auth';
 import { EventCard } from '../components/EventCard';
 import { SyncBadge } from '../components/SyncBadge';
 
@@ -78,7 +79,8 @@ export function TimelineScreen() {
       setEvents(data);
     } catch (err) {
       console.warn('[Timeline] load error:', err);
-      setError('Impossible de charger les données. Vérifiez votre connexion.');
+      const isGuest = await AuthStore.isGuestMode();
+      if (!isGuest) setError('Impossible de charger les données. Vérifiez votre connexion.');
     } finally {
       setLoading(false);
       setRefreshing(false);

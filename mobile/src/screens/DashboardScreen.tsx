@@ -77,7 +77,10 @@ export function DashboardScreen({ navigation }: Props) {
       setRemindersCount(reminders.length);
     } catch (err) {
       console.warn('[Dashboard] loadData error:', err);
-      setError('Impossible de charger les données. Vérifiez votre connexion.');
+      const isGuest = await AuthStore.isGuestMode();
+      if (!isGuest) {
+        setError('Impossible de charger les données. Vérifiez votre connexion.');
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
