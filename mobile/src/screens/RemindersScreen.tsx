@@ -108,6 +108,7 @@ export function RemindersScreen() {
         </View>
       ) : (
         <FlatList
+          testID="reminder-list"
           data={reminders}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (

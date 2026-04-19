@@ -30,7 +30,7 @@ beforeEach(() => {
 
 test('affiche le nom et l\'espèce de l\'animal', async () => {
   const { findByText, findAllByText } = render(
-    <PetProfileScreen route={defaultRoute} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+    <PetProfileScreen route={defaultRoute as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
   );
   const lunas = await findAllByText('Luna');
   expect(lunas.length).toBeGreaterThan(0);
@@ -39,14 +39,14 @@ test('affiche le nom et l\'espèce de l\'animal', async () => {
 
 test('affiche la race quand elle est fournie', async () => {
   const { findByText } = render(
-    <PetProfileScreen route={defaultRoute} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+    <PetProfileScreen route={defaultRoute as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
   );
   await findByText('Européen');
 });
 
 test('calcule et affiche l\'âge à partir de birth_date', async () => {
   const { findByText } = render(
-    <PetProfileScreen route={defaultRoute} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+    <PetProfileScreen route={defaultRoute as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
   );
   // 2020-03-15 → ~5 ans in 2026
   await findByText(/\d+ an/);
@@ -54,7 +54,7 @@ test('calcule et affiche l\'âge à partir de birth_date', async () => {
 
 test('affiche les événements récents de l\'animal', async () => {
   const { findByText } = render(
-    <PetProfileScreen route={defaultRoute} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+    <PetProfileScreen route={defaultRoute as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
   );
   await findByText(/pesée|poids/i);
 });
@@ -62,7 +62,7 @@ test('affiche les événements récents de l\'animal', async () => {
 test('état vide si aucun événement', async () => {
   server.use(http.get(`${BASE}/pets/p1/events`, () => HttpResponse.json([])));
   const { findByText } = render(
-    <PetProfileScreen route={defaultRoute} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+    <PetProfileScreen route={defaultRoute as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
   );
   await findByText(/aucun événement/i);
 });
@@ -72,7 +72,7 @@ test('n\'affiche pas de race si non fournie', async () => {
     params: { petId: 'p1', petName: 'Luna', species: 'cat', breed: undefined, birthDate: undefined },
   };
   const { queryByText, findAllByText } = render(
-    <PetProfileScreen route={routeNoBirthNoBread} navigation={{ navigate: mockNavigate, goBack: mockGoBack }} />
+    <PetProfileScreen route={routeNoBirthNoBread as any} navigation={{ navigate: mockNavigate, goBack: mockGoBack } as any} />
   );
   await findAllByText('Luna');
   expect(queryByText('Européen')).toBeNull();

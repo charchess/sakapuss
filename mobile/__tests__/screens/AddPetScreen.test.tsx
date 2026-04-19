@@ -31,7 +31,7 @@ beforeEach(() => {
 const props = {
   navigation: { navigate: mockNavigate, goBack: mockGoBack },
   route: { params: {} },
-};
+} as any;
 
 test('affiche les champs nom, espèce, date de naissance', () => {
   const { getByPlaceholderText } = render(<AddPetScreen {...props} />);

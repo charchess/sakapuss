@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import { DashboardScreen } from '../../src/screens/DashboardScreen';
+import { DashboardScreen as DashboardScreenComponent } from '../../src/screens/DashboardScreen';
+const DashboardScreen = DashboardScreenComponent as any;
 import { server } from '../mocks/server';
 import { http, HttpResponse } from 'msw';
 
