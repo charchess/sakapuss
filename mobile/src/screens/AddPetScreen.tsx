@@ -9,17 +9,15 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
+import { StackScreenProps } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
 import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme';
 import { api } from '../api/client';
 import { AuthStore } from '../store/auth';
+import { HomeStackParamList } from '../navigation/AppNavigator';
 
-interface Props {
-  navigation: any;
-  route: { params: Record<string, unknown> };
-}
+type Props = StackScreenProps<HomeStackParamList, 'AddPet'>;
 
 const SPECIES_OPTIONS = ['Chat', 'Chien', 'Lapin', 'Oiseau', 'Hamster', 'Autre'];
 
@@ -29,6 +27,7 @@ export function AddPetScreen({ navigation }: Props) {
   const [birthDate, setBirthDate] = useState('');
   const [breed, setBreed] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const validate = (): string | null => {
     if (!name.trim()) return 'Le nom est requis.';
@@ -41,15 +40,16 @@ export function AddPetScreen({ navigation }: Props) {
   const handleSubmit = async () => {
     const guest = await AuthStore.isGuestMode();
     if (guest) {
-      Alert.alert('Mode invité', 'Créez un compte pour ajouter des animaux.');
+      setError('Créez un compte pour ajouter des animaux.');
       return;
     }
-    const error = validate();
-    if (error) {
-      Alert.alert('Champ requis', error);
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
+    setError(null);
     setLoading(true);
     try {
       await api.createPet({
@@ -61,7 +61,7 @@ export function AddPetScreen({ navigation }: Props) {
       navigation.goBack();
     } catch (err: unknown) {
       const msg = (err as { message?: string })?.message ?? 'Impossible de créer l\'animal.';
-      Alert.alert('Erreur', msg);
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -106,6 +106,7 @@ export function AddPetScreen({ navigation }: Props) {
                   style={[styles.speciesPill, species === s && styles.speciesPillActive]}
                   onPress={() => setSpecies(s)}
                   activeOpacity={0.7}
+                  testID={`species-pill-${s.toLowerCase()}`}
                 >
                   <Text style={[styles.speciesPillText, species === s && styles.speciesPillTextActive]}>
                     {s}
@@ -139,6 +140,15 @@ export function AddPetScreen({ navigation }: Props) {
             />
           </View>
         </View>
+
+        {error && (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorText}>{error}</Text>
+            <TouchableOpacity onPress={() => { setError(null); handleSubmit(); }} style={styles.retryBtn}>
+              <Text style={styles.retryText}>Réessayer</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         <TouchableOpacity
           style={[styles.button, loading && styles.buttonDisabled]}
@@ -256,5 +266,26 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textSecondary,
     fontWeight: '600',
+  },
+  errorBox: {
+    backgroundColor: 'rgba(225,112,85,0.1)',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: Spacing.md,
+  },
+  errorText: {
+    color: '#E17055',
+    fontSize: 14,
+  },
+  retryBtn: {
+    marginTop: 8,
+    backgroundColor: '#E17055',
+    borderRadius: 8,
+    padding: 10,
+    alignItems: 'center' as const,
+  },
+  retryText: {
+    color: 'white',
+    fontWeight: '700' as const,
   },
 });

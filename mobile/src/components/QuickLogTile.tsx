@@ -7,14 +7,16 @@ interface Props {
   label: string;
   color: string;
   onPress: () => void;
+  testID?: string;
 }
 
-export function QuickLogTile({ icon, label, color, onPress }: Props) {
+export function QuickLogTile({ icon, label, color, onPress, testID }: Props) {
   return (
     <TouchableOpacity
       style={[styles.tile, { backgroundColor: `${color}14` }]}
       onPress={onPress}
       activeOpacity={0.7}
+      testID={testID}
     >
       <View style={[styles.iconCircle, { backgroundColor: `${color}22` }]}>
         <Text style={styles.icon}>{icon}</Text>

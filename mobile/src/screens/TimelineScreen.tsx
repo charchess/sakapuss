@@ -8,6 +8,8 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
+  LayoutAnimation,
+  Platform,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
@@ -93,6 +95,13 @@ export function TimelineScreen() {
     }, [loadEvents])
   );
 
+  const handleFilterChange = (key: string) => {
+    if (Platform.OS === 'android') {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    }
+    setActiveFilter(key);
+  };
+
   const filteredEvents = activeFilter === 'all'
     ? events
     : events.filter((e) => {
@@ -154,8 +163,9 @@ export function TimelineScreen() {
                 styles.pill,
                 active && { backgroundColor: filter.color, borderColor: filter.color },
               ]}
-              onPress={() => setActiveFilter(filter.key)}
+              onPress={() => handleFilterChange(filter.key)}
               activeOpacity={0.7}
+              testID={`filter-${filter.key}`}
             >
               <Text style={[styles.pillText, active && styles.pillTextActive]}>
                 {filter.label}
@@ -178,6 +188,7 @@ export function TimelineScreen() {
         </View>
       ) : (
         <FlatList
+          testID="timeline-list"
           data={groups}
           keyExtractor={(item) => item.dateLabel}
           renderItem={renderGroup}

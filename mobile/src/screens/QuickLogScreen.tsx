@@ -9,29 +9,20 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
+import { StackScreenProps } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
 import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme';
 import { logEvent } from '../api/sync';
+import { HomeStackParamList } from '../navigation/AppNavigator';
 
-interface RouteParams {
-  type: string;
-  label: string;
-  icon: string;
-  petId: string | null;
-  petName: string;
-}
-
-interface Props {
-  navigation: any;
-  route: { params: RouteParams };
-}
+type Props = StackScreenProps<HomeStackParamList, 'QuickLog'>;
 
 export function QuickLogScreen({ navigation, route }: Props) {
   const { type, label, icon, petId, petName } = route.params;
 
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Weight fields
   const [grams, setGrams] = useState('');
@@ -84,19 +75,20 @@ export function QuickLogScreen({ navigation, route }: Props) {
   };
 
   const handleSubmit = async () => {
-    const error = validate();
-    if (error) {
-      Alert.alert('Champ requis', error);
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
+    setError(null);
     setLoading(true);
     try {
       await logEvent(petId!, type, buildPayload());
       navigation.goBack();
     } catch (err: unknown) {
       const msg = (err as { message?: string })?.message ?? 'Erreur lors de la sauvegarde.';
-      Alert.alert('Erreur', msg);
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -248,6 +240,15 @@ export function QuickLogScreen({ navigation, route }: Props) {
           {renderFields()}
         </View>
 
+        {error && (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorText}>{error}</Text>
+            <TouchableOpacity onPress={() => { setError(null); handleSubmit(); }} style={styles.retryBtn}>
+              <Text style={styles.retryText}>Réessayer</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* Submit */}
         <TouchableOpacity
           style={[styles.button, loading && styles.buttonDisabled]}
@@ -371,5 +372,26 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textSecondary,
     fontWeight: '600',
+  },
+  errorBox: {
+    backgroundColor: 'rgba(225,112,85,0.1)',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: Spacing.md,
+  },
+  errorText: {
+    color: '#E17055',
+    fontSize: 14,
+  },
+  retryBtn: {
+    marginTop: 8,
+    backgroundColor: '#E17055',
+    borderRadius: 8,
+    padding: 10,
+    alignItems: 'center' as const,
+  },
+  retryText: {
+    color: 'white',
+    fontWeight: '700' as const,
   },
 });

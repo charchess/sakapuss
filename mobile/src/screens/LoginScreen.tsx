@@ -111,6 +111,7 @@ export function LoginScreen({ onLoginSuccess }: Props) {
               autoCapitalize="none"
               autoCorrect={false}
               returnKeyType="next"
+              testID="email-input"
             />
           </View>
 
@@ -125,6 +126,7 @@ export function LoginScreen({ onLoginSuccess }: Props) {
               secureTextEntry
               returnKeyType="done"
               onSubmitEditing={handleSubmit}
+              testID="password-input"
             />
           </View>
 
@@ -133,6 +135,7 @@ export function LoginScreen({ onLoginSuccess }: Props) {
             onPress={handleSubmit}
             disabled={loading}
             activeOpacity={0.8}
+            testID="login-btn"
           >
             {loading ? (
               <ActivityIndicator color="#fff" />
@@ -162,7 +165,7 @@ export function LoginScreen({ onLoginSuccess }: Props) {
           <View style={styles.separatorLine} />
         </View>
 
-        <TouchableOpacity style={styles.guestButton} onPress={handleGuestMode}>
+        <TouchableOpacity style={styles.guestButton} onPress={handleGuestMode} testID="guest-btn">
           <Text style={styles.guestText}>Continuer sans compte</Text>
         </TouchableOpacity>
       </ScrollView>

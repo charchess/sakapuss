@@ -9,7 +9,9 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { StackScreenProps } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
+import { HomeStackParamList } from '../navigation/AppNavigator';
 import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme';
 import { AuthStore, User } from '../store/auth';
 import { api, Pet, PetEvent } from '../api/client';
@@ -36,9 +38,7 @@ const QUICK_ACTIONS: QuickAction[] = [
   { key: 'event', icon: '📅', label: 'Évén.', color: Colors.secondary, type: 'custom' },
 ];
 
-interface Props {
-  navigation: any;
-}
+type Props = StackScreenProps<HomeStackParamList, 'Dashboard'>;
 
 export function DashboardScreen({ navigation }: Props) {
   const [user, setUser] = useState<User | null>(null);
@@ -137,7 +137,7 @@ export function DashboardScreen({ navigation }: Props) {
   }
 
   return (
-    <View style={styles.root}>
+    <View style={styles.root} testID="dashboard-root">
       <StatusBar style="dark" backgroundColor={Colors.background} />
 
       {error && (
@@ -164,7 +164,7 @@ export function DashboardScreen({ navigation }: Props) {
       {isGuest && (
         <View style={styles.guestBanner}>
           <Text style={styles.guestBannerText}>🌐 Mode hors-ligne</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Settings' as never)}>
+          <TouchableOpacity onPress={() => (navigation as any).navigate('Settings')}>
             <Text style={styles.guestBannerLink}>Créer un compte →</Text>
           </TouchableOpacity>
         </View>
@@ -189,7 +189,7 @@ export function DashboardScreen({ navigation }: Props) {
             <Text style={styles.noPetsText}>Aucun animal enregistré</Text>
             <TouchableOpacity
               style={styles.addPetBtn}
-              onPress={() => navigation.navigate('AddPet')}
+              onPress={() => navigation.navigate('AddPet', {})}
               activeOpacity={0.8}
             >
               <Text style={styles.addPetBtnText}>+ Ajouter un animal</Text>
@@ -203,9 +203,10 @@ export function DashboardScreen({ navigation }: Props) {
             <View style={styles.sectionHeaderRow}>
               <Text style={styles.sectionLabel}>Mes animaux</Text>
               <TouchableOpacity
-                onPress={() => navigation.navigate('AddPet')}
+                onPress={() => navigation.navigate('AddPet', {})}
                 style={styles.addPetMini}
                 activeOpacity={0.7}
+                testID="add-pet-btn"
               >
                 <Text style={styles.addPetMiniText}>+ Ajouter</Text>
               </TouchableOpacity>
@@ -251,8 +252,9 @@ export function DashboardScreen({ navigation }: Props) {
         {remindersCount > 0 && (
           <TouchableOpacity
             style={styles.reminderBanner}
-            onPress={() => navigation.navigate('Rappels')}
+            onPress={() => (navigation as any).navigate('Rappels')}
             activeOpacity={0.8}
+            testID="reminder-banner"
           >
             <Text style={styles.reminderBannerIcon}>🔔</Text>
             <Text style={styles.reminderBannerText}>
@@ -276,6 +278,7 @@ export function DashboardScreen({ navigation }: Props) {
                 label={action.label}
                 color={action.color}
                 onPress={() => handleQuickAction(action)}
+                testID={`quick-action-${action.key}`}
               />
             ))}
           </View>
@@ -285,7 +288,7 @@ export function DashboardScreen({ navigation }: Props) {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Activité récente</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Timeline')}>
+            <TouchableOpacity onPress={() => (navigation as any).navigate('Timeline')}>
               <Text style={styles.seeAll}>Tout voir ›</Text>
             </TouchableOpacity>
           </View>

@@ -8,25 +8,16 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { StackScreenProps } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
 import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme';
 import { api, PetEvent } from '../api/client';
 import { AuthStore } from '../store/auth';
 import { EventCard } from '../components/EventCard';
 import { speciesEmoji } from '../utils/petUtils';
+import { HomeStackParamList } from '../navigation/AppNavigator';
 
-interface RouteParams {
-  petId: string;
-  petName: string;
-  species: string;
-  breed?: string;
-  birthDate?: string;
-}
-
-interface Props {
-  navigation: any;
-  route: { params: RouteParams };
-}
+type Props = StackScreenProps<HomeStackParamList, 'PetProfile'>;
 
 function computeAge(birthDate: string): string {
   const born = new Date(birthDate);
