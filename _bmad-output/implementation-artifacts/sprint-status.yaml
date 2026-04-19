@@ -149,3 +149,23 @@ development_status:
   10-4-proactive-notifications: review
   10-5-stock-alerts-mqtt: review
   epic-10-retrospective: optional
+
+  # ═══════════════════════════════════════════════
+  # SPRINT 6 — Mobile Autonome (Local-First)
+  # Added: 2026-04-19
+  # ═══════════════════════════════════════════════
+
+  # Epic 11: Mobile Local-First — Onboarding & Data Layer
+  epic-11: backlog
+  11-1-welcome-screen-optional-auth: backlog
+  11-2-config-wizard-tracking-setup: backlog
+  11-3-local-sqlite-schema-migrations: backlog
+  11-4-repository-layer-data-abstraction: backlog
+  11-5-sync-engine-push-pull: backlog
+  epic-11-retrospective: optional
+
+  # Epic 12: Mobile Local-First — Pet & Event Management Offline
+  epic-12: backlog
+  12-1-pet-management-offline: backlog
+  12-2-quick-log-offline: backlog
+  epic-12-retrospective: optional

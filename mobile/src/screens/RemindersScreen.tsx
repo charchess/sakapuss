@@ -12,6 +12,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { Colors, Spacing, Typography } from '../constants/theme';
 import { api, Reminder } from '../api/client';
+import { AuthStore } from '../store/auth';
 import { ReminderCard } from '../components/ReminderCard';
 
 function getReminderUrgencySort(r: Reminder): number {
@@ -43,7 +44,8 @@ export function RemindersScreen() {
       setReminders(sorted);
     } catch (err) {
       console.warn('[Reminders] load error:', err);
-      setError('Impossible de charger les données. Vérifiez votre connexion.');
+      const isGuest = await AuthStore.isGuestMode();
+      if (!isGuest) setError('Impossible de charger les données. Vérifiez votre connexion.');
     } finally {
       setLoading(false);
       setRefreshing(false);

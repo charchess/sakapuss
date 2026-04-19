@@ -13,7 +13,8 @@
       "adaptiveIcon": {
         "backgroundColor": "#6C5CE7"
       },
-      "package": "com.sakapuss.mobile"
+      "package": "com.sakapuss.mobile",
+      "usesCleartextTraffic": true
     },
     "ios": {
       "supportsTablet": false,

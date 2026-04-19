@@ -7,7 +7,7 @@ classification:
   complexity: 'low'
 inputDocuments: ['product-brief-sakapuss-2026-02-27.md', 'brainstorming-session-2026-03-04.md']
 stepsCompleted: ['step-e-01-discovery', 'step-e-02-review', 'step-e-03-edit']
-lastEdited: '2026-03-09'
+lastEdited: '2026-04-19'
 ---
 
 # Product Requirements Document - Sakapuss
@@ -123,3 +123,47 @@ User creates profile, uploads photo, and sets initial health baseline.
 ### Performance
 - **NFR-PER-01**: API response time under 200ms for 95th percentile.
 - **NFR-PER-02**: MQTT command processing latency under 1s.
+
+---
+
+## Sprint 6 — Mobile Autonome (Local-First)
+
+**Date d'ajout :** 2026-04-19
+
+### Pivot Architectural
+
+L'app mobile passe d'un client léger dépendant du backend à une application **autonome locale**. Le compte utilisateur devient optionnel et débloque la synchronisation avec le portail web.
+
+### P0 — Must Have (Sprint 6)
+
+18. **Onboarding Mobile** : Écran de bienvenue avec deux chemins — "Continuer sans compte" (mode local) et "Créer un compte / Se connecter" (mode sync). L'onboarding n'est présenté qu'au premier lancement.
+
+19. **Configuration Wizard** : Assistant de configuration post-onboarding permettant de sélectionner les éléments de suivi souhaités (poids, alimentation, litière, médicaments, comportement). Chaque élément activé expose un panneau de paramétrage. La configuration est persistée localement et détermine les boutons visibles sur le dashboard.
+
+20. **Base de Données Locale (SQLite)** : Toutes les données (animaux, événements, rappels, config) sont stockées localement via `expo-sqlite` + Drizzle ORM. L'app fonctionne entièrement hors-ligne.
+
+21. **Couche Repository** : Abstraction data-layer — toute l'UI interagit avec les repositories, jamais directement avec l'API. Permet de substituer la source de données sans modifier les écrans.
+
+### P1 — Should Have (Sprint 6)
+
+22. **Moteur de Synchronisation** : Quand un compte existe, synchronisation automatique push/pull déclenchée à la reconnexion réseau et au retour en premier plan. Résolution de conflits : Last-Write-Wins côté serveur.
+
+23. **Indicateur de Sync** : Badge visuel sur le dashboard indiquant l'état de synchronisation (en attente, synchronisé, erreur).
+
+### User Journeys (Sprint 6)
+
+**Journey 7: Premier lancement sans compte**
+- Utilisateur installe l'app → Écran de bienvenue → "Continuer sans compte" → Config Wizard (sélectionne poids + litière) → Dashboard vide → Ajoute un animal → Commence à saisir. Tout est local.
+
+**Journey 8: Ajout d'un compte après usage**
+- Utilisateur a utilisé l'app en local → Paramètres → "Connecter un compte" → Auth → Les données locales `pending` sont pushées vers le serveur → `sync_status` passe à `synced`.
+
+### Functional Requirements (Sprint 6)
+
+- **FR-MOB-01**: App MUST be fully functional without network access and without an account.
+- **FR-MOB-02**: Account creation and login MUST be optional, accessible from onboarding AND settings.
+- **FR-MOB-03**: Configuration wizard MUST be shown once at first launch and accessible again from settings.
+- **FR-MOB-04**: Each activated tracking category MUST display its configuration panel (frequency, unit, etc.).
+- **FR-MOB-05**: All write operations MUST persist locally first, before any network call.
+- **FR-MOB-06**: Sync MUST be triggered automatically on network reconnection when account exists.
+- **FR-MOB-07**: Sync conflicts MUST be resolved server-wins, with local record updated silently.
