@@ -10,21 +10,24 @@ appId: com.sakapuss.mobile
 - tapOn: "Se connecter"
 - assertVisible: "Que se passe-t-il aujourd'hui ?"
 
-# Navigate to AddPet via "+ Ajouter" link
+# Naviguer vers AddPet
 - tapOn:
     text: "+ Ajouter"
 - assertVisible: "Nouvel animal"
 
-# Fill name, dismiss keyboard before scrolling further
+# Valider le formulaire vide → errorBox avec message de validation
+- tapOn: "Ajouter"
+- assertVisible: "Le nom est requis."
+
+# Remplir le formulaire correctement
 - tapOn:
     id: "pet-name-input"
 - inputText: "Caramel"
 - hideKeyboard
 
-# Pick species via pill (no keyboard interaction needed)
-- tapOn: "Chat"
+- tapOn:
+    id: "species-pill-chat"
 
-# Tap birth date input — scroll into view if needed
 - scrollUntilVisible:
     element:
       id: "pet-birthdate-input"
@@ -34,6 +37,13 @@ appId: com.sakapuss.mobile
 - inputText: "2022-06-15"
 - hideKeyboard
 
-# Submit
+# Soumettre
 - tapOn: "Ajouter"
+
+# Retour au dashboard sans erreur
 - assertVisible: "Que se passe-t-il aujourd'hui ?"
+- assertNotVisible: "Erreur"
+- assertNotVisible: "Impossible"
+
+# Vérifier que l'animal "Caramel" est visible dans la liste
+- assertVisible: "Caramel"

@@ -1,11 +1,23 @@
 appId: com.sakapuss.mobile
 ---
+# Test 1: mauvais mot de passe → erreur visible
 - launchApp:
     clearState: true
 - assertVisible: "Se connecter"
 - tapOn: "votre@email.com"
 - inputText: "playwright-e2e@test.sakapuss.local"
 - tapOn: "••••••••"
+- inputText: "mauvaisMotDePasse"
+- tapOn: "Se connecter"
+- assertVisible: "Erreur"
+- tapOn: "OK"
+
+# Test 2: corriger le mot de passe → dashboard sans erreur
+- tapOn: "••••••••"
+- eraseText: 17
 - inputText: "PlaywrightTest123!"
+- hideKeyboard
 - tapOn: "Se connecter"
 - assertVisible: "Que se passe-t-il aujourd'hui ?"
+- assertNotVisible: "Erreur"
+- assertNotVisible: "Impossible de charger"

@@ -1,16 +1,34 @@
 appId: com.sakapuss.mobile
 ---
-# Requires user to be logged in with at least one pet
-# Runs after add-pet flow in full suite
+# Pré-requis: utilisateur connecté avec au moins un animal
 - launchApp
 - tapOn: "⚖️"
 - assertVisible: "Pesée"
+- assertVisible: "Enregistrer"
+
+# Saisir sans poids → errorBox avec message de validation
+- tapOn: "Enregistrer"
+- assertVisible: "Veuillez saisir un poids valide."
+- assertNotVisible: "Que se passe-t-il aujourd'hui ?"
+
+# Saisir un poids valide
 - tapOn:
     id: "weight-input"
 - inputText: "4200"
 - hideKeyboard
 - tapOn: "Enregistrer"
-# Navigation back to dashboard on success; alert on no-pet or API error
-- assertVisible:
-    text: "Tableau de bord"
-    optional: true
+
+# Retour au dashboard sans erreur
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+- assertNotVisible: "Erreur"
+- assertNotVisible: "Impossible"
+
+# Vérifier que l'événement apparaît dans la Timeline
+- tapOn: "📋"
+- assertVisible: "Timeline"
+- assertNotVisible: "Impossible de charger les données"
+- tapOn:
+    id: "filter-weight"
+- assertNotVisible: "Impossible de charger les données"
+- tapOn:
+    id: "filter-all"
