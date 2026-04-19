@@ -9,11 +9,26 @@ appId: com.sakapuss.mobile
 - inputText: "PlaywrightTest123!"
 - tapOn: "Se connecter"
 - assertVisible: "Que se passe-t-il aujourd'hui ?"
+- assertNotVisible: "Erreur"
+- assertNotVisible: "Impossible de charger"
+
+# Timeline
 - tapOn: "📋"
 - assertVisible: "Timeline"
+- assertNotVisible: "Impossible de charger les données"
+
+# Rappels
 - tapOn: "🔔"
 - assertVisible: "Rappels"
+- assertNotVisible: "Impossible de charger les données"
+
+# Paramètres — vérifier que les infos compte sont affichées
 - tapOn: "⚙️"
 - assertVisible: "Paramètres"
+- assertVisible: "Compte"
+- assertVisible: "Serveur"
+- assertNotVisible: "Erreur"
+
+# Retour accueil
 - tapOn: "🏠"
 - assertVisible: "Que se passe-t-il aujourd'hui ?"

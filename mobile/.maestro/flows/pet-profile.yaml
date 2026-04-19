@@ -1,6 +1,5 @@
 appId: com.sakapuss.mobile
 ---
-# Pre-requisite: user is logged in and on dashboard with at least one pet
 - launchApp:
     clearState: true
 - assertVisible: "Se connecter"
@@ -10,14 +9,19 @@ appId: com.sakapuss.mobile
 - inputText: "PlaywrightTest123!"
 - tapOn: "Se connecter"
 - assertVisible: "Que se passe-t-il aujourd'hui ?"
+- assertNotVisible: "Erreur"
 
-# Navigate to pet profile via the dashboard link
+# Naviguer vers la fiche de l'animal
 - assertVisible:
     text: "Fiche de"
     optional: true
 - tapOn:
     text: "Fiche de"
     optional: true
+
+# Vérifier le contenu de la fiche — pas d'erreur
+- assertNotVisible: "Impossible de charger"
+- assertNotVisible: "Erreur"
 - assertVisible:
     text: "Événements récents"
     optional: true

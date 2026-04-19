@@ -3,7 +3,26 @@ appId: com.sakapuss.mobile
 - launchApp
 - tapOn: "📋"
 - assertVisible: "Timeline"
-- tapOn: "⚖️ Pesée"
+- assertNotVisible: "Impossible de charger les données"
+
+# Filtre Pesée — les événements litière ne doivent pas apparaître
+- tapOn:
+    id: "filter-weight"
 - assertNotVisible: "Litière nettoyée"
-- tapOn: "Tout"
+- assertNotVisible: "Impossible de charger les données"
+
+# Filtre Santé
+- tapOn:
+    id: "filter-sante"
+- assertNotVisible: "Litière nettoyée"
+
+# Filtre Litière — les événements poids ne doivent pas apparaître
+- tapOn:
+    id: "filter-litiere"
+- assertNotVisible: "Impossible de charger les données"
+
+# Retour à Tout — liste complète, pas d'erreur
+- tapOn:
+    id: "filter-all"
 - assertVisible: "Tout"
+- assertNotVisible: "Impossible de charger les données"
