@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -39,6 +39,17 @@ export function PetProfileScreen({ navigation, route }: Props) {
   const [events, setEvents] = useState<PetEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const weightEntries = useMemo(() => {
+    return events
+      .filter((e) => e.type === 'weight' && typeof e.payload?.grams === 'number')
+      .slice(0, 10)
+      .reverse()
+      .map((e) => ({
+        grams: e.payload.grams as number,
+        date: new Date(e.occurred_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }),
+      }));
+  }, [events]);
 
   useFocusEffect(
     useCallback(() => {
@@ -87,6 +98,38 @@ export function PetProfileScreen({ navigation, route }: Props) {
             )}
           </View>
         </View>
+
+        {/* Weight chart */}
+        {weightEntries.length > 0 && (
+          <View style={styles.chartCard}>
+            <Text style={styles.sectionTitle}>Évolution du poids</Text>
+            {(() => {
+              const maxG = Math.max(...weightEntries.map((e) => e.grams));
+              const minG = Math.min(...weightEntries.map((e) => e.grams));
+              const range = maxG - minG || 1;
+              return (
+                <View style={styles.chart}>
+                  {weightEntries.map((entry, i) => {
+                    const heightPct = 0.3 + 0.7 * ((entry.grams - minG) / range);
+                    return (
+                      <View key={i} style={styles.chartCol}>
+                        <Text style={styles.chartVal}>
+                          {entry.grams >= 1000
+                            ? `${(entry.grams / 1000).toFixed(1)}kg`
+                            : `${entry.grams}g`}
+                        </Text>
+                        <View style={styles.chartBarWrap}>
+                          <View style={[styles.chartBar, { height: `${Math.round(heightPct * 100)}%` as any }]} />
+                        </View>
+                        <Text style={styles.chartDate}>{entry.date}</Text>
+                      </View>
+                    );
+                  })}
+                </View>
+              );
+            })()}
+          </View>
+        )}
 
         {/* Events section */}
         <View style={styles.section}>
@@ -211,6 +254,46 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: Spacing.md,
+  },
+  chartCard: {
+    marginHorizontal: Spacing.xl,
+    marginBottom: Spacing.lg,
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.xl,
+    padding: Spacing.lg,
+    ...Shadow.card,
+  },
+  chart: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    height: 100,
+    gap: 6,
+  },
+  chartCol: {
+    flex: 1,
+    alignItems: 'center',
+    height: '100%',
+  },
+  chartVal: {
+    fontSize: 8,
+    color: Colors.textMuted,
+    marginBottom: 2,
+  },
+  chartBarWrap: {
+    flex: 1,
+    width: '100%',
+    justifyContent: 'flex-end',
+  },
+  chartBar: {
+    backgroundColor: Colors.primary,
+    borderRadius: 3,
+    width: '100%',
+    opacity: 0.8,
+  },
+  chartDate: {
+    fontSize: 8,
+    color: Colors.textMuted,
+    marginTop: 3,
   },
   emptyState: {
     alignItems: 'center',

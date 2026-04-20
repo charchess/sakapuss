@@ -10,6 +10,10 @@ import { SettingsScreen } from '../screens/SettingsScreen';
 import { QuickLogScreen } from '../screens/QuickLogScreen';
 import { PetProfileScreen } from '../screens/PetProfileScreen';
 import { AddPetScreen } from '../screens/AddPetScreen';
+import { FoyerScreen } from '../screens/FoyerScreen';
+import { ResourcesScreen } from '../screens/ResourcesScreen';
+import { BowlsScreen } from '../screens/BowlsScreen';
+import { FoodScreen } from '../screens/FoodScreen';
 
 export type HomeStackParamList = {
   Dashboard: undefined;
@@ -34,10 +38,19 @@ export type AppTabParamList = {
   Accueil: undefined;
   Timeline: undefined;
   Rappels: undefined;
+  Foyer: undefined;
   Paramètres: undefined;
 };
 
+export type FoyerStackParamList = {
+  FoyerHome: undefined;
+  Litières: undefined;
+  Gamelles: undefined;
+  Alimentation: undefined;
+};
+
 const HomeStack = createStackNavigator<HomeStackParamList>();
+const FoyerStack = createStackNavigator<FoyerStackParamList>();
 const Tab = createBottomTabNavigator<AppTabParamList>();
 
 interface TabIconProps {
@@ -111,6 +124,44 @@ function HomeStackNavigator() {
   );
 }
 
+function FoyerStackNavigator() {
+  return (
+    <FoyerStack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: Colors.background,
+          elevation: 0,
+          shadowOpacity: 0,
+          borderBottomWidth: 0,
+        },
+        headerTitleStyle: { color: Colors.textPrimary, fontWeight: '700', fontSize: 18 },
+        cardStyle: { backgroundColor: Colors.background },
+      }}
+    >
+      <FoyerStack.Screen
+        name="FoyerHome"
+        component={FoyerScreen}
+        options={{ headerShown: false }}
+      />
+      <FoyerStack.Screen
+        name="Litières"
+        component={ResourcesScreen}
+        options={{ title: 'Litières', headerBackTitle: 'Foyer', headerTintColor: Colors.primary }}
+      />
+      <FoyerStack.Screen
+        name="Gamelles"
+        component={BowlsScreen}
+        options={{ title: 'Gamelles', headerBackTitle: 'Foyer', headerTintColor: Colors.primary }}
+      />
+      <FoyerStack.Screen
+        name="Alimentation"
+        component={FoodScreen}
+        options={{ title: 'Alimentation', headerBackTitle: 'Foyer', headerTintColor: Colors.primary }}
+      />
+    </FoyerStack.Navigator>
+  );
+}
+
 export function AppNavigator({ onLogout }: Props) {
   return (
     <Tab.Navigator
@@ -158,6 +209,15 @@ export function AppNavigator({ onLogout }: Props) {
         options={{
           tabBarIcon: ({ focused }) => (
             <TabIcon icon="🔔" focused={focused} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Foyer"
+        component={FoyerStackNavigator}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon icon="🏡" focused={focused} />
           ),
         }}
       />
