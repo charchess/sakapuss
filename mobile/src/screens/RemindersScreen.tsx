@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-start',
-    paddingTop: '30%',
+    paddingTop: Spacing.xxl,
     padding: Spacing.xxl,
   },
   emptyIcon: {
