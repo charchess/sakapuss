@@ -3,9 +3,11 @@ appId: com.sakapuss.mobile
 - launchApp:
     clearState: true
 - assertVisible: "Se connecter"
-- tapOn: "votre@email.com"
+- tapOn:
+    id: "email-input"
 - inputText: "playwright-e2e@test.sakapuss.local"
-- tapOn: "••••••••"
+- tapOn:
+    id: "password-input"
 - inputText: "PlaywrightTest123!"
 - tapOn: "Se connecter"
 - assertVisible: "Que se passe-t-il aujourd'hui ?"

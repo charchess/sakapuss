@@ -4,16 +4,19 @@ appId: com.sakapuss.mobile
 - launchApp:
     clearState: true
 - assertVisible: "Se connecter"
-- tapOn: "votre@email.com"
+- tapOn:
+    id: "email-input"
 - inputText: "playwright-e2e@test.sakapuss.local"
-- tapOn: "••••••••"
+- tapOn:
+    id: "password-input"
 - inputText: "mauvaisMotDePasse"
 - tapOn: "Se connecter"
 - assertVisible: "Erreur"
 - tapOn: "OK"
 
 # Test 2: corriger le mot de passe → dashboard sans erreur
-- tapOn: "••••••••"
+- tapOn:
+    id: "password-input"
 - eraseText: 17
 - inputText: "PlaywrightTest123!"
 - hideKeyboard

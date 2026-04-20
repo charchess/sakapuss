@@ -55,6 +55,8 @@ export function DashboardScreen({ navigation }: Props) {
 
   const loadData = useCallback(async () => {
     setError(null);
+    const guest = await AuthStore.isGuestMode();
+    setIsGuest(guest);
     try {
       const [u, fetchedPets] = await Promise.all([
         AuthStore.getUser(),
@@ -78,8 +80,6 @@ export function DashboardScreen({ navigation }: Props) {
       setRemindersCount(reminders.length);
     } catch (err) {
       console.warn('[Dashboard] loadData error:', err);
-      const guest = await AuthStore.isGuestMode();
-      setIsGuest(guest);
       if (!guest) {
         setError('Impossible de charger les données. Vérifiez votre connexion.');
       }

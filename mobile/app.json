@@ -14,7 +14,8 @@
         "backgroundColor": "#6C5CE7"
       },
       "package": "com.sakapuss.mobile",
-      "usesCleartextTraffic": true
+      "usesCleartextTraffic": true,
+      "versionCode": 3
     },
     "ios": {
       "supportsTablet": false,
@@ -23,6 +24,8 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": []
+    "plugins": [
+      "@react-native-community/datetimepicker"
+    ]
   }
 }
