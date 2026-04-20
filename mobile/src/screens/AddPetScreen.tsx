@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -21,6 +21,7 @@ import { HomeStackParamList } from '../navigation/AppNavigator';
 type Props = StackScreenProps<HomeStackParamList, 'AddPet'>;
 
 const SPECIES_OPTIONS = ['Chat', 'Chien', 'Lapin', 'Oiseau', 'Hamster', 'Autre'];
+const GUEST_ERROR = 'Créez un compte pour ajouter des animaux.';
 
 export function AddPetScreen({ navigation }: Props) {
   const [name, setName] = useState('');
@@ -31,6 +32,14 @@ export function AddPetScreen({ navigation }: Props) {
   const [breed, setBreed] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isGuest, setIsGuest] = useState(false);
+
+  useEffect(() => {
+    AuthStore.isGuestMode().then((guest) => {
+      setIsGuest(guest);
+      if (guest) setError(GUEST_ERROR);
+    });
+  }, []);
 
   const validate = (): string | null => {
     if (!name.trim()) return 'Le nom est requis.';
@@ -165,11 +174,17 @@ export function AddPetScreen({ navigation }: Props) {
         </View>
 
         {error && (
-          <View style={styles.errorBox}>
+          <View style={styles.errorBox} testID="error-box">
             <Text style={styles.errorText}>{error}</Text>
-            <TouchableOpacity onPress={() => { setError(null); handleSubmit(); }} style={styles.retryBtn}>
-              <Text style={styles.retryText}>Réessayer</Text>
-            </TouchableOpacity>
+            {isGuest ? (
+              <TouchableOpacity onPress={() => navigation.goBack()} style={styles.retryBtn} testID="create-account-btn">
+                <Text style={styles.retryText}>Retour à la connexion</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity onPress={() => { setError(null); handleSubmit(); }} style={styles.retryBtn} testID="retry-btn">
+                <Text style={styles.retryText}>Réessayer</Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
 

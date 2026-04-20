@@ -24,6 +24,16 @@ appId: com.sakapuss.mobile
 - assertVisible: "Rappels"
 - assertNotVisible: "Impossible de charger les données"
 
+# Foyer
+- tapOn: "🏡"
+- assertVisible: "Foyer"
+- assertNotVisible: "Erreur"
+
+# Foyer: litières tile visible
+- assertVisible: "Litières"
+- assertVisible: "Gamelles"
+- assertVisible: "Alimentation"
+
 # Paramètres — vérifier que les infos compte sont affichées
 - tapOn: "⚙️"
 - assertVisible: "Paramètres"

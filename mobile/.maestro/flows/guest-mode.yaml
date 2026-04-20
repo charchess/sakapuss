@@ -1,0 +1,40 @@
+appId: com.sakapuss.mobile
+---
+# Guest mode: navigation sans compte
+
+- launchApp:
+    clearState: true
+- assertVisible: "Se connecter"
+
+# Continuer sans compte
+- tapOn:
+    id: "guest-btn"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+
+# Dashboard en mode guest: bannière "Mode hors-ligne" visible
+- assertVisible: "Mode hors-ligne"
+
+# Tenter d'ajouter un animal → erreur guest affiché dès l'ouverture
+- tapOn:
+    id: "add-pet-btn"
+- assertVisible: "Nouvel animal"
+- assertVisible: "Créez un compte pour ajouter des animaux."
+- assertVisible: "Retour à la connexion"
+
+# Le bouton "Retour à la connexion" fonctionne
+- tapOn:
+    id: "create-account-btn"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+
+# Settings en mode guest: bouton "Quitter le mode invité"
+- tapOn: "⚙️"
+- assertVisible: "Paramètres"
+- assertVisible: "Mode invité"
+- assertVisible: "Quitter le mode invité"
+- assertNotVisible: "Se déconnecter"
+
+# Quitter le mode guest
+- tapOn: "Quitter le mode invité"
+- assertVisible: "Retourner à l'écran de connexion ?"
+- tapOn: "Quitter"
+- assertVisible: "Se connecter"

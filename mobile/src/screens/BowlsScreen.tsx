@@ -82,7 +82,7 @@ export function BowlsScreen() {
 
       <View style={styles.header}>
         <Text style={styles.title}>Gamelles 🥣</Text>
-        <TouchableOpacity onPress={() => setShowForm(!showForm)} style={styles.addBtn}>
+        <TouchableOpacity onPress={() => setShowForm(!showForm)} style={styles.addBtn} testID="bowl-add-btn">
           <Text style={styles.addBtnText}>{showForm ? '✕' : '+ Ajouter'}</Text>
         </TouchableOpacity>
       </View>
@@ -112,6 +112,7 @@ export function BowlsScreen() {
             placeholderTextColor={Colors.textMuted}
             value={name}
             onChangeText={setName}
+            testID="bowl-name-input"
           />
 
           <Text style={styles.formLabel}>Emplacement</Text>
@@ -121,6 +122,7 @@ export function BowlsScreen() {
             placeholderTextColor={Colors.textMuted}
             value={location}
             onChangeText={setLocation}
+            testID="bowl-location-input"
           />
 
           <Text style={styles.formLabel}>Capacité en grammes (optionnel)</Text>
@@ -134,7 +136,7 @@ export function BowlsScreen() {
           />
 
           {error && <Text style={styles.errorText}>{error}</Text>}
-          <TouchableOpacity style={[styles.saveBtn, saving && { opacity: 0.6 }]} onPress={handleAdd} disabled={saving}>
+          <TouchableOpacity style={[styles.saveBtn, saving && { opacity: 0.6 }]} onPress={handleAdd} disabled={saving} testID="bowl-save-btn">
             {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Enregistrer</Text>}
           </TouchableOpacity>
         </View>

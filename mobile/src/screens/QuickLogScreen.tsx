@@ -160,6 +160,7 @@ export function QuickLogScreen({ navigation, route }: Props) {
           <TouchableOpacity
             style={styles.configureBtn}
             onPress={() => (navigation as any).navigate('Foyer')}
+            testID="configure-litter-btn"
           >
             <Text style={styles.configureBtnText}>Configurer les litières →</Text>
           </TouchableOpacity>
@@ -173,6 +174,7 @@ export function QuickLogScreen({ navigation, route }: Props) {
               style={[styles.resourceCard, selectedLitière === r.id && styles.resourceCardActive]}
               onPress={() => setSelectedLitière(r.id)}
               activeOpacity={0.7}
+              testID={`litter-card-${r.id}`}
             >
               <View style={[styles.resourceDot, { backgroundColor: r.color ?? Colors.accent }]} />
               <Text style={[styles.resourceName, selectedLitière === r.id && styles.resourceNameActive]}>
@@ -193,6 +195,7 @@ export function QuickLogScreen({ navigation, route }: Props) {
               style={[styles.pill, litterNote === n && styles.pillActive]}
               onPress={() => setLitterNote(n)}
               activeOpacity={0.7}
+              testID={`litter-note-${n.toLowerCase()}`}
             >
               <Text style={[styles.pillText, litterNote === n && styles.pillTextActive]}>{n}</Text>
             </TouchableOpacity>
@@ -213,6 +216,7 @@ export function QuickLogScreen({ navigation, route }: Props) {
           <TouchableOpacity
             style={styles.configureBtn}
             onPress={() => (navigation as any).navigate('Foyer')}
+            testID="configure-bowl-btn"
           >
             <Text style={styles.configureBtnText}>Configurer les gamelles →</Text>
           </TouchableOpacity>
@@ -409,6 +413,7 @@ export function QuickLogScreen({ navigation, route }: Props) {
           onPress={handleSubmit}
           disabled={loading}
           activeOpacity={0.8}
+          testID="quicklog-submit-btn"
         >
           {loading ? (
             <ActivityIndicator color="#fff" />

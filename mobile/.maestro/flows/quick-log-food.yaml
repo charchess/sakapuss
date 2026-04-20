@@ -1,0 +1,74 @@
+appId: com.sakapuss.mobile
+---
+# QuickLog gamelle: état vide + flux avec gamelle configurée
+
+- launchApp:
+    clearState: true
+- assertVisible: "Se connecter"
+- tapOn:
+    id: "email-input"
+- inputText: "playwright-e2e@test.sakapuss.local"
+- tapOn:
+    id: "password-input"
+- inputText: "PlaywrightTest123!"
+- hideKeyboard
+- tapOn: "Se connecter"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+
+# Tap sur Gamelle dans les Quick Actions
+- tapOn:
+    id: "quick-action-food"
+- assertVisible: "Gamelle"
+
+# Si aucune gamelle → affiche bouton de configuration
+- tapOn:
+    text: "Configurer les gamelles →"
+    optional: true
+- assertVisible:
+    text: "Gamelles"
+    optional: true
+- tapOn:
+    id: "bowl-add-btn"
+    optional: true
+- tapOn:
+    id: "bowl-name-input"
+    optional: true
+- inputText: "Gamelle Cuisine"
+  optional: true
+- tapOn:
+    id: "bowl-location-input"
+    optional: true
+- inputText: "Cuisine"
+  optional: true
+- hideKeyboard
+- tapOn:
+    id: "bowl-save-btn"
+    optional: true
+- tapOn: "Accueil"
+  optional: true
+
+# Retenter le Quick Log gamelle
+- tapOn:
+    id: "quick-action-food"
+- assertVisible: "Gamelle"
+- assertVisible: "Quelle gamelle ?"
+  optional: true
+
+# Saisir une quantité
+- tapOn: "ex: 80"
+  optional: true
+- inputText: "80"
+  optional: true
+- hideKeyboard
+
+# Confirmer
+- scrollUntilVisible:
+    element:
+      id: "quicklog-submit-btn"
+    direction: DOWN
+- tapOn:
+    id: "quicklog-submit-btn"
+
+# Retour au dashboard sans erreur
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+- assertNotVisible: "Erreur"

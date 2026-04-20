@@ -82,7 +82,7 @@ export function ResourcesScreen() {
 
       <View style={styles.header}>
         <Text style={styles.title}>Litières 🚽</Text>
-        <TouchableOpacity onPress={() => setShowForm(!showForm)} style={styles.addBtn}>
+        <TouchableOpacity onPress={() => setShowForm(!showForm)} style={styles.addBtn} testID="resource-add-btn">
           <Text style={styles.addBtnText}>{showForm ? '✕' : '+ Ajouter'}</Text>
         </TouchableOpacity>
       </View>
@@ -97,6 +97,7 @@ export function ResourcesScreen() {
             value={name}
             onChangeText={setName}
             autoFocus
+            testID="resource-name-input"
           />
           <Text style={styles.formLabel}>Couleur</Text>
           <View style={styles.colorRow}>
@@ -109,7 +110,7 @@ export function ResourcesScreen() {
             ))}
           </View>
           {error && <Text style={styles.errorText}>{error}</Text>}
-          <TouchableOpacity style={[styles.saveBtn, saving && { opacity: 0.6 }]} onPress={handleAdd} disabled={saving}>
+          <TouchableOpacity style={[styles.saveBtn, saving && { opacity: 0.6 }]} onPress={handleAdd} disabled={saving} testID="resource-save-btn">
             {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Enregistrer</Text>}
           </TouchableOpacity>
         </View>
@@ -136,10 +137,10 @@ export function ResourcesScreen() {
                 <Text style={[styles.cardName, !item.enabled && { color: Colors.textMuted }]}>{item.name}</Text>
                 <Text style={styles.cardStatus}>{item.enabled ? 'Active' : 'Désactivée'}</Text>
               </View>
-              <TouchableOpacity onPress={() => handleToggle(item)} style={styles.toggleBtn}>
+              <TouchableOpacity onPress={() => handleToggle(item)} style={styles.toggleBtn} testID={`resource-toggle-${item.id}`}>
                 <Text style={styles.toggleBtnText}>{item.enabled ? 'Désactiver' : 'Activer'}</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => handleDelete(item)} style={styles.deleteBtn}>
+              <TouchableOpacity onPress={() => handleDelete(item)} style={styles.deleteBtn} testID={`resource-delete-${item.id}`}>
                 <Text style={styles.deleteBtnText}>🗑</Text>
               </TouchableOpacity>
             </View>

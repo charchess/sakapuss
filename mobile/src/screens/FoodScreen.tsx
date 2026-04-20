@@ -141,7 +141,7 @@ export function FoodScreen() {
 
       <View style={styles.header}>
         <Text style={styles.title}>Alimentation 🍽️</Text>
-        <TouchableOpacity onPress={() => setShowForm(!showForm)} style={styles.addBtn}>
+        <TouchableOpacity onPress={() => setShowForm(!showForm)} style={styles.addBtn} testID="food-add-btn">
           <Text style={styles.addBtnText}>{showForm ? '✕' : '+ Ajouter'}</Text>
         </TouchableOpacity>
       </View>
@@ -153,6 +153,7 @@ export function FoodScreen() {
             key={t}
             style={[styles.tab, tab === t && styles.tabActive]}
             onPress={() => { setTab(t); setShowForm(false); }}
+            testID={`food-tab-${t}`}
           >
             <Text style={[styles.tabText, tab === t && styles.tabTextActive]}>
               {t === 'products' ? 'Produits' : 'Sacs en cours'}
@@ -194,16 +195,16 @@ export function FoodScreen() {
             </View>
 
             <Text style={styles.formLabel}>Nom du produit</Text>
-            <TextInput style={styles.input} placeholder="ex: Adult Indoor" placeholderTextColor={Colors.textMuted} value={pName} onChangeText={setPName} />
+            <TextInput style={styles.input} placeholder="ex: Adult Indoor" placeholderTextColor={Colors.textMuted} value={pName} onChangeText={setPName} testID="product-name-input" />
 
             <Text style={styles.formLabel}>Marque</Text>
-            <TextInput style={styles.input} placeholder="ex: Royal Canin, Hill's..." placeholderTextColor={Colors.textMuted} value={pBrand} onChangeText={setPBrand} />
+            <TextInput style={styles.input} placeholder="ex: Royal Canin, Hill's..." placeholderTextColor={Colors.textMuted} value={pBrand} onChangeText={setPBrand} testID="product-brand-input" />
 
             <Text style={styles.formLabel}>Poids sac par défaut (g, optionnel)</Text>
             <TextInput style={styles.input} placeholder="ex: 2000" placeholderTextColor={Colors.textMuted} keyboardType="numeric" value={pDefaultWeight} onChangeText={setPDefaultWeight} />
 
             {error && <Text style={styles.errorText}>{error}</Text>}
-            <TouchableOpacity style={[styles.saveBtn, saving && { opacity: 0.6 }]} onPress={handleAddProduct} disabled={saving}>
+            <TouchableOpacity style={[styles.saveBtn, saving && { opacity: 0.6 }]} onPress={handleAddProduct} disabled={saving} testID="product-save-btn">
               {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Enregistrer</Text>}
             </TouchableOpacity>
           </View>
@@ -231,13 +232,13 @@ export function FoodScreen() {
             )}
 
             <Text style={styles.formLabel}>Poids (g)</Text>
-            <TextInput style={styles.input} placeholder="ex: 2000" placeholderTextColor={Colors.textMuted} keyboardType="numeric" value={bagWeight} onChangeText={setBagWeight} />
+            <TextInput style={styles.input} placeholder="ex: 2000" placeholderTextColor={Colors.textMuted} keyboardType="numeric" value={bagWeight} onChangeText={setBagWeight} testID="bag-weight-input" />
 
             <Text style={styles.formLabel}>Date d'achat</Text>
             <TextInput style={styles.input} placeholder="YYYY-MM-DD" placeholderTextColor={Colors.textMuted} value={bagPurchased} onChangeText={setBagPurchased} />
 
             {error && <Text style={styles.errorText}>{error}</Text>}
-            <TouchableOpacity style={[styles.saveBtn, saving && { opacity: 0.6 }]} onPress={handleAddBag} disabled={saving}>
+            <TouchableOpacity style={[styles.saveBtn, saving && { opacity: 0.6 }]} onPress={handleAddBag} disabled={saving} testID="bag-save-btn">
               {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Enregistrer</Text>}
             </TouchableOpacity>
           </View>
@@ -290,12 +291,12 @@ export function FoodScreen() {
                 </View>
                 <View style={styles.bagActions}>
                   {bag.status === 'stocked' && (
-                    <TouchableOpacity onPress={() => handleOpenBag(bag.id)} style={styles.actionBtn}>
+                    <TouchableOpacity onPress={() => handleOpenBag(bag.id)} style={styles.actionBtn} testID={`bag-open-${bag.id}`}>
                       <Text style={styles.actionBtnText}>Ouvrir</Text>
                     </TouchableOpacity>
                   )}
                   {bag.status === 'opened' && (
-                    <TouchableOpacity onPress={() => handleDepleteBag(bag.id, productName(bag.product_id))} style={[styles.actionBtn, styles.actionBtnRed]}>
+                    <TouchableOpacity onPress={() => handleDepleteBag(bag.id, productName(bag.product_id))} style={[styles.actionBtn, styles.actionBtnRed]} testID={`bag-deplete-${bag.id}`}>
                       <Text style={[styles.actionBtnText, { color: Colors.error }]}>Épuisé</Text>
                     </TouchableOpacity>
                   )}

@@ -1,0 +1,79 @@
+appId: com.sakapuss.mobile
+---
+# QuickLog: médicament, observation comportementale, événement custom
+
+- launchApp:
+    clearState: true
+- assertVisible: "Se connecter"
+- tapOn:
+    id: "email-input"
+- inputText: "playwright-e2e@test.sakapuss.local"
+- tapOn:
+    id: "password-input"
+- inputText: "PlaywrightTest123!"
+- hideKeyboard
+- tapOn: "Se connecter"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+
+# Pré-requis: au moins un animal doit exister
+- assertVisible: "Fiche de"
+  optional: true
+
+# === MÉDICAMENT ===
+- tapOn:
+    id: "quick-action-medicine"
+- assertVisible: "Médic."
+- assertNotVisible: "Que se passe-t-il aujourd'hui ?"
+
+# Valider sans médicament → erreur
+- tapOn:
+    id: "quicklog-submit-btn"
+- assertVisible: "Veuillez saisir le nom du médicament."
+- assertNotVisible: "Que se passe-t-il aujourd'hui ?"
+
+# Saisir un médicament
+- tapOn: "ex: Frontline, Milbemax, Advocate..."
+- inputText: "Milbemax"
+- hideKeyboard
+- tapOn:
+    id: "quicklog-submit-btn"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+- assertNotVisible: "Erreur"
+
+# === OBSERVATION COMPORTEMENTALE ===
+- tapOn:
+    id: "quick-action-observation"
+- assertVisible: "Obs."
+- assertNotVisible: "Que se passe-t-il aujourd'hui ?"
+
+# Valider sans observation → erreur
+- tapOn:
+    id: "quicklog-submit-btn"
+- assertVisible: "Veuillez saisir ou choisir une observation."
+
+# Sélectionner un comportement rapide (pill)
+- tapOn: "Vomissement"
+- tapOn:
+    id: "quicklog-submit-btn"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+- assertNotVisible: "Erreur"
+
+# === ÉVÉNEMENT LIBRE ===
+- tapOn:
+    id: "quick-action-event"
+- assertVisible: "Évén."
+- assertNotVisible: "Que se passe-t-il aujourd'hui ?"
+
+# Valider sans description → erreur
+- tapOn:
+    id: "quicklog-submit-btn"
+- assertVisible: "Veuillez saisir une description."
+
+# Saisir une description
+- tapOn: "Décrivez l'événement..."
+- inputText: "Test événement Maestro"
+- hideKeyboard
+- tapOn:
+    id: "quicklog-submit-btn"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+- assertNotVisible: "Erreur"

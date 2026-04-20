@@ -1,0 +1,77 @@
+appId: com.sakapuss.mobile
+---
+# Alimentation: produits + cycle de vie des sacs
+
+- launchApp:
+    clearState: true
+- assertVisible: "Se connecter"
+- tapOn:
+    id: "email-input"
+- inputText: "playwright-e2e@test.sakapuss.local"
+- tapOn:
+    id: "password-input"
+- inputText: "PlaywrightTest123!"
+- hideKeyboard
+- tapOn: "Se connecter"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+
+# Naviguer Foyer → Alimentation
+- tapOn: "🏡"
+- assertVisible: "Foyer"
+- tapOn:
+    id: "foyer-tile-alimentation"
+- assertVisible: "Alimentation"
+
+# === ONGLET PRODUITS ===
+- tapOn:
+    id: "food-tab-products"
+- assertVisible: "Produits"
+
+# Ajouter un produit
+- tapOn:
+    id: "food-add-btn"
+- assertVisible: "Nouveau produit"
+- tapOn:
+    id: "product-name-input"
+- inputText: "Adult Indoor"
+- tapOn:
+    id: "product-brand-input"
+- inputText: "Royal Canin"
+- hideKeyboard
+- tapOn:
+    id: "product-save-btn"
+
+# Vérifier que le produit apparaît
+- assertVisible: "Adult Indoor"
+- assertVisible: "Royal Canin"
+
+# === ONGLET SACS ===
+- tapOn:
+    id: "food-tab-bags"
+- assertVisible: "Sacs en cours"
+
+# Ajouter un sac
+- tapOn:
+    id: "food-add-btn"
+- assertVisible: "Nouveau sac"
+- tapOn:
+    id: "bag-weight-input"
+- inputText: "2000"
+- hideKeyboard
+- tapOn:
+    id: "bag-save-btn"
+
+# Vérifier que le sac apparaît (status: En stock)
+- assertVisible: "En stock"
+
+# Ouvrir le sac
+- tapOn: "Ouvrir"
+- assertVisible: "Ouvert"
+- assertNotVisible: "En stock"
+
+# Marquer comme épuisé
+- tapOn: "Épuisé"
+- assertVisible: "Sac épuisé"
+- tapOn: "Épuisé"
+# Le sac disparaît de la liste (depleted filtrés)
+- assertNotVisible: "Ouvert"

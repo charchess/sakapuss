@@ -77,6 +77,7 @@ export function FoyerScreen({ navigation }: Props) {
             style={styles.tile}
             onPress={() => navigation.navigate(tile.screen)}
             activeOpacity={0.8}
+            testID={`foyer-tile-${tile.screen.toLowerCase().replace(/é/g, 'e').replace(/è/g, 'e')}`}
           >
             <View style={[styles.tileIcon, { backgroundColor: `${tile.color}22` }]}>
               <Text style={styles.tileEmoji}>{tile.icon}</Text>
