@@ -6,7 +6,8 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme';
-import { api, Bowl } from '../api/client';
+import { Bowl } from '../api/client';
+import { dataService } from '../store/dataService';
 
 const BOWL_TYPES = [
   { key: 'food', label: 'Nourriture', icon: '🥣' },
@@ -27,7 +28,7 @@ export function BowlsScreen() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await api.getBowls();
+      const data = await dataService.getBowls();
       setBowls(data);
     } catch {
       setError('Impossible de charger les gamelles.');
@@ -44,7 +45,7 @@ export function BowlsScreen() {
     setSaving(true);
     setError(null);
     try {
-      await api.createBowl({
+      await dataService.createBowl({
         name: name.trim(),
         location: location.trim(),
         bowl_type: bowlType,
@@ -69,7 +70,7 @@ export function BowlsScreen() {
       {
         text: 'Supprimer', style: 'destructive',
         onPress: async () => {
-          try { await api.deleteBowl(b.id); load(); }
+          try { await dataService.deleteBowl(b.id); load(); }
           catch { setError('Impossible de supprimer.'); }
         },
       },

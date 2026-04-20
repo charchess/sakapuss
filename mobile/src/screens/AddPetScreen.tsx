@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -14,15 +14,12 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { StackScreenProps } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
 import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme';
-import { api } from '../api/client';
-import { AuthStore } from '../store/auth';
+import { dataService } from '../store/dataService';
 import { HomeStackParamList } from '../navigation/AppNavigator';
 
 type Props = StackScreenProps<HomeStackParamList, 'AddPet'>;
 
 const SPECIES_OPTIONS = ['Chat', 'Chien', 'Lapin', 'Oiseau', 'Hamster', 'Autre'];
-const GUEST_ERROR = 'Créez un compte pour ajouter des animaux.';
-
 export function AddPetScreen({ navigation }: Props) {
   const [name, setName] = useState('');
   const [species, setSpecies] = useState('');
@@ -32,14 +29,6 @@ export function AddPetScreen({ navigation }: Props) {
   const [breed, setBreed] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isGuest, setIsGuest] = useState(false);
-
-  useEffect(() => {
-    AuthStore.isGuestMode().then((guest) => {
-      setIsGuest(guest);
-      if (guest) setError(GUEST_ERROR);
-    });
-  }, []);
 
   const validate = (): string | null => {
     if (!name.trim()) return 'Le nom est requis.';
@@ -50,11 +39,6 @@ export function AddPetScreen({ navigation }: Props) {
   };
 
   const handleSubmit = async () => {
-    const guest = await AuthStore.isGuestMode();
-    if (guest) {
-      setError('Créez un compte pour ajouter des animaux.');
-      return;
-    }
     const validationError = validate();
     if (validationError) {
       setError(validationError);
@@ -64,7 +48,7 @@ export function AddPetScreen({ navigation }: Props) {
     setError(null);
     setLoading(true);
     try {
-      await api.createPet({
+      await dataService.createPet({
         name: name.trim(),
         species: species.trim(),
         birth_date: birthDate.trim(),
@@ -176,15 +160,9 @@ export function AddPetScreen({ navigation }: Props) {
         {error && (
           <View style={styles.errorBox} testID="error-box">
             <Text style={styles.errorText}>{error}</Text>
-            {isGuest ? (
-              <TouchableOpacity onPress={() => navigation.goBack()} style={styles.retryBtn} testID="create-account-btn">
-                <Text style={styles.retryText}>Retour à la connexion</Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity onPress={() => { setError(null); handleSubmit(); }} style={styles.retryBtn} testID="retry-btn">
-                <Text style={styles.retryText}>Réessayer</Text>
-              </TouchableOpacity>
-            )}
+            <TouchableOpacity onPress={() => { setError(null); handleSubmit(); }} style={styles.retryBtn} testID="retry-btn">
+              <Text style={styles.retryText}>Réessayer</Text>
+            </TouchableOpacity>
           </View>
         )}
 

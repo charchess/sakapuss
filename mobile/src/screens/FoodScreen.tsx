@@ -6,7 +6,8 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme';
-import { api, FoodProduct, FoodBag } from '../api/client';
+import { FoodProduct, FoodBag } from '../api/client';
+import { dataService } from '../store/dataService';
 
 const FOOD_TYPES = ['Croquettes', 'Pâtée', 'Mixte', 'Friandises'];
 const FOOD_CATEGORIES = ['Principal', 'Complément', 'Plaisir'];
@@ -47,7 +48,7 @@ export function FoodScreen() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [p, b] = await Promise.all([api.getFoodProducts(), api.getFoodBags()]);
+      const [p, b] = await Promise.all([dataService.getFoodProducts(), dataService.getFoodBags()]);
       setProducts(p);
       setBags(b.filter((bag) => bag.status !== 'depleted'));
       if (p.length > 0 && !bagProductId) setBagProductId(p[0].id);
@@ -65,7 +66,7 @@ export function FoodScreen() {
     setSaving(true);
     setError(null);
     try {
-      await api.createFoodProduct({
+      await dataService.createFoodProduct({
         name: pName.trim(),
         brand: pBrand.trim(),
         food_type: pType,
@@ -87,7 +88,7 @@ export function FoodScreen() {
     setSaving(true);
     setError(null);
     try {
-      await api.createFoodBag({
+      await dataService.createFoodBag({
         product_id: bagProductId,
         weight_g: parseInt(bagWeight),
         purchased_at: bagPurchased,
@@ -103,7 +104,7 @@ export function FoodScreen() {
   };
 
   const handleOpenBag = async (id: string) => {
-    try { await api.openFoodBag(id); load(); }
+    try { await dataService.openFoodBag(id); load(); }
     catch { setError('Erreur.'); }
   };
 
@@ -113,7 +114,7 @@ export function FoodScreen() {
       {
         text: 'Épuisé', style: 'destructive',
         onPress: async () => {
-          try { await api.depleteFoodBag(id); load(); }
+          try { await dataService.depleteFoodBag(id); load(); }
           catch { setError('Erreur.'); }
         },
       },
@@ -126,7 +127,7 @@ export function FoodScreen() {
       {
         text: 'Supprimer', style: 'destructive',
         onPress: async () => {
-          try { await api.deleteFoodProduct(p.id); load(); }
+          try { await dataService.deleteFoodProduct(p.id); load(); }
           catch { setError('Impossible de supprimer.'); }
         },
       },

@@ -11,8 +11,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import { StackScreenProps } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
 import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme';
-import { api, PetEvent } from '../api/client';
-import { AuthStore } from '../store/auth';
+import { PetEvent } from '../api/client';
+import { dataService } from '../store/dataService';
 import { EventCard } from '../components/EventCard';
 import { speciesEmoji } from '../utils/petUtils';
 import { HomeStackParamList } from '../navigation/AppNavigator';
@@ -57,12 +57,11 @@ export function PetProfileScreen({ navigation, route }: Props) {
       setError(null);
       (async () => {
         try {
-          const data = await api.getPetEvents(petId);
+          const data = await dataService.getPetEvents(petId);
           if (active) setEvents(data.slice(0, 20));
         } catch (err) {
           console.warn('[PetProfile] load error:', err);
-          const isGuest = await AuthStore.isGuestMode();
-          if (active && !isGuest) setError('Impossible de charger les événements.');
+          if (active) setError('Impossible de charger les événements.');
         } finally {
           if (active) setLoading(false);
         }

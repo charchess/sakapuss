@@ -6,7 +6,8 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme';
-import { api, Resource } from '../api/client';
+import { Resource } from '../api/client';
+import { dataService } from '../store/dataService';
 
 const LITTER_COLORS = ['#FDCB6E', '#00B894', '#6C5CE7', '#E17055', '#74B9FF', '#A29BFE'];
 
@@ -22,7 +23,7 @@ export function ResourcesScreen() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await api.getResources('litter');
+      const data = await dataService.getResources('litter');
       setResources(data);
     } catch {
       setError('Impossible de charger les litières.');
@@ -38,7 +39,7 @@ export function ResourcesScreen() {
     setSaving(true);
     setError(null);
     try {
-      await api.createResource({ name: name.trim(), type: 'litter', color });
+      await dataService.createResource({ name: name.trim(), type: 'litter', color });
       setName('');
       setColor(LITTER_COLORS[0]);
       setShowForm(false);
@@ -52,7 +53,7 @@ export function ResourcesScreen() {
 
   const handleToggle = async (r: Resource) => {
     try {
-      await api.updateResource(r.id, { enabled: !r.enabled });
+      await dataService.updateResource(r.id, { enabled: !r.enabled });
       load();
     } catch {
       setError('Impossible de modifier.');
@@ -66,7 +67,7 @@ export function ResourcesScreen() {
         text: 'Supprimer', style: 'destructive',
         onPress: async () => {
           try {
-            await api.deleteResource(r.id);
+            await dataService.deleteResource(r.id);
             load();
           } catch {
             setError('Impossible de supprimer.');

@@ -14,7 +14,8 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { Colors, Radius, Spacing, Typography } from '../constants/theme';
-import { api, PetEvent } from '../api/client';
+import { PetEvent } from '../api/client';
+import { dataService } from '../store/dataService';
 import { AuthStore } from '../store/auth';
 import { EventCard } from '../components/EventCard';
 import { SyncBadge } from '../components/SyncBadge';
@@ -77,7 +78,7 @@ export function TimelineScreen() {
   const loadEvents = useCallback(async () => {
     setError(null);
     try {
-      const data = await api.getAllEvents(limit);
+      const data = await dataService.getAllEvents(limit);
       setEvents(data);
     } catch (err) {
       console.warn('[Timeline] load error:', err);

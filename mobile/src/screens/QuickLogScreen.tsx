@@ -13,8 +13,8 @@ import {
 import { StackScreenProps } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
 import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme';
-import { logEvent } from '../api/sync';
-import { api, Resource, Bowl } from '../api/client';
+import { dataService } from '../store/dataService';
+import { Resource, Bowl } from '../api/client';
 import { HomeStackParamList } from '../navigation/AppNavigator';
 
 type Props = StackScreenProps<HomeStackParamList, 'QuickLog'>;
@@ -54,7 +54,7 @@ export function QuickLogScreen({ navigation, route }: Props) {
   useEffect(() => {
     if (type === 'litter_clean') {
       setLoadingResources(true);
-      api.getResources('litter')
+      dataService.getResources('litter')
         .then((data) => {
           setLitières(data.filter((r) => r.enabled));
           if (data.length > 0) setSelectedLitière(data[0].id);
@@ -63,7 +63,7 @@ export function QuickLogScreen({ navigation, route }: Props) {
         .finally(() => setLoadingResources(false));
     } else if (type === 'food_serve') {
       setLoadingResources(true);
-      api.getBowls()
+      dataService.getBowls()
         .then((data) => {
           const food = data.filter((b) => b.bowl_type === 'food');
           setBowls(food);
@@ -129,16 +129,16 @@ export function QuickLogScreen({ navigation, route }: Props) {
     setLoading(true);
     try {
       if (type === 'food_serve' && selectedBowl) {
-        await api.fillBowl(selectedBowl, {
+        await dataService.fillBowl(selectedBowl, {
           pet_id: petId ?? undefined,
           amount_g: parseFloat(amount) || undefined,
         });
       }
       if (petId) {
-        await logEvent(petId, type, buildPayload());
+        await dataService.logEvent(petId, type, buildPayload());
       } else if (type === 'litter_clean' || type === 'food_serve') {
         // resource-level events don't require a pet
-        if (petId) await logEvent(petId, type, buildPayload());
+        if (petId) await dataService.logEvent(petId, type, buildPayload());
       }
       navigation.goBack();
     } catch (err: unknown) {

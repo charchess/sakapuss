@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-nati
 import { useFocusEffect } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme';
-import { api } from '../api/client';
+import { dataService } from '../store/dataService';
 
 interface FoyerNavigationProp {
   navigate: (screen: string) => void;
@@ -22,10 +22,10 @@ export function FoyerScreen({ navigation }: Props) {
   useFocusEffect(
     useCallback(() => {
       Promise.all([
-        api.getResources('litter'),
-        api.getBowls(),
-        api.getFoodProducts(),
-        api.getFoodBags('opened'),
+        dataService.getResources('litter'),
+        dataService.getBowls(),
+        dataService.getFoodProducts(),
+        dataService.getFoodBags('opened'),
       ])
         .then(([litières, bowls, products, bags]) => {
           setLitièresCount(litières.filter((r) => r.enabled).length);

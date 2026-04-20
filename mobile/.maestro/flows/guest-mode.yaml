@@ -1,6 +1,6 @@
 appId: com.sakapuss.mobile
 ---
-# Guest mode: navigation sans compte
+# Mode local (sans compte): toutes les fonctionnalités disponibles
 
 - launchApp:
     clearState: true
@@ -11,29 +11,83 @@ appId: com.sakapuss.mobile
     id: "guest-btn"
 - assertVisible: "Que se passe-t-il aujourd'hui ?"
 
-# Dashboard en mode guest: bannière "Mode hors-ligne" visible
-- assertVisible: "Mode hors-ligne"
+# Dashboard en mode local: bannière "Données locales" visible
+- assertVisible: "Données locales"
+- assertVisible: "Synchroniser →"
 
-# Tenter d'ajouter un animal → erreur guest affiché dès l'ouverture
+# Ajouter un animal en mode local (doit fonctionner)
 - tapOn:
     id: "add-pet-btn"
 - assertVisible: "Nouvel animal"
-- assertVisible: "Créez un compte pour ajouter des animaux."
-- assertVisible: "Retour à la connexion"
+- assertNotVisible: "Créez un compte"
 
-# Le bouton "Retour à la connexion" fonctionne
 - tapOn:
-    id: "create-account-btn"
+    id: "pet-name-input"
+- inputText: "Félix"
+- hideKeyboard
+- tapOn:
+    id: "species-pill-chat"
+- scrollUntilVisible:
+    element:
+      id: "pet-birthdate-input"
+    direction: DOWN
+- tapOn:
+    id: "pet-birthdate-input"
+- tapOn: "OK"
+- scrollUntilVisible:
+    element:
+      text: "Ajouter"
+    direction: DOWN
+- tapOn: "Ajouter"
+
+# Retour au dashboard, animal créé localement
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+- assertVisible: "Félix"
+
+# Quick Log poids sur l'animal créé localement
+- tapOn:
+    id: "quick-action-weight"
+- assertVisible: "Pesée"
+- tapOn:
+    id: "weight-input"
+- inputText: "4500"
+- hideKeyboard
+- tapOn:
+    id: "quicklog-submit-btn"
 - assertVisible: "Que se passe-t-il aujourd'hui ?"
 
-# Settings en mode guest: bouton "Quitter le mode invité"
+# Foyer: configurer une litière en mode local
+- tapOn: "🏡"
+- assertVisible: "Foyer"
+- tapOn:
+    id: "foyer-tile-litieres"
+- tapOn:
+    id: "resource-add-btn"
+- tapOn:
+    id: "resource-name-input"
+- inputText: "Litière locale"
+- hideKeyboard
+- tapOn:
+    id: "resource-save-btn"
+- assertVisible: "Litière locale"
+
+# Quick Log litière avec la ressource locale
+- tapOn: "🏠"
+- tapOn:
+    id: "quick-action-litter"
+- assertVisible: "Litière"
+- assertVisible: "Litière locale"
+- tapOn:
+    id: "quicklog-submit-btn"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+
+# Settings: bouton "Quitter le mode invité" visible
 - tapOn: "⚙️"
-- assertVisible: "Paramètres"
 - assertVisible: "Mode invité"
 - assertVisible: "Quitter le mode invité"
 - assertNotVisible: "Se déconnecter"
 
-# Quitter le mode guest
+# Quitter le mode local
 - tapOn: "Quitter le mode invité"
 - assertVisible: "Retourner à l'écran de connexion ?"
 - tapOn: "Quitter"
