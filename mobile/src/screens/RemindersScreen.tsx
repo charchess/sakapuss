@@ -11,8 +11,8 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { Colors, Spacing, Typography } from '../constants/theme';
-import { api, Reminder } from '../api/client';
-import { AuthStore } from '../store/auth';
+import { Reminder } from '../api/client';
+import { dataService } from '../store/dataService';
 import { ReminderCard } from '../components/ReminderCard';
 
 function getReminderUrgencySort(r: Reminder): number {
@@ -34,7 +34,7 @@ export function RemindersScreen() {
   const loadReminders = useCallback(async () => {
     setError(null);
     try {
-      const data = await api.getPendingReminders();
+      const data = await dataService.getPendingReminders();
       const sorted = [...data].sort((a, b) => {
         const ua = getReminderUrgencySort(a);
         const ub = getReminderUrgencySort(b);
@@ -44,8 +44,7 @@ export function RemindersScreen() {
       setReminders(sorted);
     } catch (err) {
       console.warn('[Reminders] load error:', err);
-      const isGuest = await AuthStore.isGuestMode();
-      if (!isGuest) setError('Impossible de charger les données. Vérifiez votre connexion.');
+      setError('Impossible de charger les données. Vérifiez votre connexion.');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -115,10 +114,10 @@ export function RemindersScreen() {
             <ReminderCard
               reminder={item}
               onComplete={async (id) => {
-                try { await api.completeReminder(id); loadReminders(); } catch (err) { console.warn('[Reminders] complete error:', err); }
+                try { await dataService.completeReminder(id); loadReminders(); } catch (err) { console.warn('[Reminders] complete error:', err); }
               }}
               onPostpone={async (id, days) => {
-                try { await api.postponeReminder(id, days); loadReminders(); } catch (err) { console.warn('[Reminders] postpone error:', err); }
+                try { await dataService.postponeReminder(id, days); loadReminders(); } catch (err) { console.warn('[Reminders] postpone error:', err); }
               }}
             />
           )}
@@ -195,7 +194,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-start',
-    paddingTop: '30%',
+    paddingTop: Spacing.xxl,
     padding: Spacing.xxl,
   },
   emptyIcon: {

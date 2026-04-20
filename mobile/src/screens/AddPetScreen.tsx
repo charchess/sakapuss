@@ -10,21 +10,22 @@ import {
   Platform,
   ActivityIndicator,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { StackScreenProps } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
 import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme';
-import { api } from '../api/client';
-import { AuthStore } from '../store/auth';
+import { dataService } from '../store/dataService';
 import { HomeStackParamList } from '../navigation/AppNavigator';
 
 type Props = StackScreenProps<HomeStackParamList, 'AddPet'>;
 
 const SPECIES_OPTIONS = ['Chat', 'Chien', 'Lapin', 'Oiseau', 'Hamster', 'Autre'];
-
 export function AddPetScreen({ navigation }: Props) {
   const [name, setName] = useState('');
   const [species, setSpecies] = useState('');
   const [birthDate, setBirthDate] = useState('');
+  const [dateObj, setDateObj] = useState(new Date(2020, 0, 1));
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [breed, setBreed] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,11 +39,6 @@ export function AddPetScreen({ navigation }: Props) {
   };
 
   const handleSubmit = async () => {
-    const guest = await AuthStore.isGuestMode();
-    if (guest) {
-      setError('Créez un compte pour ajouter des animaux.');
-      return;
-    }
     const validationError = validate();
     if (validationError) {
       setError(validationError);
@@ -52,7 +48,7 @@ export function AddPetScreen({ navigation }: Props) {
     setError(null);
     setLoading(true);
     try {
-      await api.createPet({
+      await dataService.createPet({
         name: name.trim(),
         species: species.trim(),
         birth_date: birthDate.trim(),
@@ -117,16 +113,36 @@ export function AddPetScreen({ navigation }: Props) {
           </View>
 
           <View style={styles.field}>
-            <Text style={styles.fieldLabel}>Date de naissance * (YYYY-MM-DD)</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="YYYY-MM-DD"
-              placeholderTextColor={Colors.textMuted}
-              value={birthDate}
-              onChangeText={setBirthDate}
-              keyboardType="numbers-and-punctuation"
+            <Text style={styles.fieldLabel}>Date de naissance *</Text>
+            <TouchableOpacity
+              style={styles.dateBtn}
+              onPress={() => setShowDatePicker(true)}
               testID="pet-birthdate-input"
-            />
+              activeOpacity={0.7}
+            >
+              <Text style={styles.dateBtnIcon}>📅</Text>
+              <Text style={[styles.dateBtnText, !birthDate && { color: Colors.textMuted }]}>
+                {birthDate || 'Sélectionner une date'}
+              </Text>
+            </TouchableOpacity>
+            {showDatePicker && (
+              <DateTimePicker
+                value={dateObj}
+                mode="date"
+                display={Platform.OS === 'android' ? 'default' : 'spinner'}
+                maximumDate={new Date()}
+                onChange={(_, selected) => {
+                  setShowDatePicker(false);
+                  if (selected) {
+                    setDateObj(selected);
+                    const y = selected.getFullYear();
+                    const m = String(selected.getMonth() + 1).padStart(2, '0');
+                    const d = String(selected.getDate()).padStart(2, '0');
+                    setBirthDate(`${y}-${m}-${d}`);
+                  }
+                }}
+              />
+            )}
           </View>
 
           <View style={styles.field}>
@@ -142,9 +158,9 @@ export function AddPetScreen({ navigation }: Props) {
         </View>
 
         {error && (
-          <View style={styles.errorBox}>
+          <View style={styles.errorBox} testID="error-box">
             <Text style={styles.errorText}>{error}</Text>
-            <TouchableOpacity onPress={() => { setError(null); handleSubmit(); }} style={styles.retryBtn}>
+            <TouchableOpacity onPress={() => { setError(null); handleSubmit(); }} style={styles.retryBtn} testID="retry-btn">
               <Text style={styles.retryText}>Réessayer</Text>
             </TouchableOpacity>
           </View>
@@ -216,6 +232,25 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 15,
     color: Colors.textPrimary,
+  },
+  dateBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.background,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: Radius.md,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  dateBtnIcon: {
+    fontSize: 16,
+    marginRight: 10,
+  },
+  dateBtnText: {
+    fontSize: 15,
+    color: Colors.textPrimary,
+    fontWeight: '500',
   },
   speciesRow: {
     flexDirection: 'row',

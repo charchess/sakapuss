@@ -1,0 +1,86 @@
+appId: com.sakapuss.mobile
+---
+# Alimentation: produits + cycle de vie des sacs
+
+- launchApp:
+    clearState: true
+- assertVisible: "Se connecter"
+- tapOn:
+    id: "email-input"
+- inputText: "playwright-e2e@test.sakapuss.local"
+- tapOn:
+    id: "password-input"
+- inputText: "PlaywrightTest123!"
+- hideKeyboard
+- tapOn: "Se connecter"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+
+# Naviguer Foyer → Alimentation
+- tapOn: "🏡"
+- assertVisible: "Foyer"
+- tapOn:
+    id: "foyer-tile-alimentation"
+- assertVisible: "Alimentation"
+
+# === ONGLET PRODUITS ===
+- tapOn:
+    id: "food-tab-products"
+- assertVisible: "Produits"
+
+# Ajouter un produit
+- tapOn:
+    id: "food-add-btn"
+- assertVisible: "Nouveau produit"
+- tapOn:
+    id: "product-name-input"
+- inputText: "Adult Indoor"
+- hideKeyboard
+- tapOn:
+    id: "product-brand-input"
+- inputText: "Royal Canin"
+- hideKeyboard
+- tapOn:
+    id: "product-save-btn"
+- waitForAnimationToEnd
+
+# Vérifier que le produit apparaît
+- assertVisible: "Adult Indoor"
+
+# === ONGLET SACS ===
+- tapOn:
+    id: "food-tab-bags"
+- assertVisible: "Sacs en cours"
+
+# Ajouter un sac
+- tapOn:
+    id: "food-add-btn"
+- assertVisible: "Nouveau sac"
+# Sélectionner le produit (brand + name: "Royal Canin Adult Indoor")
+- tapOn: "Royal Canin Adult Indoor"
+- scrollUntilVisible:
+    element:
+      id: "bag-weight-input"
+    direction: DOWN
+- tapOn:
+    id: "bag-weight-input"
+- inputText: "2000"
+- hideKeyboard
+- tapOn:
+    id: "bag-save-btn"
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+
+# Vérifier que le sac apparaît (status: En stock)
+- assertVisible: "Ouvrir"
+
+# Ouvrir le sac
+- tapOn: "Ouvrir"
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+- assertVisible: "Épuisé"
+
+# Marquer comme épuisé
+- tapOn: "Épuisé"
+- assertVisible: "Sac épuisé"
+- tapOn: "Épuisé"
+- waitForAnimationToEnd

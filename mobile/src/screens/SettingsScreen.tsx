@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Constants from 'expo-constants';
 import {
   View,
   Text,
@@ -246,7 +247,9 @@ export function SettingsScreen({ onLogout }: Props) {
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.version}>Sakapuss Mobile v1.0.0</Text>
+        <Text style={styles.version}>
+          Sakapuss v{Constants.expoConfig?.version ?? '1.0.0'} ({Constants.expoConfig?.android?.versionCode ?? 1})
+        </Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );

@@ -15,6 +15,85 @@ import { StatusBar } from 'expo-status-bar';
 import { Colors, Radius, Spacing, Typography, Shadow } from '../constants/theme';
 import { api } from '../api/client';
 import { AuthStore } from '../store/auth';
+import { localDb } from '../store/localDb';
+
+async function migrateLocalToServer(): Promise<void> {
+  const [pets, resources, bowls, products, bags] = await Promise.all([
+    localDb.getPets(),
+    localDb.getResources(),
+    localDb.getBowls(),
+    localDb.getFoodProducts(),
+    localDb.getFoodBags(),
+  ]);
+
+  // Migrate pets; build old→new ID map for event migration
+  const petIdMap = new Map<string, string>();
+  for (const pet of pets) {
+    try {
+      const newPet = await api.createPet({
+        name: pet.name,
+        species: pet.species,
+        birth_date: pet.birth_date ?? new Date().toISOString().split('T')[0],
+        breed: pet.breed,
+      });
+      petIdMap.set(pet.id, newPet.id);
+    } catch { /* skip individual failures */ }
+  }
+
+  // Migrate events in chronological order
+  for (const [oldId, newId] of petIdMap.entries()) {
+    const events = await localDb.getPetEvents(oldId);
+    for (const event of [...events].reverse()) {
+      try {
+        await api.createPetEvent(newId, event.type, event.payload, event.occurred_at);
+      } catch { /* skip */ }
+    }
+  }
+
+  // Migrate resources
+  for (const r of resources) {
+    try { await api.createResource({ name: r.name, type: r.type, color: r.color }); }
+    catch { /* skip */ }
+  }
+
+  // Migrate bowls
+  for (const b of bowls) {
+    try { await api.createBowl({ name: b.name, location: b.location, bowl_type: b.bowl_type, capacity_g: b.capacity_g }); }
+    catch { /* skip */ }
+  }
+
+  // Migrate food products; build product ID map for bag migration
+  const productIdMap = new Map<string, string>();
+  for (const p of products) {
+    try {
+      const newP = await api.createFoodProduct({
+        name: p.name, brand: p.brand,
+        food_type: p.food_type, food_category: p.food_category,
+        default_bag_weight_g: p.default_bag_weight_g,
+      });
+      productIdMap.set(p.id, newP.id);
+    } catch { /* skip */ }
+  }
+
+  // Migrate food bags with remapped product IDs
+  for (const bag of bags) {
+    const newProductId = productIdMap.get(bag.product_id) ?? bag.product_id;
+    try {
+      const newBag = await api.createFoodBag({
+        product_id: newProductId,
+        weight_g: bag.weight_g,
+        purchased_at: bag.purchased_at,
+      });
+      if (bag.status === 'opened') await api.openFoodBag(newBag.id).catch(() => {});
+      if (bag.status === 'depleted') {
+        await api.openFoodBag(newBag.id).catch(() => {});
+        await api.depleteFoodBag(newBag.id).catch(() => {});
+      }
+    } catch { /* skip */ }
+  }
+
+  await localDb.clear();
+}
 
 interface Props {
   onLoginSuccess: () => void;
@@ -44,6 +123,8 @@ export function LoginScreen({ onLoginSuccess }: Props) {
 
     setLoading(true);
     try {
+      const wasGuest = await AuthStore.isGuestMode();
+
       const response =
         mode === 'login'
           ? await api.login(email.trim(), password)
@@ -51,6 +132,11 @@ export function LoginScreen({ onLoginSuccess }: Props) {
 
       await AuthStore.setToken(response.access_token);
       await AuthStore.setUser(response.user);
+
+      if (wasGuest) {
+        await migrateLocalToServer();
+      }
+
       onLoginSuccess();
     } catch (err: unknown) {
       const msg =

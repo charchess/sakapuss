@@ -28,14 +28,14 @@ export function QuickLogTile({ icon, label, color, onPress, testID }: Props) {
 
 const styles = StyleSheet.create({
   tile: {
-    flex: 1,
-    margin: 5,
+    width: '31%',
+    margin: '1.16%',
     borderRadius: Radius.lg,
     paddingVertical: 16,
     paddingHorizontal: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 88,
+    minHeight: 90,
     ...Shadow.card,
   },
   iconCircle: {

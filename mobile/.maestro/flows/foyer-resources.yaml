@@ -1,0 +1,78 @@
+appId: com.sakapuss.mobile
+---
+# Foyer: CRUD litières et gamelles
+
+- launchApp:
+    clearState: true
+- assertVisible: "Se connecter"
+- tapOn:
+    id: "email-input"
+- inputText: "playwright-e2e@test.sakapuss.local"
+- tapOn:
+    id: "password-input"
+- inputText: "PlaywrightTest123!"
+- hideKeyboard
+- tapOn: "Se connecter"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+
+# Naviguer vers l'onglet Foyer
+- tapOn: "🏡"
+- assertVisible: "Foyer"
+- assertNotVisible: "Erreur"
+
+# === LITIÈRES ===
+- tapOn:
+    id: "foyer-tile-litieres"
+- assertVisible: "Litières"
+
+# Ajouter une litière
+- tapOn:
+    id: "resource-add-btn"
+- assertVisible: "Nom de la litière"
+- tapOn:
+    id: "resource-name-input"
+- inputText: "Litière Test Maestro"
+- hideKeyboard
+- tapOn:
+    id: "resource-save-btn"
+
+# Vérifier que la litière apparaît dans la liste
+- assertVisible: "Litière Test Maestro"
+- assertVisible: "Active"
+
+# Désactiver la litière (le premier toggle visible)
+- tapOn: "Désactiver"
+- assertVisible: "Désactivée"
+- assertNotVisible:
+    text: "Active"
+    optional: true
+
+# Réactiver
+- tapOn: "Activer"
+- assertVisible: "Active"
+
+# Retour au Foyer
+- tapOn: "Foyer"
+
+# === GAMELLES ===
+- tapOn:
+    id: "foyer-tile-gamelles"
+- assertVisible: "Gamelles"
+
+# Ajouter une gamelle
+- tapOn:
+    id: "bowl-add-btn"
+- assertVisible: "Nom"
+- tapOn:
+    id: "bowl-name-input"
+- inputText: "Gamelle Test Maestro"
+- tapOn:
+    id: "bowl-location-input"
+- inputText: "Cuisine"
+- hideKeyboard
+- tapOn:
+    id: "bowl-save-btn"
+
+# Vérifier que la gamelle apparaît
+- assertVisible: "Gamelle Test Maestro"
+- assertVisible: "Cuisine"

@@ -1,0 +1,97 @@
+appId: com.sakapuss.mobile
+---
+# Mode local (sans compte): toutes les fonctionnalités disponibles
+
+- launchApp:
+    clearState: true
+- assertVisible: "Se connecter"
+
+# Continuer sans compte
+- tapOn:
+    id: "guest-btn"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+- waitForAnimationToEnd
+
+# Dashboard en mode local: bannière "Données locales" visible
+- assertVisible:
+    id: "guest-banner"
+- assertVisible:
+    id: "guest-banner-text"
+
+# Ajouter un animal en mode local (doit fonctionner)
+- tapOn:
+    id: "add-pet-btn"
+- assertVisible: "Nouvel animal"
+- assertNotVisible: "Créez un compte"
+
+- tapOn:
+    id: "pet-name-input"
+- inputText: "Félix"
+- hideKeyboard
+- tapOn:
+    id: "species-pill-chat"
+- scrollUntilVisible:
+    element:
+      id: "pet-birthdate-input"
+    direction: DOWN
+- tapOn:
+    id: "pet-birthdate-input"
+- tapOn: "OK"
+- scrollUntilVisible:
+    element:
+      text: "Ajouter"
+    direction: DOWN
+- tapOn: "Ajouter"
+
+# Retour au dashboard, animal créé localement
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+- assertVisible: "Félix"
+
+# Quick Log poids sur l'animal créé localement
+- tapOn:
+    id: "quick-action-weight"
+- assertVisible: "Pesée"
+- tapOn:
+    id: "weight-input"
+- inputText: "4500"
+- hideKeyboard
+- tapOn:
+    id: "quicklog-submit-btn"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+
+# Foyer: configurer une litière en mode local
+- tapOn: "🏡"
+- assertVisible: "Foyer"
+- tapOn:
+    id: "foyer-tile-litieres"
+- tapOn:
+    id: "resource-add-btn"
+- tapOn:
+    id: "resource-name-input"
+- inputText: "Litière locale"
+- hideKeyboard
+- tapOn:
+    id: "resource-save-btn"
+- assertVisible: "Litière locale"
+
+# Quick Log litière avec la ressource locale
+- tapOn: "🏠"
+- tapOn:
+    id: "quick-action-litter"
+- assertVisible: "Litière"
+- assertVisible: "Litière locale"
+- tapOn:
+    id: "quicklog-submit-btn"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+
+# Settings: bouton "Quitter le mode invité" visible
+- tapOn: "⚙️"
+- assertVisible: "Mode invité"
+- assertVisible: "Quitter le mode invité"
+- assertNotVisible: "Se déconnecter"
+
+# Quitter le mode local
+- tapOn: "Quitter le mode invité"
+- assertVisible: "Retourner à l'écran de connexion ?"
+- tapOn: "Quitter"
+- assertVisible: "Se connecter"

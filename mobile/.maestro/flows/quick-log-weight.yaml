@@ -4,10 +4,14 @@ appId: com.sakapuss.mobile
 - launchApp
 - tapOn: "⚖️"
 - assertVisible: "Pesée"
-- assertVisible: "Enregistrer"
+- scrollUntilVisible:
+    element:
+      id: "quicklog-submit-btn"
+    direction: DOWN
 
 # Saisir sans poids → errorBox avec message de validation
-- tapOn: "Enregistrer"
+- tapOn:
+    id: "quicklog-submit-btn"
 - assertVisible: "Veuillez saisir un poids valide."
 - assertNotVisible: "Que se passe-t-il aujourd'hui ?"
 
@@ -16,7 +20,12 @@ appId: com.sakapuss.mobile
     id: "weight-input"
 - inputText: "4200"
 - hideKeyboard
-- tapOn: "Enregistrer"
+- scrollUntilVisible:
+    element:
+      id: "quicklog-submit-btn"
+    direction: DOWN
+- tapOn:
+    id: "quicklog-submit-btn"
 
 # Retour au dashboard sans erreur
 - assertVisible: "Que se passe-t-il aujourd'hui ?"

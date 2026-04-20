@@ -1,0 +1,72 @@
+appId: com.sakapuss.mobile
+---
+# QuickLog litière: état vide + flux avec ressource configurée
+
+- launchApp:
+    clearState: true
+- assertVisible: "Se connecter"
+- tapOn:
+    id: "email-input"
+- inputText: "playwright-e2e@test.sakapuss.local"
+- tapOn:
+    id: "password-input"
+- inputText: "PlaywrightTest123!"
+- hideKeyboard
+- tapOn: "Se connecter"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+
+# Tap sur Litière dans les Quick Actions
+- tapOn:
+    id: "quick-action-litter"
+- assertVisible: "Litière"
+
+# === CAS 1: Aucune litière configurée ===
+# Si aucune litière → affiche état vide avec bouton configurer
+# (Ce test passe que des litières soient configurées ou non)
+
+# === CAS 2: Flux complet avec litière ===
+# Aller configurer une litière si nécessaire
+- tapOn:
+    text: "Configurer les litières →"
+    optional: true
+- assertVisible:
+    text: "Litières"
+    optional: true
+- tapOn:
+    id: "resource-add-btn"
+    optional: true
+- tapOn:
+    id: "resource-name-input"
+    optional: true
+- inputText: "Litière Salon"
+  optional: true
+- hideKeyboard
+- tapOn:
+    id: "resource-save-btn"
+    optional: true
+- tapOn: "Accueil"
+  optional: true
+
+# Retenter le Quick Log litière
+- tapOn:
+    id: "quick-action-litter"
+- assertVisible: "Litière"
+
+# Sélectionner la note RAS (sélectionnée par défaut)
+- assertVisible: "Quelle litière ?"
+  optional: true
+- tapOn:
+    id: "litter-note-ras"
+    optional: true
+
+# Confirmer
+- scrollUntilVisible:
+    element:
+      id: "quicklog-submit-btn"
+    direction: DOWN
+- tapOn:
+    id: "quicklog-submit-btn"
+
+# Retour au dashboard sans erreur
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+- assertNotVisible: "Erreur"

@@ -110,6 +110,62 @@ export interface Reminder {
   status: string;
 }
 
+export interface Resource {
+  id: string;
+  name: string;
+  type: string; // 'litter' | 'food_bowl' | 'water'
+  color?: string;
+  tracking_mode?: string;
+  enabled: boolean;
+  created_at: string;
+}
+
+export interface Bowl {
+  id: string;
+  name: string;
+  location: string;
+  capacity_g?: number;
+  capacity_ml?: number;
+  bowl_type: string; // 'food' | 'water'
+  current_product_id?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Serving {
+  id: string;
+  bowl_id: string;
+  bag_id?: string;
+  pet_id?: string;
+  served_at: string;
+  amount_g?: number;
+  amount_ml?: number;
+  notes?: string;
+}
+
+export interface FoodProduct {
+  id: string;
+  name: string;
+  brand: string;
+  food_type: string;
+  food_category: string;
+  default_bag_weight_g?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FoodBag {
+  id: string;
+  product_id: string;
+  weight_g: number;
+  purchased_at: string;
+  opened_at?: string;
+  depleted_at?: string;
+  status: string; // 'stocked' | 'opened' | 'depleted'
+  created_at: string;
+  updated_at: string;
+}
+
 export const api = {
   login(email: string, password: string): Promise<LoginResponse> {
     return apiClient.post<LoginResponse>(Endpoints.login, { email, password }, true);
@@ -158,5 +214,66 @@ export const api = {
 
   postponeReminder(reminderId: string, delayDays: number): Promise<Reminder> {
     return apiClient.post<Reminder>(`/reminders/${reminderId}/postpone`, { delay_days: delayDays });
+  },
+
+  // Resources (litières, etc.)
+  getResources(type?: string): Promise<Resource[]> {
+    const q = type ? `?type=${type}` : '';
+    return apiClient.get<Resource[]>(`${Endpoints.resources}${q}`);
+  },
+  createResource(data: { name: string; type: string; color?: string; tracking_mode?: string }): Promise<Resource> {
+    return apiClient.post<Resource>(Endpoints.resources, data);
+  },
+  updateResource(id: string, data: { name?: string; color?: string; enabled?: boolean }): Promise<Resource> {
+    return request<Resource>('PATCH', Endpoints.resource(id), data);
+  },
+  deleteResource(id: string): Promise<void> {
+    return apiClient.delete<void>(Endpoints.resource(id));
+  },
+
+  // Bowls (gamelles)
+  getBowls(): Promise<Bowl[]> {
+    return apiClient.get<Bowl[]>(Endpoints.bowls);
+  },
+  createBowl(data: { name: string; location: string; bowl_type: string; capacity_g?: number; capacity_ml?: number; current_product_id?: string }): Promise<Bowl> {
+    return apiClient.post<Bowl>(Endpoints.bowls, data);
+  },
+  updateBowl(id: string, data: Partial<Bowl>): Promise<Bowl> {
+    return apiClient.put<Bowl>(Endpoints.bowl(id), data);
+  },
+  deleteBowl(id: string): Promise<void> {
+    return apiClient.delete<void>(Endpoints.bowl(id));
+  },
+  fillBowl(id: string, data: { pet_id?: string; amount_g?: number; amount_ml?: number; notes?: string }): Promise<Serving> {
+    return apiClient.post<Serving>(Endpoints.bowlFill(id), {
+      ...data,
+      served_at: new Date().toISOString(),
+    });
+  },
+
+  // Food products
+  getFoodProducts(): Promise<FoodProduct[]> {
+    return apiClient.get<FoodProduct[]>(Endpoints.foodProducts);
+  },
+  createFoodProduct(data: { name: string; brand: string; food_type: string; food_category: string; default_bag_weight_g?: number }): Promise<FoodProduct> {
+    return apiClient.post<FoodProduct>(Endpoints.foodProducts, data);
+  },
+  deleteFoodProduct(id: string): Promise<void> {
+    return apiClient.delete<void>(Endpoints.foodProduct(id));
+  },
+
+  // Food bags
+  getFoodBags(status?: string): Promise<FoodBag[]> {
+    const q = status ? `?bag_status=${status}` : '';
+    return apiClient.get<FoodBag[]>(`${Endpoints.foodBags}${q}`);
+  },
+  createFoodBag(data: { product_id: string; weight_g: number; purchased_at: string }): Promise<FoodBag> {
+    return apiClient.post<FoodBag>(Endpoints.foodBags, data);
+  },
+  openFoodBag(id: string): Promise<FoodBag> {
+    return apiClient.post<FoodBag>(Endpoints.foodBagOpen(id), {});
+  },
+  depleteFoodBag(id: string): Promise<FoodBag> {
+    return apiClient.post<FoodBag>(Endpoints.foodBagDeplete(id), {});
   },
 };

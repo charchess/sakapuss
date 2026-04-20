@@ -1,0 +1,46 @@
+appId: com.sakapuss.mobile
+---
+# Rappels: affichage de la liste + validation d'un rappel (si existant)
+
+- launchApp:
+    clearState: true
+- assertVisible: "Se connecter"
+- tapOn:
+    id: "email-input"
+- inputText: "playwright-e2e@test.sakapuss.local"
+- tapOn:
+    id: "password-input"
+- inputText: "PlaywrightTest123!"
+- hideKeyboard
+- tapOn: "Se connecter"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+
+# Naviguer vers les rappels
+- tapOn: "🔔"
+- assertVisible: "Rappels"
+- assertNotVisible: "Impossible de charger les données"
+
+# L'état vide "Tout est à jour !" ou la liste de rappels sont les deux cas valides
+# Aucune erreur ne doit être visible
+- assertNotVisible: "Erreur"
+- assertNotVisible: "Impossible"
+
+# Si des rappels sont visibles, valider le premier rappel du jour
+- tapOn:
+    text: "Aujourd'hui"
+    optional: true
+- tapOn:
+    text: "Valider"
+    optional: true
+- assertNotVisible: "Erreur"
+  optional: true
+
+# Tester la navigation vers un rappel existant
+- tapOn:
+    id: "reminder-list"
+    optional: true
+- assertNotVisible: "Impossible de charger les données"
+
+# Retour via pull-to-refresh (vérifie que l'écran ne plante pas)
+- scroll
+- assertVisible: "Rappels"

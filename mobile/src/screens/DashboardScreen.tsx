@@ -14,7 +14,8 @@ import { StatusBar } from 'expo-status-bar';
 import { HomeStackParamList } from '../navigation/AppNavigator';
 import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme';
 import { AuthStore, User } from '../store/auth';
-import { api, Pet, PetEvent } from '../api/client';
+import { Pet, PetEvent } from '../api/client';
+import { dataService } from '../store/dataService';
 import { flushQueue } from '../api/sync';
 import { PetAvatar } from '../components/PetAvatar';
 import { QuickLogTile } from '../components/QuickLogTile';
@@ -55,10 +56,12 @@ export function DashboardScreen({ navigation }: Props) {
 
   const loadData = useCallback(async () => {
     setError(null);
+    const guest = await AuthStore.isGuestMode();
+    setIsGuest(guest);
     try {
       const [u, fetchedPets] = await Promise.all([
         AuthStore.getUser(),
-        api.getPets(),
+        dataService.getPets(),
       ]);
       setUser(u);
       setPets(fetchedPets);
@@ -69,17 +72,15 @@ export function DashboardScreen({ navigation }: Props) {
 
       const [events, reminders] = await Promise.all([
         targetId
-          ? api.getPetEvents(targetId)
-          : api.getAllEvents(20),
-        api.getPendingReminders(),
+          ? dataService.getPetEvents(targetId)
+          : dataService.getAllEvents(20),
+        dataService.getPendingReminders(),
       ]);
 
       setRecentEvents(events.slice(0, 10));
       setRemindersCount(reminders.length);
     } catch (err) {
       console.warn('[Dashboard] loadData error:', err);
-      const guest = await AuthStore.isGuestMode();
-      setIsGuest(guest);
       if (!guest) {
         setError('Impossible de charger les données. Vérifiez votre connexion.');
       }
@@ -99,7 +100,7 @@ export function DashboardScreen({ navigation }: Props) {
   const handleSelectPet = async (petId: string) => {
     setSelectedPetId(petId);
     try {
-      const events = await api.getPetEvents(petId);
+      const events = await dataService.getPetEvents(petId);
       setRecentEvents(events.slice(0, 10));
     } catch (err) {
       console.warn('[Dashboard] handleSelectPet error:', err);
@@ -162,10 +163,10 @@ export function DashboardScreen({ navigation }: Props) {
 
       {/* Guest banner */}
       {isGuest && (
-        <View style={styles.guestBanner}>
-          <Text style={styles.guestBannerText}>🌐 Mode hors-ligne</Text>
-          <TouchableOpacity onPress={() => (navigation as any).navigate('Settings')}>
-            <Text style={styles.guestBannerLink}>Créer un compte →</Text>
+        <View style={styles.guestBanner} testID="guest-banner">
+          <Text style={styles.guestBannerText} testID="guest-banner-text">💾 Données locales</Text>
+          <TouchableOpacity onPress={() => (navigation as any).navigate('Settings')} testID="guest-banner-sync">
+            <Text style={styles.guestBannerLink}>Synchroniser →</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -191,6 +192,7 @@ export function DashboardScreen({ navigation }: Props) {
               style={styles.addPetBtn}
               onPress={() => navigation.navigate('AddPet', {})}
               activeOpacity={0.8}
+              testID="add-pet-btn"
             >
               <Text style={styles.addPetBtnText}>+ Ajouter un animal</Text>
             </TouchableOpacity>
