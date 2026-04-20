@@ -10,10 +10,13 @@ appId: com.sakapuss.mobile
 - tapOn:
     id: "guest-btn"
 - assertVisible: "Que se passe-t-il aujourd'hui ?"
+- waitForAnimationToEnd
 
 # Dashboard en mode local: bannière "Données locales" visible
-- assertVisible: "Données locales"
-- assertVisible: "Synchroniser →"
+- assertVisible:
+    id: "guest-banner"
+- assertVisible:
+    id: "guest-banner-text"
 
 # Ajouter un animal en mode local (doit fonctionner)
 - tapOn:

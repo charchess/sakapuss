@@ -163,9 +163,9 @@ export function DashboardScreen({ navigation }: Props) {
 
       {/* Guest banner */}
       {isGuest && (
-        <View style={styles.guestBanner}>
-          <Text style={styles.guestBannerText}>💾 Données locales</Text>
-          <TouchableOpacity onPress={() => (navigation as any).navigate('Settings')}>
+        <View style={styles.guestBanner} testID="guest-banner">
+          <Text style={styles.guestBannerText} testID="guest-banner-text">💾 Données locales</Text>
+          <TouchableOpacity onPress={() => (navigation as any).navigate('Settings')} testID="guest-banner-sync">
             <Text style={styles.guestBannerLink}>Synchroniser →</Text>
           </TouchableOpacity>
         </View>
@@ -192,6 +192,7 @@ export function DashboardScreen({ navigation }: Props) {
               style={styles.addPetBtn}
               onPress={() => navigation.navigate('AddPet', {})}
               activeOpacity={0.8}
+              testID="add-pet-btn"
             >
               <Text style={styles.addPetBtnText}>+ Ajouter un animal</Text>
             </TouchableOpacity>

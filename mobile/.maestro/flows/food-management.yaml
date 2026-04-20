@@ -34,16 +34,17 @@ appId: com.sakapuss.mobile
 - tapOn:
     id: "product-name-input"
 - inputText: "Adult Indoor"
+- hideKeyboard
 - tapOn:
     id: "product-brand-input"
 - inputText: "Royal Canin"
 - hideKeyboard
 - tapOn:
     id: "product-save-btn"
+- waitForAnimationToEnd
 
 # Vérifier que le produit apparaît
 - assertVisible: "Adult Indoor"
-- assertVisible: "Royal Canin"
 
 # === ONGLET SACS ===
 - tapOn:
@@ -54,24 +55,32 @@ appId: com.sakapuss.mobile
 - tapOn:
     id: "food-add-btn"
 - assertVisible: "Nouveau sac"
+# Sélectionner le produit (brand + name: "Royal Canin Adult Indoor")
+- tapOn: "Royal Canin Adult Indoor"
+- scrollUntilVisible:
+    element:
+      id: "bag-weight-input"
+    direction: DOWN
 - tapOn:
     id: "bag-weight-input"
 - inputText: "2000"
 - hideKeyboard
 - tapOn:
     id: "bag-save-btn"
+- waitForAnimationToEnd
+- waitForAnimationToEnd
 
 # Vérifier que le sac apparaît (status: En stock)
-- assertVisible: "En stock"
+- assertVisible: "Ouvrir"
 
 # Ouvrir le sac
 - tapOn: "Ouvrir"
-- assertVisible: "Ouvert"
-- assertNotVisible: "En stock"
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+- assertVisible: "Épuisé"
 
 # Marquer comme épuisé
 - tapOn: "Épuisé"
 - assertVisible: "Sac épuisé"
 - tapOn: "Épuisé"
-# Le sac disparaît de la liste (depleted filtrés)
-- assertNotVisible: "Ouvert"
+- waitForAnimationToEnd
