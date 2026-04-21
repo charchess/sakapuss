@@ -510,12 +510,14 @@ export function QuickLogScreen({ navigation, route }: Props) {
           {renderFields()}
         </View>
 
+      </ScrollView>
+
+      <View style={styles.footer}>
         {error && (
           <View style={styles.errorBox}>
             <Text style={styles.errorText}>{error}</Text>
           </View>
         )}
-
         <TouchableOpacity
           style={[styles.button, loading && styles.buttonDisabled]}
           onPress={handleSubmit}
@@ -533,14 +535,15 @@ export function QuickLogScreen({ navigation, route }: Props) {
         <TouchableOpacity style={styles.cancel} onPress={() => navigation.goBack()}>
           <Text style={styles.cancelText}>Annuler</Text>
         </TouchableOpacity>
-      </ScrollView>
+      </View>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.background },
-  scroll: { padding: Spacing.xl, paddingBottom: 48 },
+  scroll: { padding: Spacing.xl, paddingBottom: Spacing.md },
+  footer: { paddingHorizontal: Spacing.xl, paddingBottom: 24, paddingTop: Spacing.sm, backgroundColor: Colors.background },
   pageHeader: { alignItems: 'center', marginBottom: Spacing.xl },
   pageIcon: { fontSize: 56, marginBottom: 8 },
   pageTitle: { ...Typography.h2, color: Colors.textPrimary, marginBottom: 8 },

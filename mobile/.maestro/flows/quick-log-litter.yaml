@@ -4,6 +4,14 @@ appId: com.sakapuss.mobile
 
 - launchApp:
     clearState: true
+# Dismiss Expo dev menu if it appears on launch (menu can appear 2-3s after launch)
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+- runFlow:
+    file: ../helpers/dismiss-dev-menu.yaml
+    when:
+      visible: "Continue"
+- waitForAnimationToEnd
 - assertVisible: "Se connecter"
 - tapOn:
     id: "email-input"
@@ -20,12 +28,7 @@ appId: com.sakapuss.mobile
     id: "quick-action-litter"
 - assertVisible: "Litière"
 
-# === CAS 1: Aucune litière configurée ===
 # Si aucune litière → affiche état vide avec bouton configurer
-# (Ce test passe que des litières soient configurées ou non)
-
-# === CAS 2: Flux complet avec litière ===
-# Aller configurer une litière si nécessaire
 - tapOn:
     text: "Configurer les litières →"
     optional: true
@@ -38,32 +41,30 @@ appId: com.sakapuss.mobile
 - tapOn:
     id: "resource-name-input"
     optional: true
-- inputText: "Litière Salon"
-  optional: true
+- inputText: "Litiere Salon"
 - hideKeyboard
 - tapOn:
     id: "resource-save-btn"
     optional: true
-- tapOn: "Accueil"
-  optional: true
+- tapOn:
+    text: "Accueil"
+    optional: true
 
-# Retenter le Quick Log litière
+# Retenter le Quick Log litière (seulement si on a navigué ailleurs)
 - tapOn:
     id: "quick-action-litter"
+    optional: true
 - assertVisible: "Litière"
 
 # Sélectionner la note RAS (sélectionnée par défaut)
-- assertVisible: "Quelle litière ?"
-  optional: true
+- assertVisible:
+    text: "Quelle litière ?"
+    optional: true
 - tapOn:
     id: "litter-note-ras"
     optional: true
 
-# Confirmer
-- scrollUntilVisible:
-    element:
-      id: "quicklog-submit-btn"
-    direction: DOWN
+# Confirmer (bouton sticky, toujours visible)
 - tapOn:
     id: "quicklog-submit-btn"
 

@@ -4,6 +4,14 @@ appId: com.sakapuss.mobile
 
 - launchApp:
     clearState: true
+# Dismiss Expo dev menu if it appears on launch (menu can appear 2-3s after launch)
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+- runFlow:
+    file: ../helpers/dismiss-dev-menu.yaml
+    when:
+      visible: "Continue"
+- waitForAnimationToEnd
 - assertVisible: "Se connecter"
 - tapOn:
     id: "email-input"
@@ -16,8 +24,9 @@ appId: com.sakapuss.mobile
 - assertVisible: "Que se passe-t-il aujourd'hui ?"
 
 # Pré-requis: au moins un animal doit exister
-- assertVisible: "Fiche de"
-  optional: true
+- assertVisible:
+    text: "Fiche de"
+    optional: true
 
 # === MÉDICAMENT ===
 - tapOn:
@@ -25,7 +34,7 @@ appId: com.sakapuss.mobile
 - assertVisible: "Médic."
 - assertNotVisible: "Que se passe-t-il aujourd'hui ?"
 
-# Valider sans médicament → erreur
+# Valider sans médicament → erreur (bouton sticky, toujours visible)
 - tapOn:
     id: "quicklog-submit-btn"
 - assertVisible: "Veuillez saisir le nom du médicament."
@@ -71,7 +80,7 @@ appId: com.sakapuss.mobile
 
 # Saisir une description
 - tapOn: "Décrivez l'événement..."
-- inputText: "Test événement Maestro"
+- inputText: "Test evenement Maestro"
 - hideKeyboard
 - tapOn:
     id: "quicklog-submit-btn"

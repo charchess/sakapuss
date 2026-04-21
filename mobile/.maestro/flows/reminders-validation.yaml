@@ -4,6 +4,14 @@ appId: com.sakapuss.mobile
 
 - launchApp:
     clearState: true
+# Dismiss Expo dev menu if it appears on launch (menu can appear 2-3s after launch)
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+- runFlow:
+    file: ../helpers/dismiss-dev-menu.yaml
+    when:
+      visible: "Continue"
+- waitForAnimationToEnd
 - assertVisible: "Se connecter"
 - tapOn:
     id: "email-input"
@@ -32,8 +40,9 @@ appId: com.sakapuss.mobile
 - tapOn:
     text: "Valider"
     optional: true
-- assertNotVisible: "Erreur"
-  optional: true
+- assertNotVisible:
+    text: "Erreur"
+    optional: true
 
 # Tester la navigation vers un rappel existant
 - tapOn:
