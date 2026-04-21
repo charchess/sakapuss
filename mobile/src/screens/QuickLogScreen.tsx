@@ -44,6 +44,7 @@ export function QuickLogScreen({ navigation, route }: Props) {
   const [stockedBags, setStockedBags] = useState<FoodBag[]>([]);
   const [selectedBagId, setSelectedBagId] = useState<string | null>(null);
   const [foodProducts, setFoodProducts] = useState<FoodProduct[]>([]);
+  const [bagServings, setBagServings] = useState<Record<string, number>>({});
   const [openingBag, setOpeningBag] = useState(false);
 
   // Weight fields
@@ -74,17 +75,29 @@ export function QuickLogScreen({ navigation, route }: Props) {
         dataService.getBowls(),
         dataService.getFoodBags(),
         dataService.getFoodProducts(),
+        dataService.getAllEvents(500),
       ])
-        .then(([bowlsData, bagsData, productsData]) => {
+        .then(([bowlsData, bagsData, productsData, events]) => {
           const food = bowlsData.filter((b) => b.bowl_type === 'food');
           setBowls(food);
-          if (food.length > 0) setSelectedBowl(food[0].id);
+          if (food.length > 0) {
+            setSelectedBowl(food[0].id);
+            if (food[0].capacity_g) setAmount(String(food[0].capacity_g));
+          }
           setFoodProducts(productsData);
           const opened = bagsData.filter((b) => b.status === 'opened');
           const stocked = bagsData.filter((b) => b.status === 'stocked');
           setOpenedBags(opened);
           setStockedBags(stocked);
           if (opened.length > 0) setSelectedBagId(opened[0].id);
+          const servMap: Record<string, number> = {};
+          events
+            .filter((e) => e.type === 'food_serve' && e.payload.bag_id && e.payload.amount_grams)
+            .forEach((e) => {
+              const bid = e.payload.bag_id as string;
+              servMap[bid] = (servMap[bid] ?? 0) + ((e.payload.amount_grams as number) || 0);
+            });
+          setBagServings(servMap);
         })
         .catch(() => {})
         .finally(() => setLoadingResources(false));
@@ -263,7 +276,7 @@ export function QuickLogScreen({ navigation, route }: Props) {
             <TouchableOpacity
               key={b.id}
               style={[styles.resourceCard, selectedBowl === b.id && styles.resourceCardActive]}
-              onPress={() => setSelectedBowl(b.id)}
+              onPress={() => { setSelectedBowl(b.id); if (b.capacity_g) setAmount(String(b.capacity_g)); }}
               activeOpacity={0.7}
             >
               <Text style={styles.resourceCardIcon}>🥣</Text>
@@ -321,7 +334,16 @@ export function QuickLogScreen({ navigation, route }: Props) {
                   <Text style={[styles.resourceName, selectedBagId === bag.id && styles.resourceNameActive]}>
                     {p ? `${p.brand} ${p.name}` : 'Sac'}
                   </Text>
-                  <Text style={styles.resourceSub}>{(bag.weight_g / 1000).toFixed(1)} kg · Ouvert</Text>
+                  <Text style={styles.resourceSub}>
+                    {(() => {
+                      const consumed = bagServings[bag.id] ?? 0;
+                      const remaining = Math.max(0, bag.weight_g - consumed);
+                      const pct = Math.round((remaining / bag.weight_g) * 100);
+                      return consumed > 0
+                        ? `~${(remaining / 1000).toFixed(1)} kg restant (${pct}%)`
+                        : `${(bag.weight_g / 1000).toFixed(1)} kg · Ouvert`;
+                    })()}
+                  </Text>
                 </View>
                 {selectedBagId === bag.id && <Text style={styles.checkmark}>✓</Text>}
               </TouchableOpacity>
