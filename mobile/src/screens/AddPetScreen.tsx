@@ -54,7 +54,7 @@ export function AddPetScreen({ navigation }: Props) {
         birth_date: birthDate.trim(),
         breed: breed.trim() || undefined,
       });
-      navigation.goBack();
+      navigation.navigate('OnboardingAdmin', {});
     } catch (err: unknown) {
       const msg = (err as { message?: string })?.message ?? 'Impossible de créer l\'animal.';
       setError(msg);

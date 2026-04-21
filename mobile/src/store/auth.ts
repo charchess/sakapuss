@@ -5,6 +5,7 @@ const TOKEN_KEY = 'sakapuss_token';
 const USER_KEY = 'sakapuss_user';
 const BASE_URL_KEY = 'sakapuss_base_url';
 const GUEST_KEY = 'sakapuss_guest';
+const ONBOARDING_KEY = 'sakapuss_onboarding';
 
 export interface User {
   id: string;
@@ -57,7 +58,7 @@ export const AuthStore = {
   },
 
   async logout(): Promise<void> {
-    await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY, GUEST_KEY]);
+    await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY, GUEST_KEY, ONBOARDING_KEY]);
   },
 
   async isLoggedIn(): Promise<boolean> {

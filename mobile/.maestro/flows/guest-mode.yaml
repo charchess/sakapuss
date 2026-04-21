@@ -43,6 +43,17 @@ appId: com.sakapuss.mobile
     direction: DOWN
 - tapOn: "Ajouter"
 
+# Wizard d'onboarding → passer les 3 étapes (mode local)
+- assertVisible: "Rappels santé"
+- tapOn:
+    id: "onboarding-actions-skip"
+- assertVisible: "Poids initial"
+- tapOn:
+    id: "onboarding-actions-skip"
+- assertVisible: "Configuration alimentation"
+- tapOn:
+    id: "onboarding-actions-skip"
+
 # Retour au dashboard, animal créé localement
 - assertVisible: "Que se passe-t-il aujourd'hui ?"
 - assertVisible: "Felix"
