@@ -142,4 +142,21 @@ export const dataService = {
     }
     return api.postponeReminder(id, delayDays);
   },
+
+  async createReminder(petId: string, data: { name: string; frequency_days: number; type?: string }): Promise<void> {
+    if (await isGuest()) {
+      const due = new Date();
+      due.setDate(due.getDate() + data.frequency_days);
+      await localDb.createReminder({
+        pet_id: petId,
+        name: data.name,
+        type: data.type ?? 'health',
+        frequency_days: data.frequency_days,
+        next_due_date: due.toISOString(),
+        status: 'upcoming',
+      });
+      return;
+    }
+    await api.createReminder(petId, data);
+  },
 };

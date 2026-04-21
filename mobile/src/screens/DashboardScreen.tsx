@@ -14,7 +14,7 @@ import { StatusBar } from 'expo-status-bar';
 import { HomeStackParamList } from '../navigation/AppNavigator';
 import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme';
 import { AuthStore, User } from '../store/auth';
-import { Pet, PetEvent, FoodBag, FoodProduct } from '../api/client';
+import { Pet, PetEvent, FoodBag, Resource, Bowl } from '../api/client';
 import { dataService } from '../store/dataService';
 import { flushQueue } from '../api/sync';
 import { PetAvatar } from '../components/PetAvatar';
@@ -28,11 +28,12 @@ interface QuickAction {
   label: string;
   color: string;
   type: string;
+  requires?: 'litter' | 'bowls';
 }
 
-const QUICK_ACTIONS: QuickAction[] = [
-  { key: 'litter', icon: '🚽', label: 'Litière', color: Colors.success, type: 'litter_clean' },
-  { key: 'food', icon: '🥣', label: 'Gamelle', color: Colors.accent, type: 'food_serve' },
+const ALL_QUICK_ACTIONS: QuickAction[] = [
+  { key: 'litter', icon: '🚽', label: 'Litière', color: Colors.success, type: 'litter_clean', requires: 'litter' },
+  { key: 'food', icon: '🥣', label: 'Gamelle', color: Colors.accent, type: 'food_serve', requires: 'bowls' },
   { key: 'weight', icon: '⚖️', label: 'Pesée', color: Colors.primary, type: 'weight' },
   { key: 'medicine', icon: '💊', label: 'Médic.', color: Colors.error, type: 'health_note' },
   { key: 'observation', icon: '👁️', label: 'Obs.', color: Colors.info, type: 'behavior' },
@@ -48,12 +49,20 @@ export function DashboardScreen({ navigation }: Props) {
   const [recentEvents, setRecentEvents] = useState<PetEvent[]>([]);
   const [remindersCount, setRemindersCount] = useState(0);
   const [openedBagsInfo, setOpenedBagsInfo] = useState<Array<{ bag: FoodBag; productName: string }>>([]);
+  const [litterResources, setLitterResources] = useState<Resource[]>([]);
+  const [bowls, setBowls] = useState<Bowl[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isGuest, setIsGuest] = useState(false);
 
   const selectedPet = pets.find((p) => p.id === selectedPetId) ?? null;
+
+  const visibleActions = ALL_QUICK_ACTIONS.filter((a) => {
+    if (a.requires === 'litter') return litterResources.length > 0;
+    if (a.requires === 'bowls') return bowls.length > 0;
+    return true;
+  });
 
   const loadData = useCallback(async () => {
     setError(null);
@@ -71,17 +80,21 @@ export function DashboardScreen({ navigation }: Props) {
       const targetId = selectedPetId ?? firstPetId;
       setSelectedPetId(targetId);
 
-      const [events, reminders, openedBags, foodProducts] = await Promise.all([
+      const [events, reminders, openedBags, foodProducts, resources, fetchedBowls] = await Promise.all([
         targetId
           ? dataService.getPetEvents(targetId)
           : dataService.getAllEvents(20),
         dataService.getPendingReminders(),
         dataService.getFoodBags('opened'),
         dataService.getFoodProducts(),
+        dataService.getResources('litter'),
+        dataService.getBowls(),
       ]);
 
       setRecentEvents(events.slice(0, 10));
       setRemindersCount(reminders.length);
+      setLitterResources(resources);
+      setBowls(fetchedBowls);
       setOpenedBagsInfo(
         openedBags.map((bag) => ({
           bag,
@@ -303,7 +316,7 @@ export function DashboardScreen({ navigation }: Props) {
             <Text style={styles.selectPetHint}>Sélectionnez un animal ci-dessus</Text>
           )}
           <View style={styles.grid}>
-            {QUICK_ACTIONS.map((action) => (
+            {visibleActions.map((action) => (
               <QuickLogTile
                 key={action.key}
                 icon={action.icon}

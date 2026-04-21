@@ -3,6 +3,14 @@ appId: com.sakapuss.mobile
 # Test 1: mauvais mot de passe → erreur visible
 - launchApp:
     clearState: true
+# Dismiss Expo dev menu if it appears on launch (menu can appear 2-3s after launch)
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+- runFlow:
+    file: ../helpers/dismiss-dev-menu.yaml
+    when:
+      visible: "Continue"
+- waitForAnimationToEnd
 - assertVisible: "Se connecter"
 - tapOn:
     id: "email-input"

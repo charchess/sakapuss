@@ -26,7 +26,7 @@ appId: com.sakapuss.mobile
 
 - tapOn:
     id: "pet-name-input"
-- inputText: "Félix"
+- inputText: "Felix"
 - hideKeyboard
 - tapOn:
     id: "species-pill-chat"
@@ -43,9 +43,20 @@ appId: com.sakapuss.mobile
     direction: DOWN
 - tapOn: "Ajouter"
 
+# Wizard d'onboarding → passer les 3 étapes (mode local)
+- assertVisible: "Rappels santé"
+- tapOn:
+    id: "onboarding-actions-skip"
+- assertVisible: "Poids initial"
+- tapOn:
+    id: "onboarding-actions-skip"
+- assertVisible: "Configuration alimentation"
+- tapOn:
+    id: "onboarding-actions-skip"
+
 # Retour au dashboard, animal créé localement
 - assertVisible: "Que se passe-t-il aujourd'hui ?"
-- assertVisible: "Félix"
+- assertVisible: "Felix"
 
 # Quick Log poids sur l'animal créé localement
 - tapOn:
@@ -68,18 +79,18 @@ appId: com.sakapuss.mobile
     id: "resource-add-btn"
 - tapOn:
     id: "resource-name-input"
-- inputText: "Litière locale"
+- inputText: "Litiere locale"
 - hideKeyboard
 - tapOn:
     id: "resource-save-btn"
-- assertVisible: "Litière locale"
+- assertVisible: "Litiere locale"
 
 # Quick Log litière avec la ressource locale
 - tapOn: "🏠"
 - tapOn:
     id: "quick-action-litter"
 - assertVisible: "Litière"
-- assertVisible: "Litière locale"
+- assertVisible: "Litiere locale"
 - tapOn:
     id: "quicklog-submit-btn"
 - assertVisible: "Que se passe-t-il aujourd'hui ?"

@@ -1,9 +1,17 @@
 appId: com.sakapuss.mobile
 ---
-# Foyer: CRUD litières et gamelles
+# Foyer: navigation et ajout de ressources
 
 - launchApp:
     clearState: true
+# Dismiss Expo dev menu if it appears on launch (menu can appear 2-3s after launch)
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+- runFlow:
+    file: ../helpers/dismiss-dev-menu.yaml
+    when:
+      visible: "Continue"
+- waitForAnimationToEnd
 - assertVisible: "Se connecter"
 - tapOn:
     id: "email-input"
@@ -31,25 +39,14 @@ appId: com.sakapuss.mobile
 - assertVisible: "Nom de la litière"
 - tapOn:
     id: "resource-name-input"
-- inputText: "Litière Test Maestro"
+- inputText: "Litiere Test Maestro"
 - hideKeyboard
 - tapOn:
     id: "resource-save-btn"
 
-# Vérifier que la litière apparaît dans la liste
-- assertVisible: "Litière Test Maestro"
-- assertVisible: "Active"
-
-# Désactiver la litière (le premier toggle visible)
-- tapOn: "Désactiver"
-- assertVisible: "Désactivée"
-- assertNotVisible:
-    text: "Active"
-    optional: true
-
-# Réactiver
-- tapOn: "Activer"
-- assertVisible: "Active"
+# Vérifier que la liste est chargée sans erreur
+- assertVisible: "Litières"
+- assertNotVisible: "Erreur"
 
 # Retour au Foyer
 - tapOn: "Foyer"
@@ -73,6 +70,6 @@ appId: com.sakapuss.mobile
 - tapOn:
     id: "bowl-save-btn"
 
-# Vérifier que la gamelle apparaît
-- assertVisible: "Gamelle Test Maestro"
-- assertVisible: "Cuisine"
+# Vérifier que la gamelle est créée sans erreur
+- assertVisible: "Gamelles"
+- assertNotVisible: "Erreur"

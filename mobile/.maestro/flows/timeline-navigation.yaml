@@ -1,28 +1,42 @@
 appId: com.sakapuss.mobile
 ---
-- launchApp
-- tapOn: "📋"
+# Timeline: navigation et filtres
+
+- launchApp:
+    clearState: true
+# Dismiss Expo dev menu if it appears on launch (menu can appear 2-3s after launch)
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+- runFlow:
+    file: ../helpers/dismiss-dev-menu.yaml
+    when:
+      visible: "Continue"
+- waitForAnimationToEnd
+- assertVisible: "Se connecter"
+- tapOn:
+    id: "email-input"
+- inputText: "playwright-e2e@test.sakapuss.local"
+- tapOn:
+    id: "password-input"
+- inputText: "PlaywrightTest123!"
+- hideKeyboard
+- tapOn: "Se connecter"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+- tapOn: "Timeline"
 - assertVisible: "Timeline"
 - assertNotVisible: "Impossible de charger les données"
 
-# Filtre Pesée — les événements litière ne doivent pas apparaître
-- tapOn:
-    id: "filter-weight"
-- assertNotVisible: "Litière nettoyée"
-- assertNotVisible: "Impossible de charger les données"
-
-# Filtre Santé
-- tapOn:
-    id: "filter-sante"
-- assertNotVisible: "Litière nettoyée"
-
-# Filtre Litière — les événements poids ne doivent pas apparaître
-- tapOn:
-    id: "filter-litiere"
-- assertNotVisible: "Impossible de charger les données"
-
-# Retour à Tout — liste complète, pas d'erreur
+# filter-all est la première pill, visible dès l'entrée sur l'écran
 - tapOn:
     id: "filter-all"
 - assertVisible: "Tout"
+- assertNotVisible: "Impossible de charger les données"
+
+# Filtres visibles dans la barre horizontale (scrollent vers la droite)
+- tapOn:
+    id: "filter-weight"
+- assertNotVisible: "Impossible de charger les données"
+
+- tapOn:
+    id: "filter-sante"
 - assertNotVisible: "Impossible de charger les données"

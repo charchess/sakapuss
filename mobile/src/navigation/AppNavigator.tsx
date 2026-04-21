@@ -14,6 +14,7 @@ import { FoyerScreen } from '../screens/FoyerScreen';
 import { ResourcesScreen } from '../screens/ResourcesScreen';
 import { BowlsScreen } from '../screens/BowlsScreen';
 import { FoodScreen } from '../screens/FoodScreen';
+import { OnboardingAdminScreen } from '../screens/OnboardingAdminScreen';
 
 export type HomeStackParamList = {
   Dashboard: undefined;
@@ -32,6 +33,7 @@ export type HomeStackParamList = {
     birthDate?: string;
   };
   AddPet: Record<string, never>;
+  OnboardingAdmin: { fromSettings?: boolean };
 };
 
 export type AppTabParamList = {
@@ -119,6 +121,11 @@ function HomeStackNavigator() {
           headerBackTitle: 'Accueil',
           headerTintColor: Colors.primary,
         }}
+      />
+      <HomeStack.Screen
+        name="OnboardingAdmin"
+        component={OnboardingAdminScreen}
+        options={{ headerShown: false }}
       />
     </HomeStack.Navigator>
   );

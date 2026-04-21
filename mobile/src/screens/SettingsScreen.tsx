@@ -11,37 +11,49 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme';
 import { AuthStore, User } from '../store/auth';
 import { SyncQueue } from '../store/syncQueue';
+import { OnboardingState } from '../store/onboardingState';
 import { DEFAULT_BASE_URL } from '../constants/api';
 
 interface Props {
   onLogout: () => void;
 }
 
+const SETUP_ROWS = [
+  { key: 'health' as const, icon: '💊', label: 'Rappels santé' },
+  { key: 'weight' as const, icon: '⚖️', label: 'Poids initial' },
+  { key: 'food' as const, icon: '🥣', label: 'Configuration alimentation' },
+];
+
 export function SettingsScreen({ onLogout }: Props) {
+  const navigation = useNavigation<any>(); // eslint-disable-line @typescript-eslint/no-explicit-any
   const [user, setUser] = useState<User | null>(null);
   const [baseUrl, setBaseUrl] = useState(DEFAULT_BASE_URL);
   const [editingUrl, setEditingUrl] = useState(false);
   const [urlDraft, setUrlDraft] = useState('');
   const [pendingCount, setPendingCount] = useState(0);
   const [isGuest, setIsGuest] = useState(false);
+  const [onboardingDone, setOnboardingDone] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const load = async () => {
-      const [u, url, count, guest] = await Promise.all([
+      const [u, url, count, guest, obs] = await Promise.all([
         AuthStore.getUser(),
         AuthStore.getBaseUrl(),
         SyncQueue.getPendingCount(),
         AuthStore.isGuestMode(),
+        OnboardingState.get(),
       ]);
       setUser(u);
       setBaseUrl(url);
       setUrlDraft(url);
       setPendingCount(count);
       setIsGuest(guest);
+      setOnboardingDone(obs);
     };
     load();
     const unsub = SyncQueue.subscribe(async () => {
@@ -107,6 +119,31 @@ export function SettingsScreen({ onLogout }: Props) {
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.title}>Paramètres</Text>
+
+        {/* Setup banner — shown when onboarding has incomplete categories */}
+        {SETUP_ROWS.some((r) => !onboardingDone[r.key]) && (
+          <View style={styles.setupBanner} testID="parametres-setup-banner">
+            <Text style={styles.setupBannerTitle}>Terminer la configuration</Text>
+            {SETUP_ROWS.filter((r) => !onboardingDone[r.key]).map((r) => (
+              <TouchableOpacity
+                key={r.key}
+                style={styles.setupRow}
+                onPress={() =>
+                  navigation.navigate('Accueil', {
+                    screen: 'OnboardingAdmin',
+                    params: { fromSettings: true },
+                  })
+                }
+                activeOpacity={0.7}
+                testID="parametres-setup-row"
+              >
+                <Text style={styles.setupRowIcon}>{r.icon}</Text>
+                <Text style={styles.setupRowLabel}>{r.label}</Text>
+                <Text style={styles.setupRowArrow}>›</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
 
         {/* User info / Guest banner */}
         <View style={styles.section}>
@@ -433,5 +470,44 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: Colors.textMuted,
     marginTop: Spacing.xl,
+  },
+  setupBanner: {
+    backgroundColor: `${Colors.accent}18`,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: `${Colors.accent}44`,
+    padding: Spacing.md,
+    marginBottom: Spacing.xl,
+  },
+  setupBannerTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: Colors.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginBottom: Spacing.sm,
+  },
+  setupRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: `${Colors.accent}33`,
+  },
+  setupRowIcon: {
+    fontSize: 18,
+    marginRight: Spacing.sm,
+    width: 26,
+    textAlign: 'center',
+  },
+  setupRowLabel: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.textPrimary,
+  },
+  setupRowArrow: {
+    fontSize: 18,
+    color: Colors.textMuted,
   },
 });

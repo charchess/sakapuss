@@ -1,8 +1,9 @@
 appId: com.sakapuss.mobile
 ---
+# Paramètres: bandeau "Terminer la configuration" + reprise du wizard
+
 - launchApp:
     clearState: true
-# Dismiss Expo dev menu if it appears on launch (menu can appear 2-3s after launch)
 - waitForAnimationToEnd
 - waitForAnimationToEnd
 - runFlow:
@@ -17,27 +18,20 @@ appId: com.sakapuss.mobile
 - tapOn:
     id: "password-input"
 - inputText: "PlaywrightTest123!"
+- hideKeyboard
 - tapOn: "Se connecter"
 - assertVisible: "Que se passe-t-il aujourd'hui ?"
 
-# Naviguer vers AddPet
+# Ajouter un animal mais passer tout l'onboarding
 - tapOn:
     text: "+ Ajouter"
 - assertVisible: "Nouvel animal"
-
-# Valider le formulaire vide → errorBox avec message de validation
-- tapOn: "Ajouter"
-- assertVisible: "Le nom est requis."
-
-# Remplir le formulaire correctement
 - tapOn:
     id: "pet-name-input"
-- inputText: "Caramel"
+- inputText: "Mochi"
 - hideKeyboard
-
 - tapOn:
-    id: "species-pill-chat"
-
+    id: "species-pill-chien"
 - scrollUntilVisible:
     element:
       id: "pet-birthdate-input"
@@ -45,15 +39,13 @@ appId: com.sakapuss.mobile
 - tapOn:
     id: "pet-birthdate-input"
 - tapOn: "OK"
-
-# Soumettre
 - scrollUntilVisible:
     element:
       text: "Ajouter"
     direction: DOWN
 - tapOn: "Ajouter"
 
-# Wizard d'onboarding → passer les 3 étapes
+# Passer les 3 étapes du wizard
 - assertVisible: "Rappels santé"
 - tapOn:
     id: "onboarding-actions-skip"
@@ -64,10 +56,28 @@ appId: com.sakapuss.mobile
 - tapOn:
     id: "onboarding-actions-skip"
 
-# Retour au dashboard sans erreur
+# Retour au dashboard
 - assertVisible: "Que se passe-t-il aujourd'hui ?"
-- assertNotVisible: "Erreur"
-- assertNotVisible: "Impossible"
 
-# Vérifier que l'animal "Caramel" est visible dans la liste
-- assertVisible: "Caramel"
+# Naviguer vers Paramètres — le bandeau "Terminer la configuration" doit être visible
+- tapOn: "⚙️"
+- assertVisible: "Paramètres"
+- assertVisible:
+    id: "parametres-setup-banner"
+
+# Une ligne de configuration est présente
+- assertVisible:
+    id: "parametres-setup-row"
+
+# Tapper une ligne → ouvre le wizard
+- tapOn:
+    id: "parametres-setup-row"
+- assertVisible: "Rappels santé"
+
+# Compléter l'étape Santé depuis les paramètres
+- tapOn:
+    id: "onboarding-actions-save"
+
+# Retour implicite vers Paramètres (fromSettings=true)
+- assertVisible: "Paramètres"
+- assertNotVisible: "Erreur"

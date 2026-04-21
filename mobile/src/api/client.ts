@@ -106,6 +106,7 @@ export interface Reminder {
   pet_name: string;
   name: string;
   type: string;
+  frequency_days?: number;
   next_due_date: string;
   status: string;
 }
@@ -214,6 +215,10 @@ export const api = {
 
   postponeReminder(reminderId: string, delayDays: number): Promise<Reminder> {
     return apiClient.post<Reminder>(`/reminders/${reminderId}/postpone`, { delay_days: delayDays });
+  },
+
+  createReminder(petId: string, data: { name: string; frequency_days: number; type?: string }): Promise<Reminder> {
+    return apiClient.post<Reminder>(`/pets/${petId}/reminders`, { type: 'health', ...data });
   },
 
   // Resources (litières, etc.)
