@@ -14,7 +14,7 @@ import { StackScreenProps } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
 import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme';
 import { dataService } from '../store/dataService';
-import { Resource, Bowl } from '../api/client';
+import { Resource, Bowl, FoodBag, FoodProduct } from '../api/client';
 import { HomeStackParamList } from '../navigation/AppNavigator';
 
 type Props = StackScreenProps<HomeStackParamList, 'QuickLog'>;
@@ -38,6 +38,13 @@ export function QuickLogScreen({ navigation, route }: Props) {
   const [bowls, setBowls] = useState<Bowl[]>([]);
   const [selectedBowl, setSelectedBowl] = useState<string | null>(null);
   const [amount, setAmount] = useState('');
+
+  // Bag/food selection (food_serve)
+  const [openedBags, setOpenedBags] = useState<FoodBag[]>([]);
+  const [stockedBags, setStockedBags] = useState<FoodBag[]>([]);
+  const [selectedBagId, setSelectedBagId] = useState<string | null>(null);
+  const [foodProducts, setFoodProducts] = useState<FoodProduct[]>([]);
+  const [openingBag, setOpeningBag] = useState(false);
 
   // Weight fields
   const [grams, setGrams] = useState('');
@@ -63,11 +70,21 @@ export function QuickLogScreen({ navigation, route }: Props) {
         .finally(() => setLoadingResources(false));
     } else if (type === 'food_serve') {
       setLoadingResources(true);
-      dataService.getBowls()
-        .then((data) => {
-          const food = data.filter((b) => b.bowl_type === 'food');
+      Promise.all([
+        dataService.getBowls(),
+        dataService.getFoodBags(),
+        dataService.getFoodProducts(),
+      ])
+        .then(([bowlsData, bagsData, productsData]) => {
+          const food = bowlsData.filter((b) => b.bowl_type === 'food');
           setBowls(food);
           if (food.length > 0) setSelectedBowl(food[0].id);
+          setFoodProducts(productsData);
+          const opened = bagsData.filter((b) => b.status === 'opened');
+          const stocked = bagsData.filter((b) => b.status === 'stocked');
+          setOpenedBags(opened);
+          setStockedBags(stocked);
+          if (opened.length > 0) setSelectedBagId(opened[0].id);
         })
         .catch(() => {})
         .finally(() => setLoadingResources(false));
@@ -85,7 +102,7 @@ export function QuickLogScreen({ navigation, route }: Props) {
       case 'custom':
         return { note: note.trim() };
       case 'food_serve':
-        return { bowl_id: selectedBowl, amount_grams: parseFloat(amount) || undefined };
+        return { bowl_id: selectedBowl, bag_id: selectedBagId ?? undefined, amount_grams: parseFloat(amount) || undefined };
       case 'litter_clean':
         return { resource_id: selectedLitière, note: litterNote !== 'RAS' ? litterNote : undefined };
       default:
@@ -132,6 +149,7 @@ export function QuickLogScreen({ navigation, route }: Props) {
         await dataService.fillBowl(selectedBowl, {
           pet_id: petId ?? undefined,
           amount_g: parseFloat(amount) || undefined,
+          bag_id: selectedBagId ?? undefined,
         });
       }
       if (petId) {
@@ -146,6 +164,23 @@ export function QuickLogScreen({ navigation, route }: Props) {
       setError(msg);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOpenBag = async (bagId: string) => {
+    setOpeningBag(true);
+    try {
+      await dataService.openFoodBag(bagId);
+      const bagsData = await dataService.getFoodBags();
+      const opened = bagsData.filter((b) => b.status === 'opened');
+      const stocked = bagsData.filter((b) => b.status === 'stocked');
+      setOpenedBags(opened);
+      setStockedBags(stocked);
+      setSelectedBagId(bagId);
+    } catch {
+      setError("Impossible d'ouvrir le sac.");
+    } finally {
+      setOpeningBag(false);
     }
   };
 
@@ -243,6 +278,57 @@ export function QuickLogScreen({ navigation, route }: Props) {
           ))}
         </View>
       )}
+
+      <View style={styles.field}>
+        <Text style={styles.fieldLabel}>Quel aliment ?</Text>
+        {openingBag ? (
+          <ActivityIndicator color={Colors.primary} style={{ marginVertical: 12 }} />
+        ) : openedBags.length === 0 && stockedBags.length === 0 ? (
+          <Text style={styles.hintSub}>Aucun sac — ajoutez-en dans Alimentation</Text>
+        ) : openedBags.length === 0 ? (
+          <>
+            <Text style={styles.hintSub}>Aucun sac ouvert — appuyez pour ouvrir :</Text>
+            {stockedBags.map((bag) => {
+              const p = foodProducts.find((fp) => fp.id === bag.product_id);
+              return (
+                <TouchableOpacity
+                  key={bag.id}
+                  style={styles.resourceCard}
+                  onPress={() => handleOpenBag(bag.id)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.resourceCardIcon}>📦</Text>
+                  <View style={styles.resourceCardInfo}>
+                    <Text style={styles.resourceName}>{p ? `${p.brand} ${p.name}` : 'Sac'}</Text>
+                    <Text style={styles.resourceSub}>{(bag.weight_g / 1000).toFixed(1)} kg · Ouvrir →</Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </>
+        ) : (
+          openedBags.map((bag) => {
+            const p = foodProducts.find((fp) => fp.id === bag.product_id);
+            return (
+              <TouchableOpacity
+                key={bag.id}
+                style={[styles.resourceCard, selectedBagId === bag.id && styles.resourceCardActive]}
+                onPress={() => setSelectedBagId(bag.id)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.resourceCardIcon}>🍽️</Text>
+                <View style={styles.resourceCardInfo}>
+                  <Text style={[styles.resourceName, selectedBagId === bag.id && styles.resourceNameActive]}>
+                    {p ? `${p.brand} ${p.name}` : 'Sac'}
+                  </Text>
+                  <Text style={styles.resourceSub}>{(bag.weight_g / 1000).toFixed(1)} kg · Ouvert</Text>
+                </View>
+                {selectedBagId === bag.id && <Text style={styles.checkmark}>✓</Text>}
+              </TouchableOpacity>
+            );
+          })
+        )}
+      </View>
 
       <View style={styles.field}>
         <Text style={styles.fieldLabel}>Quantité (grammes, optionnel)</Text>
@@ -533,6 +619,7 @@ const styles = StyleSheet.create({
   buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
   cancel: { marginTop: Spacing.md, alignItems: 'center', paddingVertical: 12 },
   cancelText: { fontSize: 14, color: Colors.textSecondary, fontWeight: '600' },
+  hintSub: { fontSize: 12, color: Colors.textMuted, marginBottom: Spacing.sm, fontStyle: 'italic' },
   errorBox: {
     backgroundColor: 'rgba(225,112,85,0.1)',
     borderRadius: 12,

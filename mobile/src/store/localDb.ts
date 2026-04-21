@@ -127,10 +127,11 @@ export const localDb = {
     await write(K.bowls, all.filter((b) => b.id !== id));
   },
 
-  async fillBowl(id: string, data: { pet_id?: string; amount_g?: number }): Promise<Serving> {
+  async fillBowl(id: string, data: { pet_id?: string; amount_g?: number; bag_id?: string }): Promise<Serving> {
     const serving: Serving = {
       id: localId(),
       bowl_id: id,
+      bag_id: data.bag_id,
       pet_id: data.pet_id,
       amount_g: data.amount_g,
       served_at: new Date().toISOString(),

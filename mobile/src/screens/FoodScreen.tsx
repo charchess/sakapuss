@@ -25,6 +25,7 @@ const BAG_STATUS_LABELS: Record<string, string> = {
 export function FoodScreen() {
   const [products, setProducts] = useState<FoodProduct[]>([]);
   const [bags, setBags] = useState<FoodBag[]>([]);
+  const [bagServings, setBagServings] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [tab, setTab] = useState<'products' | 'bags'>('products');
@@ -48,10 +49,22 @@ export function FoodScreen() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [p, b] = await Promise.all([dataService.getFoodProducts(), dataService.getFoodBags()]);
+      const [p, b, events] = await Promise.all([
+        dataService.getFoodProducts(),
+        dataService.getFoodBags(),
+        dataService.getAllEvents(500),
+      ]);
       setProducts(p);
       setBags(b.filter((bag) => bag.status !== 'depleted'));
       if (p.length > 0 && !bagProductId) setBagProductId(p[0].id);
+      const servMap: Record<string, number> = {};
+      events
+        .filter((e) => e.type === 'food_serve' && e.payload.bag_id && e.payload.amount_grams)
+        .forEach((e) => {
+          const bid = e.payload.bag_id as string;
+          servMap[bid] = (servMap[bid] ?? 0) + ((e.payload.amount_grams as number) || 0);
+        });
+      setBagServings(servMap);
     } catch {
       setError('Impossible de charger les aliments.');
     } finally {
@@ -71,7 +84,7 @@ export function FoodScreen() {
         brand: pBrand.trim(),
         food_type: pType,
         food_category: pCategory,
-        default_bag_weight_g: pDefaultWeight ? parseInt(pDefaultWeight) : undefined,
+        default_bag_weight_g: pDefaultWeight ? Math.round(parseFloat(pDefaultWeight.replace(',', '.')) * 1000) : undefined,
       });
       setPName(''); setPBrand(''); setPDefaultWeight('');
       setShowForm(false);
@@ -90,7 +103,7 @@ export function FoodScreen() {
     try {
       await dataService.createFoodBag({
         product_id: bagProductId,
-        weight_g: parseInt(bagWeight),
+        weight_g: Math.round(parseFloat(bagWeight.replace(',', '.')) * 1000),
         purchased_at: bagPurchased,
       });
       setBagWeight('');
@@ -201,8 +214,8 @@ export function FoodScreen() {
             <Text style={styles.formLabel}>Marque</Text>
             <TextInput style={styles.input} placeholder="ex: Royal Canin, Hill's..." placeholderTextColor={Colors.textMuted} value={pBrand} onChangeText={setPBrand} testID="product-brand-input" />
 
-            <Text style={styles.formLabel}>Poids sac par défaut (g, optionnel)</Text>
-            <TextInput style={styles.input} placeholder="ex: 2000" placeholderTextColor={Colors.textMuted} keyboardType="numeric" value={pDefaultWeight} onChangeText={setPDefaultWeight} />
+            <Text style={styles.formLabel}>Poids sac par défaut (kg, optionnel)</Text>
+            <TextInput style={styles.input} placeholder="ex: 2" placeholderTextColor={Colors.textMuted} keyboardType="decimal-pad" value={pDefaultWeight} onChangeText={setPDefaultWeight} />
 
             {error && <Text style={styles.errorText}>{error}</Text>}
             <TouchableOpacity style={[styles.saveBtn, saving && { opacity: 0.6 }]} onPress={handleAddProduct} disabled={saving} testID="product-save-btn">
@@ -232,8 +245,8 @@ export function FoodScreen() {
               ))
             )}
 
-            <Text style={styles.formLabel}>Poids (g)</Text>
-            <TextInput style={styles.input} placeholder="ex: 2000" placeholderTextColor={Colors.textMuted} keyboardType="numeric" value={bagWeight} onChangeText={setBagWeight} testID="bag-weight-input" />
+            <Text style={styles.formLabel}>Poids (kg)</Text>
+            <TextInput style={styles.input} placeholder="ex: 2 ou 1,5" placeholderTextColor={Colors.textMuted} keyboardType="decimal-pad" value={bagWeight} onChangeText={setBagWeight} testID="bag-weight-input" />
 
             <Text style={styles.formLabel}>Date d'achat</Text>
             <TextInput style={styles.input} placeholder="YYYY-MM-DD" placeholderTextColor={Colors.textMuted} value={bagPurchased} onChangeText={setBagPurchased} />
@@ -261,7 +274,7 @@ export function FoodScreen() {
                   <Text style={styles.cardName}>{p.name}</Text>
                   <Text style={styles.cardSub}>{p.brand} · {p.food_type} · {p.food_category}</Text>
                   {p.default_bag_weight_g ? (
-                    <Text style={styles.cardSub}>Poids sac : {p.default_bag_weight_g}g</Text>
+                    <Text style={styles.cardSub}>Poids sac : {(p.default_bag_weight_g / 1000).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} kg</Text>
                   ) : null}
                 </View>
                 <TouchableOpacity onPress={() => handleDeleteProduct(p)} style={styles.deleteBtn}>
@@ -284,11 +297,35 @@ export function FoodScreen() {
                 <View style={styles.cardContent}>
                   <Text style={styles.cardName}>{productName(bag.product_id)}</Text>
                   <Text style={styles.cardSub}>
-                    {bag.weight_g}g · {BAG_STATUS_LABELS[bag.status] ?? bag.status}
+                    {(bag.weight_g / 1000).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} kg · {BAG_STATUS_LABELS[bag.status] ?? bag.status}
                   </Text>
                   {bag.opened_at ? (
                     <Text style={styles.cardSub}>Ouvert le {bag.opened_at.split('T')[0]}</Text>
                   ) : null}
+                  {bag.status === 'opened' && bag.opened_at && (() => {
+                    const consumed = bagServings[bag.id] ?? 0;
+                    const remaining = Math.max(0, bag.weight_g - consumed);
+                    const daysOpen = Math.max(0.1, (Date.now() - new Date(bag.opened_at).getTime()) / 86400000);
+                    const avgDaily = consumed > 0 ? consumed / daysOpen : null;
+                    const estimatedDate = avgDaily && avgDaily > 0
+                      ? new Date(Date.now() + (remaining / avgDaily) * 86400000)
+                      : null;
+                    const pct = Math.round((remaining / bag.weight_g) * 100);
+                    return (
+                      <>
+                        <Text style={styles.cardSub}>
+                          ≈{(remaining / 1000).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} kg restant ({pct}%)
+                        </Text>
+                        {estimatedDate ? (
+                          <Text style={styles.cardSub}>
+                            📅 Épuisé ~le {estimatedDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                          </Text>
+                        ) : (
+                          <Text style={styles.cardSub}>Loguez des repas pour estimer la date</Text>
+                        )}
+                      </>
+                    );
+                  })()}
                 </View>
                 <View style={styles.bagActions}>
                   {bag.status === 'stocked' && (

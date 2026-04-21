@@ -79,7 +79,7 @@ export const dataService = {
     return api.deleteBowl(id);
   },
 
-  async fillBowl(id: string, data: { pet_id?: string; amount_g?: number }): Promise<Serving> {
+  async fillBowl(id: string, data: { pet_id?: string; amount_g?: number; bag_id?: string }): Promise<Serving> {
     if (await isGuest()) return localDb.fillBowl(id, data);
     return api.fillBowl(id, data);
   },
