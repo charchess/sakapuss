@@ -14,7 +14,7 @@ import { StatusBar } from 'expo-status-bar';
 import { HomeStackParamList } from '../navigation/AppNavigator';
 import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme';
 import { AuthStore, User } from '../store/auth';
-import { Pet, PetEvent } from '../api/client';
+import { Pet, PetEvent, FoodBag, FoodProduct } from '../api/client';
 import { dataService } from '../store/dataService';
 import { flushQueue } from '../api/sync';
 import { PetAvatar } from '../components/PetAvatar';
@@ -47,6 +47,7 @@ export function DashboardScreen({ navigation }: Props) {
   const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
   const [recentEvents, setRecentEvents] = useState<PetEvent[]>([]);
   const [remindersCount, setRemindersCount] = useState(0);
+  const [openedBagsInfo, setOpenedBagsInfo] = useState<Array<{ bag: FoodBag; productName: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,15 +71,23 @@ export function DashboardScreen({ navigation }: Props) {
       const targetId = selectedPetId ?? firstPetId;
       setSelectedPetId(targetId);
 
-      const [events, reminders] = await Promise.all([
+      const [events, reminders, openedBags, foodProducts] = await Promise.all([
         targetId
           ? dataService.getPetEvents(targetId)
           : dataService.getAllEvents(20),
         dataService.getPendingReminders(),
+        dataService.getFoodBags('opened'),
+        dataService.getFoodProducts(),
       ]);
 
       setRecentEvents(events.slice(0, 10));
       setRemindersCount(reminders.length);
+      setOpenedBagsInfo(
+        openedBags.map((bag) => ({
+          bag,
+          productName: foodProducts.find((p) => p.id === bag.product_id)?.name ?? 'Aliment',
+        }))
+      );
     } catch (err) {
       console.warn('[Dashboard] loadData error:', err);
       if (!guest) {
@@ -266,6 +275,27 @@ export function DashboardScreen({ navigation }: Props) {
           </TouchableOpacity>
         )}
 
+        {/* Stock aliments */}
+        {openedBagsInfo.length > 0 && (
+          <TouchableOpacity
+            style={styles.stockBanner}
+            onPress={() => (navigation as any).navigate('Foyer', { screen: 'Alimentation' })}
+            activeOpacity={0.8}
+            testID="stock-banner"
+          >
+            <Text style={styles.stockBannerIcon}>📦</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.stockBannerTitle}>Stock aliments</Text>
+              <Text style={styles.stockBannerSub} numberOfLines={1}>
+                {openedBagsInfo.map(({ bag, productName }) =>
+                  `${productName} · ${(bag.weight_g / 1000).toFixed(1)} kg`
+                ).join('  ·  ')}
+              </Text>
+            </View>
+            <Text style={styles.stockBannerArrow}>›</Text>
+          </TouchableOpacity>
+        )}
+
         {/* Quick Log grid */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Saisie rapide</Text>
@@ -400,6 +430,22 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: Colors.textMuted,
   },
+  stockBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: `${Colors.success}18`,
+    borderWidth: 1,
+    borderColor: `${Colors.success}44`,
+    borderRadius: Radius.md,
+    marginHorizontal: Spacing.xl,
+    marginTop: Spacing.md,
+    paddingVertical: 12,
+    paddingHorizontal: Spacing.lg,
+  },
+  stockBannerIcon: { fontSize: 18, marginRight: 8 },
+  stockBannerTitle: { fontSize: 13, fontWeight: '700', color: Colors.textPrimary },
+  stockBannerSub: { fontSize: 12, color: Colors.textMuted, marginTop: 1 },
+  stockBannerArrow: { fontSize: 20, color: Colors.textMuted },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
