@@ -244,7 +244,7 @@ export const api = {
   deleteBowl(id: string): Promise<void> {
     return apiClient.delete<void>(Endpoints.bowl(id));
   },
-  fillBowl(id: string, data: { pet_id?: string; amount_g?: number; amount_ml?: number; notes?: string }): Promise<Serving> {
+  fillBowl(id: string, data: { pet_id?: string; amount_g?: number; amount_ml?: number; notes?: string; bag_id?: string }): Promise<Serving> {
     return apiClient.post<Serving>(Endpoints.bowlFill(id), {
       ...data,
       served_at: new Date().toISOString(),
