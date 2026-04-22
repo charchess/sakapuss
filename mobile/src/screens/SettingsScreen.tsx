@@ -5,6 +5,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  Switch,
   StyleSheet,
   ScrollView,
   Alert,
@@ -16,7 +17,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme';
 import { AuthStore, User } from '../store/auth';
 import { SyncQueue } from '../store/syncQueue';
-import { OnboardingState } from '../store/onboardingState';
+import { OnboardingState, ModuleConfig } from '../store/onboardingState';
 import { DEFAULT_BASE_URL } from '../constants/api';
 
 interface Props {
@@ -38,15 +39,17 @@ export function SettingsScreen({ onLogout }: Props) {
   const [pendingCount, setPendingCount] = useState(0);
   const [isGuest, setIsGuest] = useState(false);
   const [onboardingDone, setOnboardingDone] = useState<Record<string, boolean>>({});
+  const [modules, setModules] = useState<ModuleConfig>({ health: true, litter: true, bowls: true, food: false });
 
   useEffect(() => {
     const load = async () => {
-      const [u, url, count, guest, obs] = await Promise.all([
+      const [u, url, count, guest, obs, mods] = await Promise.all([
         AuthStore.getUser(),
         AuthStore.getBaseUrl(),
         SyncQueue.getPendingCount(),
         AuthStore.isGuestMode(),
         OnboardingState.get(),
+        OnboardingState.getModules(),
       ]);
       setUser(u);
       setBaseUrl(url);
@@ -54,6 +57,7 @@ export function SettingsScreen({ onLogout }: Props) {
       setPendingCount(count);
       setIsGuest(guest);
       setOnboardingDone(obs);
+      setModules(mods);
     };
     load();
     const unsub = SyncQueue.subscribe(async () => {
@@ -269,6 +273,39 @@ export function SettingsScreen({ onLogout }: Props) {
                 </TouchableOpacity>
               </>
             )}
+          </View>
+        </View>
+
+        {/* Fonctionnalités */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Fonctionnalités</Text>
+          <View style={styles.card}>
+            {([
+              { key: 'health' as const, icon: '💊', label: 'Rappels santé' },
+              { key: 'litter' as const, icon: '🚽', label: 'Litière' },
+              { key: 'bowls' as const, icon: '🥣', label: 'Gamelles' },
+              { key: 'food' as const, icon: '🛒', label: 'Stock alimentaire' },
+            ] as const).map((m, i, arr) => (
+              <View key={m.key}>
+                <View style={styles.row}>
+                  <Text style={styles.rowIcon}>{m.icon}</Text>
+                  <View style={styles.rowBody}>
+                    <Text style={styles.rowValue}>{m.label}</Text>
+                  </View>
+                  <Switch
+                    value={modules[m.key]}
+                    onValueChange={(v) => {
+                      const next = { ...modules, [m.key]: v };
+                      setModules(next);
+                      OnboardingState.setModules(next);
+                    }}
+                    trackColor={{ false: Colors.border, true: Colors.primary }}
+                    thumbColor="#fff"
+                  />
+                </View>
+                {i < arr.length - 1 && <View style={styles.divider} />}
+              </View>
+            ))}
           </View>
         </View>
 

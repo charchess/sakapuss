@@ -1,10 +1,19 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const ONBOARDING_KEY = 'sakapuss_onboarding';
+export const MODULES_KEY = 'sakapuss_modules';
 
 export type CategoryKey = 'pets' | 'modules' | 'health' | 'weight' | 'litter' | 'bowls' | 'food';
 type State = Record<CategoryKey, boolean>;
 
+export interface ModuleConfig {
+  health: boolean;
+  litter: boolean;
+  bowls: boolean;
+  food: boolean;
+}
+
+const defaultModules = (): ModuleConfig => ({ health: true, litter: true, bowls: true, food: false });
 const defaults = (): State => ({ pets: false, modules: false, health: false, weight: false, litter: false, bowls: false, food: false });
 
 export const OnboardingState = {
@@ -29,5 +38,17 @@ export const OnboardingState = {
 
   async reset(): Promise<void> {
     await AsyncStorage.removeItem(ONBOARDING_KEY);
+  },
+
+  async getModules(): Promise<ModuleConfig> {
+    try {
+      const val = await AsyncStorage.getItem(MODULES_KEY);
+      if (val) return { ...defaultModules(), ...JSON.parse(val) };
+    } catch {}
+    return defaultModules();
+  },
+
+  async setModules(config: ModuleConfig): Promise<void> {
+    await AsyncStorage.setItem(MODULES_KEY, JSON.stringify(config));
   },
 };
