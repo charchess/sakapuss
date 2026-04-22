@@ -69,7 +69,7 @@ export const dataService = {
     return api.getBowls();
   },
 
-  async createBowl(data: { name: string; location: string; bowl_type: 'food' | 'water'; capacity_g?: number }): Promise<Bowl> {
+  async createBowl(data: { name: string; location: string; bowl_type: 'food' | 'water'; capacity_g?: number; capacity_ml?: number }): Promise<Bowl> {
     if (await isGuest()) return localDb.createBowl(data);
     return api.createBowl(data);
   },
