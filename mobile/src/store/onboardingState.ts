@@ -2,10 +2,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const ONBOARDING_KEY = 'sakapuss_onboarding';
 
-export type CategoryKey = 'pets' | 'health' | 'weight' | 'bowls' | 'food';
+export type CategoryKey = 'pets' | 'modules' | 'health' | 'weight' | 'litter' | 'bowls' | 'food';
 type State = Record<CategoryKey, boolean>;
 
-const defaults = (): State => ({ pets: false, health: false, weight: false, bowls: false, food: false });
+const defaults = (): State => ({ pets: false, modules: false, health: false, weight: false, litter: false, bowls: false, food: false });
 
 export const OnboardingState = {
   async get(): Promise<State> {
