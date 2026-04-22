@@ -15,7 +15,7 @@
       },
       "package": "com.sakapuss.mobile",
       "usesCleartextTraffic": true,
-      "versionCode": 6
+      "versionCode": 0
     },
     "ios": {
       "supportsTablet": false,
