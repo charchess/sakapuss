@@ -1,7 +1,7 @@
 appId: com.sakapuss.mobile
 ---
 # Onboarding Admin: wizard complet après ajout d'un premier animal
-# Vérifie les 3 étapes (Santé → Poids → Alimentation) + résultat dans Rappels
+# 5 étapes : Animaux → Santé → Poids → Gamelles → Stocks
 
 - launchApp:
     clearState: true
@@ -46,28 +46,30 @@ appId: com.sakapuss.mobile
     direction: DOWN
 - tapOn: "Ajouter"
 
-# === ÉTAPE 1 : Rappels santé ===
-- assertVisible: "Rappels santé"
-- assertVisible: "Étape 1 sur 3"
+# === ÉTAPE 1 : Vos animaux ===
+- assertVisible: "Vos animaux"
+- assertVisible: "Étape 1 sur 5"
+# Passer : l'animal vient d'être créé dans AddPetScreen
+- tapOn:
+    id: "onboarding-actions-skip"
 
-# Vermifuge et Anti-puces sont pré-cochés
+# === ÉTAPE 2 : Rappels santé ===
+- assertVisible: "Rappels santé"
+- assertVisible: "Étape 2 sur 5"
 - assertVisible:
     id: "onboarding-health-deworming"
 - assertVisible:
     id: "onboarding-health-flea"
-
 # Activer Vaccin annuel
 - tapOn:
     id: "onboarding-health-vaccine"
-
-# Passer l'étape santé : le compte de test accumule des animaux → des dizaines d'API calls parallèles
-# qui peuvent échouer avec 409 Conflict ; l'UI est vérifiée, on skip pour ne pas bloquer
+# Passer : compte test accumule des animaux → dizaines d'API calls
 - tapOn:
     id: "onboarding-actions-skip"
 
-# === ÉTAPE 2 : Poids initial ===
+# === ÉTAPE 3 : Poids initial ===
 - assertVisible: "Poids initial"
-- assertVisible: "Étape 2 sur 3"
+- assertVisible: "Étape 3 sur 5"
 - tapOn:
     id: "onboarding-weight-entry"
 - inputText: "4200"
@@ -75,23 +77,30 @@ appId: com.sakapuss.mobile
 - tapOn:
     id: "onboarding-actions-save"
 
-# === ÉTAPE 3 : Alimentation ===
-- assertVisible: "Configuration alimentation"
-- assertVisible: "Étape 3 sur 3"
+# === ÉTAPE 4 : Gamelles ===
+- assertVisible: "Gamelles"
+- assertVisible: "Étape 4 sur 5"
 - tapOn:
     id: "onboarding-food-entry"
 - eraseText: 10
-- inputText: "Gamelle Cuisine"
+- inputText: "Gamelle Lumi"
 - hideKeyboard
 - tapOn:
     id: "onboarding-actions-save"
+
+# === ÉTAPE 5 : Stocks & produits ===
+- assertVisible: "Stocks & produits"
+- assertVisible: "Étape 5 sur 5"
+# Passer : optionnel
+- tapOn:
+    id: "onboarding-actions-skip"
 
 # → Dashboard sans erreur
 - assertVisible: "Que se passe-t-il aujourd'hui ?"
 - assertNotVisible: "Erreur"
 - assertNotVisible: "Impossible"
 
-# Vérifier que les rappels ont bien été créés
+# Vérifier les rappels
 - tapOn: "🔔"
 - assertVisible: "Rappels"
 - assertNotVisible: "Impossible de charger les données"
