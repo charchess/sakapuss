@@ -16,7 +16,7 @@ import { StackScreenProps } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
 import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme';
 import { dataService } from '../store/dataService';
-import { OnboardingState } from '../store/onboardingState';
+import { OnboardingState, ModuleConfig } from '../store/onboardingState';
 import { HomeStackParamList } from '../navigation/AppNavigator';
 import { Pet } from '../api/client';
 
@@ -34,13 +34,6 @@ interface PetDraft {
   dateObj: Date;
   showPicker: boolean;
   breed: string;
-}
-
-interface ModuleConfig {
-  health: boolean;
-  litter: boolean;
-  bowls: boolean;
-  food: boolean;
 }
 
 interface ReminderDraft {
@@ -153,6 +146,10 @@ export function OnboardingAdminScreen({ navigation, route }: Props) {
   const [allPets, setAllPets] = useState<Pet[]>([]);
 
   const [modules, setModules] = useState<ModuleConfig>({ health: true, litter: true, bowls: true, food: false });
+
+  const updateModules = (patch: Partial<ModuleConfig>) => {
+    setModules((prev) => { const next = { ...prev, ...patch }; OnboardingState.setModules(next); return next; });
+  };
   const [reminders, setReminders] = useState<ReminderDraft[]>(SUGGESTED_REMINDERS.map((r) => ({ ...r, key: uid() })));
   const [weights, setWeights] = useState<Record<string, string>>({});
   const [litters, setLitters] = useState<LitterDraft[]>([newLitterDraft()]);
@@ -164,12 +161,12 @@ export function OnboardingAdminScreen({ navigation, route }: Props) {
   const isLastStep = stepIndex === steps.length - 1;
 
   useEffect(() => {
-    dataService
-      .getPets()
-      .then((pets) => {
+    Promise.all([dataService.getPets(), OnboardingState.getModules()])
+      .then(([pets, savedModules]) => {
         setExistingPets(pets);
         setAllPets(pets);
         if (pets.length === 0) setPetDrafts([newPetDraft()]);
+        setModules(savedModules);
       })
       .catch(() => {})
       .finally(() => setInitializing(false));
@@ -422,7 +419,7 @@ export function OnboardingAdminScreen({ navigation, route }: Props) {
               <TouchableOpacity
                 key={m.key}
                 style={[styles.moduleCard, modules[m.key] && styles.moduleCardActive]}
-                onPress={() => setModules((prev) => ({ ...prev, [m.key]: !prev[m.key] }))}
+                onPress={() => updateModules({ [m.key]: !modules[m.key] })}
                 activeOpacity={0.7}
               >
                 <Text style={styles.moduleIcon}>{m.icon}</Text>
