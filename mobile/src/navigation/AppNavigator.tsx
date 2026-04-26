@@ -33,7 +33,7 @@ export type HomeStackParamList = {
     birthDate?: string;
   };
   AddPet: Record<string, never>;
-  OnboardingAdmin: { fromSettings?: boolean };
+  OnboardingAdmin: { fromSettings?: boolean; onCompleteCallback?: () => void };
 };
 
 export type AppTabParamList = {

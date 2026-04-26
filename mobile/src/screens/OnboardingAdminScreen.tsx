@@ -327,6 +327,8 @@ export function OnboardingAdminScreen({ navigation, route }: Props) {
   };
 
   const finish = () => {
+    const cb = route.params?.onCompleteCallback;
+    if (cb) { cb(); return; }
     if (fromSettings) navigation.goBack();
     else navigation.navigate('Dashboard');
   };
