@@ -159,4 +159,9 @@ export const dataService = {
     }
     await api.createReminder(petId, data);
   },
+
+  async deleteReminder(id: string): Promise<void> {
+    if (await isGuest()) return;
+    await api.deleteReminder(id);
+  },
 };

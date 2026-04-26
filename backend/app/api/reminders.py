@@ -165,6 +165,15 @@ def complete_reminder(reminder_id: str, db: DbSession, current_user: User = Depe
     return reminder_to_response(r, pet.name if pet else None)
 
 
+@router.delete("/reminders/{reminder_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_reminder(reminder_id: str, db: DbSession, current_user: User = Depends(get_current_user)):
+    r = db.query(Reminder).filter(Reminder.id == reminder_id).first()
+    if not r:
+        raise HTTPException(status_code=404, detail="Reminder not found")
+    db.delete(r)
+    db.commit()
+
+
 @router.post("/reminders/{reminder_id}/postpone")
 def postpone_reminder(
     reminder_id: str, payload: PostponeRequest, db: DbSession, current_user: User = Depends(get_current_user)

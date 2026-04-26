@@ -221,6 +221,10 @@ export const api = {
     return apiClient.post<Reminder>(`/pets/${petId}/reminders`, { type: 'health', ...data });
   },
 
+  deleteReminder(reminderId: string): Promise<void> {
+    return apiClient.delete<void>(`/reminders/${reminderId}`);
+  },
+
   // Resources (litières, etc.)
   getResources(type?: string): Promise<Resource[]> {
     const q = type ? `?type=${type}` : '';

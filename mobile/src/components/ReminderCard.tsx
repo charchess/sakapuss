@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Colors, Radius, Shadow, Spacing } from '../constants/theme';
 import { Reminder } from '../api/client';
 
@@ -7,6 +7,7 @@ interface Props {
   reminder: Reminder;
   onComplete?: (reminderId: string) => void;
   onPostpone?: (reminderId: string, days: number) => void;
+  onDelete?: (reminderId: string) => void;
 }
 
 type Urgency = 'overdue' | 'today' | 'upcoming';
@@ -57,10 +58,21 @@ function reminderTypeIcon(type: string): string {
   return '🔔';
 }
 
-export function ReminderCard({ reminder, onComplete, onPostpone }: Props) {
+export function ReminderCard({ reminder, onComplete, onPostpone, onDelete }: Props) {
   const urgency = getUrgency(reminder.next_due_date);
   const color = urgencyColor(urgency);
   const showActions = !!(onComplete && onPostpone);
+
+  const handleDelete = () => {
+    Alert.alert(
+      'Supprimer ce rappel',
+      `Supprimer "${reminder.name}" définitivement ?`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        { text: 'Supprimer', style: 'destructive', onPress: () => onDelete?.(reminder.id) },
+      ]
+    );
+  };
 
   return (
     <View style={[styles.card, { borderLeftColor: color, borderLeftWidth: 4 }]}>
@@ -88,8 +100,15 @@ export function ReminderCard({ reminder, onComplete, onPostpone }: Props) {
           </View>
         )}
       </View>
-      <View style={[styles.badge, { backgroundColor: `${color}1A` }]}>
-        <Text style={[styles.badgeText, { color }]}>{urgencyLabel(urgency)}</Text>
+      <View style={styles.rightColumn}>
+        <View style={[styles.badge, { backgroundColor: `${color}1A` }]}>
+          <Text style={[styles.badgeText, { color }]}>{urgencyLabel(urgency)}</Text>
+        </View>
+        {onDelete && (
+          <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete} activeOpacity={0.7}>
+            <Text style={styles.deleteBtnText}>🗑️</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -128,16 +147,25 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     marginTop: 2,
   },
+  rightColumn: {
+    alignItems: 'flex-end',
+    gap: 6,
+    marginLeft: Spacing.sm,
+  },
   badge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: Radius.full,
-    marginLeft: Spacing.sm,
-    alignSelf: 'flex-start',
   },
   badgeText: {
     fontSize: 11,
     fontWeight: '700',
+  },
+  deleteBtn: {
+    padding: 4,
+  },
+  deleteBtnText: {
+    fontSize: 16,
   },
   actions: {
     flexDirection: 'row',

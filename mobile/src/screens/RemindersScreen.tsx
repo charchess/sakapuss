@@ -119,6 +119,9 @@ export function RemindersScreen() {
               onPostpone={async (id, days) => {
                 try { await dataService.postponeReminder(id, days); loadReminders(); } catch (err) { console.warn('[Reminders] postpone error:', err); }
               }}
+              onDelete={async (id) => {
+                try { await dataService.deleteReminder(id); loadReminders(); } catch (err) { console.warn('[Reminders] delete error:', err); }
+              }}
             />
           )}
           contentContainerStyle={styles.listContent}
