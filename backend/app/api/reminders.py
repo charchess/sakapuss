@@ -165,6 +165,37 @@ def complete_reminder(reminder_id: str, db: DbSession, current_user: User = Depe
     return reminder_to_response(r, pet.name if pet else None)
 
 
+@router.post("/reminders/{reminder_id}/miss")
+def miss_reminder(reminder_id: str, db: DbSession, current_user: User = Depends(get_current_user)):
+    from backend.app.modules.health.models import Event as PetEvent
+
+    r = db.query(Reminder).filter(Reminder.id == reminder_id).first()
+    if not r:
+        raise HTTPException(status_code=404, detail="Reminder not found")
+
+    due = r.next_due_date
+    if isinstance(due, datetime):
+        due = due.date()
+
+    missed_event = PetEvent(
+        pet_id=r.pet_id,
+        type="missed_reminder",
+        occurred_at=datetime.now(UTC),
+        payload={"reminder_id": r.id, "reminder_name": r.name, "due_date": str(due)},
+    )
+    db.add(missed_event)
+
+    if r.frequency_days:
+        due_dt = datetime.combine(due, datetime.min.time())
+        r.next_due_date = due_dt + timedelta(days=r.frequency_days)
+
+    db.commit()
+    db.refresh(r)
+
+    pet = db.query(Pet).filter(Pet.id == r.pet_id).first()
+    return reminder_to_response(r, pet.name if pet else None)
+
+
 @router.delete("/reminders/{reminder_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_reminder(reminder_id: str, db: DbSession, current_user: User = Depends(get_current_user)):
     r = db.query(Reminder).filter(Reminder.id == reminder_id).first()

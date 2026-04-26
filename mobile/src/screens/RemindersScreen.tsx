@@ -120,7 +120,7 @@ export function RemindersScreen() {
                 try { await dataService.postponeReminder(id, days); loadReminders(); } catch (err) { console.warn('[Reminders] postpone error:', err); }
               }}
               onMissed={async (id) => {
-                try { await dataService.postponeReminder(id, 1); loadReminders(); } catch (err) { console.warn('[Reminders] missed error:', err); }
+                try { await dataService.missReminder(id); loadReminders(); } catch (err) { console.warn('[Reminders] missed error:', err); }
               }}
               onDelete={async (id) => {
                 try { await dataService.deleteReminder(id); loadReminders(); } catch (err) { console.warn('[Reminders] delete error:', err); }
