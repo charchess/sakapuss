@@ -2,7 +2,7 @@
   "expo": {
     "name": "Sakapuss",
     "slug": "sakapuss",
-    "version": "1.4.0",
+    "version": "1.4.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -15,7 +15,7 @@
       },
       "package": "com.sakapuss.mobile",
       "usesCleartextTraffic": true,
-      "versionCode": 26042216
+      "versionCode": 26042620
     },
     "ios": {
       "supportsTablet": false,

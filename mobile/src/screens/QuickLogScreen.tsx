@@ -9,7 +9,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Switch,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { StackScreenProps } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
 import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme';
@@ -21,6 +23,35 @@ type Props = StackScreenProps<HomeStackParamList, 'QuickLog'>;
 
 const LITTER_NOTES = ['RAS', 'Sang', 'Diarrhée', 'Constipation', 'Vomi'];
 const BEHAVIOR_QUICK = ['Vomissement', 'Perte appétit', 'Léthargie', 'Grattage', 'Agitation'];
+
+const KNOWN_MEDS: Record<string, number> = {
+  frontline: 30,
+  advocate: 30,
+  advantage: 30,
+  stronghold: 30,
+  milbemax: 90,
+  vermifuge: 90,
+  drontal: 90,
+  profender: 90,
+  bravecto: 90,
+  nexgard: 30,
+  vaccin: 365,
+  vaccination: 365,
+  primovaccination: 365,
+  rappel: 365,
+};
+
+function detectMedFrequency(name: string): number | null {
+  const lower = name.toLowerCase();
+  for (const [key, days] of Object.entries(KNOWN_MEDS)) {
+    if (lower.includes(key)) return days;
+  }
+  return null;
+}
+
+function formatDate(d: Date): string {
+  return d.toISOString().split('T')[0];
+}
 
 export function QuickLogScreen({ navigation, route }: Props) {
   const { type, label, icon, petId, petName } = route.params;
@@ -54,6 +85,11 @@ export function QuickLogScreen({ navigation, route }: Props) {
   // Health note fields
   const [product, setProduct] = useState('');
   const [dose, setDose] = useState('');
+  const [healthDate, setHealthDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [createReminder, setCreateReminder] = useState(false);
+  const [reminderFreq, setReminderFreq] = useState<number | null>(null);
+  const [detectedFreq, setDetectedFreq] = useState<number | null>(null);
 
   // Behavior / custom fields
   const [note, setNote] = useState('');
@@ -109,7 +145,7 @@ export function QuickLogScreen({ navigation, route }: Props) {
       case 'weight':
         return { grams: parseFloat(grams) || 0, note: weightNote.trim() || undefined };
       case 'health_note':
-        return { product: product.trim(), dose: dose.trim() || undefined };
+        return { product: product.trim(), dose: dose.trim() || undefined, date: formatDate(healthDate) };
       case 'behavior':
         return { note: (quickBehavior || note).trim() };
       case 'custom':
@@ -167,6 +203,14 @@ export function QuickLogScreen({ navigation, route }: Props) {
       }
       if (petId) {
         await dataService.logEvent(petId, type, buildPayload());
+        if (type === 'health_note' && createReminder && petId) {
+          const freq = reminderFreq ?? detectedFreq ?? 30;
+          await dataService.createReminder(petId, {
+            name: product.trim(),
+            frequency_days: freq,
+            type: 'health',
+          });
+        }
       } else if (type === 'litter_clean' || type === 'food_serve') {
         // resource-level events don't require a pet
         if (petId) await dataService.logEvent(petId, type, buildPayload());
@@ -396,6 +440,18 @@ export function QuickLogScreen({ navigation, route }: Props) {
     </>
   );
 
+  const handleProductChange = (text: string) => {
+    setProduct(text);
+    const freq = detectMedFrequency(text);
+    setDetectedFreq(freq);
+    if (freq !== null && !createReminder) {
+      setCreateReminder(true);
+      setReminderFreq(freq);
+    }
+  };
+
+  const reminderDays = reminderFreq ?? detectedFreq ?? 30;
+
   const renderHealthFields = () => (
     <>
       <View style={styles.field}>
@@ -405,8 +461,13 @@ export function QuickLogScreen({ navigation, route }: Props) {
           placeholder="ex: Frontline, Milbemax, Advocate..."
           placeholderTextColor={Colors.textMuted}
           value={product}
-          onChangeText={setProduct}
+          onChangeText={handleProductChange}
         />
+        {detectedFreq !== null && (
+          <Text style={styles.medHint}>
+            💡 {product.split(' ')[0]} détecté — rappel suggéré tous les {detectedFreq} jours
+          </Text>
+        )}
       </View>
       <View style={styles.field}>
         <Text style={styles.fieldLabel}>Dose (optionnel)</Text>
@@ -416,6 +477,59 @@ export function QuickLogScreen({ navigation, route }: Props) {
           placeholderTextColor={Colors.textMuted}
           value={dose}
           onChangeText={setDose}
+        />
+      </View>
+      <View style={styles.field}>
+        <Text style={styles.fieldLabel}>Date de prise</Text>
+        <TouchableOpacity
+          style={styles.dateButton}
+          onPress={() => setShowDatePicker(true)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.dateButtonText}>📅 {formatDate(healthDate)}</Text>
+        </TouchableOpacity>
+        {showDatePicker && (
+          <DateTimePicker
+            value={healthDate}
+            mode="date"
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            maximumDate={new Date()}
+            onChange={(_, date) => {
+              setShowDatePicker(Platform.OS === 'ios');
+              if (date) setHealthDate(date);
+            }}
+          />
+        )}
+      </View>
+      <View style={[styles.field, styles.reminderRow]}>
+        <View style={styles.reminderLeft}>
+          <Text style={styles.fieldLabel}>Créer un rappel</Text>
+          {createReminder && (
+            <View style={styles.freqRow}>
+              <TouchableOpacity
+                style={styles.freqBtn}
+                onPress={() => setReminderFreq(Math.max(1, reminderDays - 5))}
+              >
+                <Text style={styles.freqBtnText}>−</Text>
+              </TouchableOpacity>
+              <Text style={styles.freqValue}>tous les {reminderDays}j</Text>
+              <TouchableOpacity
+                style={styles.freqBtn}
+                onPress={() => setReminderFreq(reminderDays + 5)}
+              >
+                <Text style={styles.freqBtnText}>+</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+        <Switch
+          value={createReminder}
+          onValueChange={(v) => {
+            setCreateReminder(v);
+            if (v && reminderFreq === null) setReminderFreq(detectedFreq ?? 30);
+          }}
+          trackColor={{ false: Colors.border, true: Colors.primary }}
+          thumbColor="#fff"
         />
       </View>
     </>
@@ -645,6 +759,31 @@ const styles = StyleSheet.create({
   cancel: { marginTop: Spacing.md, alignItems: 'center', paddingVertical: 12 },
   cancelText: { fontSize: 14, color: Colors.textSecondary, fontWeight: '600' },
   hintSub: { fontSize: 12, color: Colors.textMuted, marginBottom: Spacing.sm, fontStyle: 'italic' },
+  medHint: { fontSize: 12, color: Colors.primary, marginTop: 6, fontStyle: 'italic' },
+  dateButton: {
+    backgroundColor: Colors.background,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: Radius.md,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  dateButtonText: { fontSize: 15, color: Colors.textPrimary },
+  reminderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  reminderLeft: { flex: 1 },
+  freqRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 8 },
+  freqBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.primaryBorder,
+  },
+  freqBtnText: { fontSize: 18, color: Colors.primary, fontWeight: '700', lineHeight: 22 },
+  freqValue: { fontSize: 13, fontWeight: '600', color: Colors.textPrimary },
   errorBox: {
     backgroundColor: 'rgba(225,112,85,0.1)',
     borderRadius: 12,
