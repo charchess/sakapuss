@@ -24,6 +24,20 @@ type Props = StackScreenProps<HomeStackParamList, 'QuickLog'>;
 const LITTER_NOTES = ['RAS', 'Sang', 'Diarrhée', 'Constipation', 'Vomi'];
 const BEHAVIOR_QUICK = ['Vomissement', 'Perte appétit', 'Léthargie', 'Grattage', 'Agitation'];
 
+const FREQ_PRESETS: { label: string; days: number | null }[] = [
+  { label: '2×/j', days: 0.5 },
+  { label: '1×/j', days: 1 },
+  { label: 'Hebdo', days: 7 },
+  { label: '2 sem', days: 14 },
+  { label: 'Mensuel', days: 30 },
+  { label: '3 mois', days: 90 },
+  { label: '6 mois', days: 180 },
+  { label: '1 an', days: 365 },
+  { label: 'Perso', days: null },
+];
+
+const DOSE_UNITS = ['comprimé', 'ml', 'pipette', 'spot-on', 'sachet', 'µg'];
+
 const KNOWN_MEDS: Record<string, number> = {
   frontline: 30,
   advocate: 30,
@@ -84,12 +98,15 @@ export function QuickLogScreen({ navigation, route }: Props) {
 
   // Health note fields
   const [product, setProduct] = useState('');
-  const [dose, setDose] = useState('');
+  const [doseAmount, setDoseAmount] = useState('');
+  const [doseUnit, setDoseUnit] = useState('comprimé');
   const [healthDate, setHealthDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [createReminder, setCreateReminder] = useState(false);
   const [reminderFreq, setReminderFreq] = useState<number | null>(null);
   const [detectedFreq, setDetectedFreq] = useState<number | null>(null);
+  const [freqPresetLabel, setFreqPresetLabel] = useState<string | null>(null);
+  const [customFreqText, setCustomFreqText] = useState('');
 
   // Behavior / custom fields
   const [note, setNote] = useState('');
@@ -144,8 +161,10 @@ export function QuickLogScreen({ navigation, route }: Props) {
     switch (type) {
       case 'weight':
         return { grams: parseFloat(grams) || 0, note: weightNote.trim() || undefined };
-      case 'health_note':
-        return { product: product.trim(), dose: dose.trim() || undefined, date: formatDate(healthDate) };
+      case 'health_note': {
+        const doseStr = doseAmount.trim() ? `${doseAmount.trim()} ${doseUnit}` : undefined;
+        return { product: product.trim(), dose: doseStr, date: formatDate(healthDate) };
+      }
       case 'behavior':
         return { note: (quickBehavior || note).trim() };
       case 'custom':
@@ -444,13 +463,35 @@ export function QuickLogScreen({ navigation, route }: Props) {
     setProduct(text);
     const freq = detectMedFrequency(text);
     setDetectedFreq(freq);
-    if (freq !== null && !createReminder) {
+    if (freq !== null) {
       setCreateReminder(true);
       setReminderFreq(freq);
+      const preset = FREQ_PRESETS.find((p) => p.days === freq);
+      setFreqPresetLabel(preset?.label ?? 'Perso');
+      if (!preset) setCustomFreqText(String(freq));
     }
   };
 
-  const reminderDays = reminderFreq ?? detectedFreq ?? 30;
+  const selectFreqPreset = (label: string, days: number | null) => {
+    setFreqPresetLabel(label);
+    if (days !== null) {
+      setReminderFreq(days);
+    } else {
+      setReminderFreq(customFreqText ? parseFloat(customFreqText) : null);
+    }
+  };
+
+  const freqLabel = (days: number) => {
+    if (days < 1) return `${Math.round(days * 24)}×/j`;
+    if (days === 1) return 'chaque jour';
+    if (days === 7) return 'chaque semaine';
+    if (days === 14) return 'toutes les 2 sem';
+    if (days === 30) return 'chaque mois';
+    if (days === 90) return 'tous les 3 mois';
+    if (days === 180) return 'tous les 6 mois';
+    if (days === 365) return 'chaque année';
+    return `tous les ${days}j`;
+  };
 
   const renderHealthFields = () => (
     <>
@@ -465,19 +506,34 @@ export function QuickLogScreen({ navigation, route }: Props) {
         />
         {detectedFreq !== null && (
           <Text style={styles.medHint}>
-            💡 {product.split(' ')[0]} détecté — rappel suggéré tous les {detectedFreq} jours
+            💡 {product.split(' ')[0]} détecté — rappel suggéré {freqLabel(detectedFreq)}
           </Text>
         )}
       </View>
       <View style={styles.field}>
         <Text style={styles.fieldLabel}>Dose (optionnel)</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="ex: 1 comprimé, 0.5 ml..."
-          placeholderTextColor={Colors.textMuted}
-          value={dose}
-          onChangeText={setDose}
-        />
+        <View style={styles.doseRow}>
+          <TextInput
+            style={[styles.input, styles.doseInput]}
+            placeholder="0.5"
+            placeholderTextColor={Colors.textMuted}
+            keyboardType="decimal-pad"
+            value={doseAmount}
+            onChangeText={setDoseAmount}
+          />
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.unitScroll} contentContainerStyle={styles.unitScrollContent}>
+            {DOSE_UNITS.map((u) => (
+              <TouchableOpacity
+                key={u}
+                style={[styles.pill, doseUnit === u && styles.pillActive]}
+                onPress={() => setDoseUnit(u)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.pillText, doseUnit === u && styles.pillTextActive]}>{u}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
       </View>
       <View style={styles.field}>
         <Text style={styles.fieldLabel}>Date de prise</Text>
@@ -502,36 +558,54 @@ export function QuickLogScreen({ navigation, route }: Props) {
         )}
       </View>
       <View style={[styles.field, styles.reminderRow]}>
-        <View style={styles.reminderLeft}>
-          <Text style={styles.fieldLabel}>Créer un rappel</Text>
-          {createReminder && (
-            <View style={styles.freqRow}>
-              <TouchableOpacity
-                style={styles.freqBtn}
-                onPress={() => setReminderFreq(Math.max(1, reminderDays - 5))}
-              >
-                <Text style={styles.freqBtnText}>−</Text>
-              </TouchableOpacity>
-              <Text style={styles.freqValue}>tous les {reminderDays}j</Text>
-              <TouchableOpacity
-                style={styles.freqBtn}
-                onPress={() => setReminderFreq(reminderDays + 5)}
-              >
-                <Text style={styles.freqBtnText}>+</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
+        <Text style={styles.fieldLabel}>Créer un rappel</Text>
         <Switch
           value={createReminder}
           onValueChange={(v) => {
             setCreateReminder(v);
-            if (v && reminderFreq === null) setReminderFreq(detectedFreq ?? 30);
+            if (v && reminderFreq === null) {
+              setReminderFreq(detectedFreq ?? 30);
+              const preset = FREQ_PRESETS.find((p) => p.days === (detectedFreq ?? 30));
+              setFreqPresetLabel(preset?.label ?? 'Perso');
+            }
           }}
           trackColor={{ false: Colors.border, true: Colors.primary }}
           thumbColor="#fff"
         />
       </View>
+      {createReminder && (
+        <View style={styles.field}>
+          <Text style={styles.fieldLabel}>Fréquence du rappel</Text>
+          <View style={styles.pillRow}>
+            {FREQ_PRESETS.map((p) => (
+              <TouchableOpacity
+                key={p.label}
+                style={[styles.pill, freqPresetLabel === p.label && styles.pillActive]}
+                onPress={() => selectFreqPreset(p.label, p.days)}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.pillText, freqPresetLabel === p.label && styles.pillTextActive]}>{p.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          {freqPresetLabel === 'Perso' && (
+            <View style={styles.customFreqRow}>
+              <TextInput
+                style={[styles.input, styles.customFreqInput]}
+                placeholder="ex: 21"
+                placeholderTextColor={Colors.textMuted}
+                keyboardType="decimal-pad"
+                value={customFreqText}
+                onChangeText={(t) => { setCustomFreqText(t); setReminderFreq(parseFloat(t) || null); }}
+              />
+              <Text style={styles.customFreqUnit}>jours</Text>
+            </View>
+          )}
+          {reminderFreq !== null && freqPresetLabel !== 'Perso' && (
+            <Text style={styles.medHint}>→ Prochain rappel {freqLabel(reminderFreq)} après la prise</Text>
+          )}
+        </View>
+      )}
     </>
   );
 
@@ -769,21 +843,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   dateButtonText: { fontSize: 15, color: Colors.textPrimary },
-  reminderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  reminderLeft: { flex: 1 },
-  freqRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6, gap: 8 },
-  freqBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: Colors.primaryBorder,
-  },
-  freqBtnText: { fontSize: 18, color: Colors.primary, fontWeight: '700', lineHeight: 22 },
-  freqValue: { fontSize: 13, fontWeight: '600', color: Colors.textPrimary },
+  reminderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: Spacing.lg },
+  doseRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  doseInput: { width: 80 },
+  unitScroll: { flex: 1 },
+  unitScrollContent: { flexDirection: 'row', gap: 8, alignItems: 'center' },
+  customFreqRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: Spacing.sm },
+  customFreqInput: { width: 100 },
+  customFreqUnit: { fontSize: 14, color: Colors.textSecondary },
   errorBox: {
     backgroundColor: 'rgba(225,112,85,0.1)',
     borderRadius: 12,
