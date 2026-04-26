@@ -221,6 +221,10 @@ export const api = {
     return apiClient.post<Reminder>(`/pets/${petId}/reminders`, { type: 'health', ...data });
   },
 
+  missReminder(reminderId: string): Promise<Reminder> {
+    return apiClient.post<Reminder>(`/reminders/${reminderId}/miss`, {});
+  },
+
   deleteReminder(reminderId: string): Promise<void> {
     return apiClient.delete<void>(`/reminders/${reminderId}`);
   },
