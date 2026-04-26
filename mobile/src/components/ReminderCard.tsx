@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Colors, Radius, Shadow, Spacing } from '../constants/theme';
 import { Reminder } from '../api/client';
@@ -7,17 +7,26 @@ interface Props {
   reminder: Reminder;
   onComplete?: (reminderId: string) => void;
   onPostpone?: (reminderId: string, days: number) => void;
+  onMissed?: (reminderId: string) => void;
   onDelete?: (reminderId: string) => void;
 }
 
 type Urgency = 'overdue' | 'today' | 'upcoming';
+
+const POSTPONE_OPTIONS = [
+  { label: '1j', days: 1 },
+  { label: '2j', days: 2 },
+  { label: '3j', days: 3 },
+  { label: '1 sem', days: 7 },
+  { label: '2 sem', days: 14 },
+  { label: '1 mois', days: 30 },
+];
 
 function getUrgency(nextDueDate: string): Urgency {
   const now = new Date();
   const due = new Date(nextDueDate);
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const dueDay = new Date(due.getFullYear(), due.getMonth(), due.getDate());
-
   if (dueDay < today) return 'overdue';
   if (dueDay.getTime() === today.getTime()) return 'today';
   return 'upcoming';
@@ -52,16 +61,17 @@ function reminderTypeIcon(type: string): string {
   const t = type.toLowerCase();
   if (t.includes('vaccine') || t.includes('vaccin')) return '💉';
   if (t.includes('vet') || t.includes('vétér')) return '🏥';
-  if (t.includes('medicine') || t.includes('médic')) return '💊';
+  if (t.includes('medicine') || t.includes('médic') || t === 'health') return '💊';
   if (t.includes('weight') || t.includes('pesée')) return '⚖️';
   if (t.includes('grooming') || t.includes('toilett')) return '✂️';
   return '🔔';
 }
 
-export function ReminderCard({ reminder, onComplete, onPostpone, onDelete }: Props) {
+export function ReminderCard({ reminder, onComplete, onPostpone, onMissed, onDelete }: Props) {
+  const [showPostpone, setShowPostpone] = useState(false);
   const urgency = getUrgency(reminder.next_due_date);
   const color = urgencyColor(urgency);
-  const showActions = !!(onComplete && onPostpone);
+  const isFrequent = reminder.frequency_days != null && reminder.frequency_days <= 7;
 
   const handleDelete = () => {
     Alert.alert(
@@ -76,57 +86,97 @@ export function ReminderCard({ reminder, onComplete, onPostpone, onDelete }: Pro
 
   return (
     <View style={[styles.card, { borderLeftColor: color, borderLeftWidth: 4 }]}>
-      <Text style={styles.typeIcon}>{reminderTypeIcon(reminder.type)}</Text>
-      <View style={styles.body}>
-        <Text style={styles.name}>{reminder.name}</Text>
-        <Text style={styles.petName}>{reminder.pet_name}</Text>
-        <Text style={styles.date}>{formatDate(reminder.next_due_date)}</Text>
-        {showActions && (
-          <View style={styles.actions}>
+      {/* Header row */}
+      <View style={styles.header}>
+        <Text style={styles.typeIcon}>{reminderTypeIcon(reminder.type)}</Text>
+        <View style={styles.body}>
+          <Text style={styles.name}>{reminder.name}</Text>
+          <Text style={styles.petName}>{reminder.pet_name}</Text>
+          <Text style={styles.date}>{formatDate(reminder.next_due_date)}</Text>
+        </View>
+        <View style={styles.rightColumn}>
+          <View style={[styles.badge, { backgroundColor: `${color}1A` }]}>
+            <Text style={[styles.badgeText, { color }]}>{urgencyLabel(urgency)}</Text>
+          </View>
+          {onDelete && (
+            <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete} activeOpacity={0.7}>
+              <Text style={styles.deleteBtnText}>🗑️</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+
+      {/* Action buttons */}
+      {(onComplete || onPostpone || onMissed) && (
+        <View style={styles.actions}>
+          {onComplete && (
             <TouchableOpacity
               style={[styles.actionBtn, styles.actionBtnDone]}
-              onPress={() => onComplete!(reminder.id)}
+              onPress={() => onComplete(reminder.id)}
               activeOpacity={0.8}
             >
-              <Text style={styles.actionBtnText}>✅ Fait</Text>
+              <Text style={[styles.actionBtnText, { color: Colors.success }]}>✅ Fait</Text>
             </TouchableOpacity>
+          )}
+          {onPostpone && (
             <TouchableOpacity
-              style={[styles.actionBtn, styles.actionBtnPostpone]}
-              onPress={() => onPostpone!(reminder.id, 7)}
+              style={[styles.actionBtn, styles.actionBtnPostpone, showPostpone && styles.actionBtnActive]}
+              onPress={() => setShowPostpone((v) => !v)}
               activeOpacity={0.8}
             >
-              <Text style={[styles.actionBtnText, { color: Colors.textSecondary }]}>⏭️ +7j</Text>
+              <Text style={[styles.actionBtnText, { color: Colors.primary }]}>⏭️ Reporter</Text>
             </TouchableOpacity>
-          </View>
-        )}
-      </View>
-      <View style={styles.rightColumn}>
-        <View style={[styles.badge, { backgroundColor: `${color}1A` }]}>
-          <Text style={[styles.badgeText, { color }]}>{urgencyLabel(urgency)}</Text>
+          )}
+          {onMissed && isFrequent && (
+            <TouchableOpacity
+              style={[styles.actionBtn, styles.actionBtnMissed]}
+              onPress={() => onMissed(reminder.id)}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.actionBtnText, { color: Colors.error }]}>❌ Manqué</Text>
+            </TouchableOpacity>
+          )}
         </View>
-        {onDelete && (
-          <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete} activeOpacity={0.7}>
-            <Text style={styles.deleteBtnText}>🗑️</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+      )}
+
+      {/* Postpone picker */}
+      {showPostpone && onPostpone && (
+        <View style={styles.postponePicker}>
+          <Text style={styles.postponeLabel}>Reporter de :</Text>
+          <View style={styles.postponeOptions}>
+            {POSTPONE_OPTIONS.map((opt) => (
+              <TouchableOpacity
+                key={opt.days}
+                style={styles.postponePill}
+                onPress={() => { onPostpone(reminder.id, opt.days); setShowPostpone(false); }}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.postponePillText}>{opt.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: Colors.surface,
     borderRadius: Radius.md,
     padding: Spacing.md,
     marginVertical: 4,
     ...Shadow.card,
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
   typeIcon: {
     fontSize: 24,
     marginRight: Spacing.md,
+    marginTop: 2,
   },
   body: {
     flex: 1,
@@ -162,19 +212,20 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   deleteBtn: {
-    padding: 4,
+    padding: 2,
   },
   deleteBtnText: {
-    fontSize: 16,
+    fontSize: 15,
   },
   actions: {
     flexDirection: 'row',
     marginTop: Spacing.sm,
-    gap: 8,
+    gap: 6,
+    flexWrap: 'wrap',
   },
   actionBtn: {
     paddingHorizontal: 12,
-    paddingVertical: 5,
+    paddingVertical: 6,
     borderRadius: Radius.full,
     borderWidth: 1,
   },
@@ -184,11 +235,50 @@ const styles = StyleSheet.create({
   },
   actionBtnPostpone: {
     backgroundColor: Colors.primaryLight,
-    borderColor: Colors.border,
+    borderColor: Colors.primaryBorder,
+  },
+  actionBtnActive: {
+    backgroundColor: `${Colors.primary}22`,
+    borderColor: Colors.primary,
+  },
+  actionBtnMissed: {
+    backgroundColor: `${Colors.error}10`,
+    borderColor: `${Colors.error}40`,
   },
   actionBtnText: {
     fontSize: 12,
     fontWeight: '600',
-    color: Colors.success,
+  },
+  postponePicker: {
+    marginTop: Spacing.sm,
+    padding: Spacing.sm,
+    backgroundColor: Colors.background,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  postponeLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: Colors.textSecondary,
+    marginBottom: 6,
+  },
+  postponeOptions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  postponePill: {
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.primaryLight,
+    borderWidth: 1,
+    borderColor: Colors.primaryBorder,
+  },
+  postponePillText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.primary,
   },
 });
