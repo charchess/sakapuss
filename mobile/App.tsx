@@ -4,28 +4,47 @@ import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { createStackNavigator } from '@react-navigation/stack';
 import { AuthStore } from './src/store/auth';
 import { AuthNavigator } from './src/navigation/AuthNavigator';
 import { AppNavigator } from './src/navigation/AppNavigator';
+import { OnboardingAdminScreen } from './src/screens/OnboardingAdminScreen';
+import { dataService } from './src/store/dataService';
 import { Colors } from './src/constants/theme';
 import { flushQueue } from './src/api/sync';
 import NetInfo from '@react-native-community/netinfo';
 
-type AppState = 'loading' | 'auth' | 'app';
+type AppState = 'loading' | 'auth' | 'onboarding' | 'app';
+
+const OnbStack = createStackNavigator();
+
+function OnboardingGate({ onComplete }: { onComplete: () => void }) {
+  return (
+    <OnbStack.Navigator screenOptions={{ headerShown: false }}>
+      <OnbStack.Screen
+        name="OnboardingAdmin"
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        component={OnboardingAdminScreen as React.ComponentType<any>}
+        initialParams={{ fromSettings: false, onCompleteCallback: onComplete }}
+      />
+    </OnbStack.Navigator>
+  );
+}
 
 export default function App() {
   const [appState, setAppState] = useState<AppState>('loading');
 
   const checkAuth = useCallback(async () => {
     const ready = await AuthStore.isAuthenticated();
-    setAppState(ready ? 'app' : 'auth');
+    if (!ready) { setAppState('auth'); return; }
+    const pets = await dataService.getPets();
+    setAppState(pets.length === 0 ? 'onboarding' : 'app');
   }, []);
 
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
 
-  // Auto-flush sync queue when connectivity is restored
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
       if (state.isConnected) {
@@ -37,12 +56,17 @@ export default function App() {
     return unsubscribe;
   }, []);
 
-  const handleLoginSuccess = useCallback(() => {
-    setAppState('app');
+  const handleLoginSuccess = useCallback(async () => {
+    const pets = await dataService.getPets();
+    setAppState(pets.length === 0 ? 'onboarding' : 'app');
   }, []);
 
   const handleLogout = useCallback(() => {
     setAppState('auth');
+  }, []);
+
+  const handleOnboardingComplete = useCallback(() => {
+    setAppState('app');
   }, []);
 
   if (appState === 'loading') {
@@ -60,6 +84,8 @@ export default function App() {
         <StatusBar style="dark" backgroundColor={Colors.background} />
         {appState === 'auth' ? (
           <AuthNavigator onLoginSuccess={handleLoginSuccess} />
+        ) : appState === 'onboarding' ? (
+          <OnboardingGate onComplete={handleOnboardingComplete} />
         ) : (
           <AppNavigator onLogout={handleLogout} />
         )}

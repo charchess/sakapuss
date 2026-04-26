@@ -1,0 +1,40 @@
+appId: com.sakapuss.mobile
+---
+# Test: créer un rappel via l'app puis le supprimer
+
+- launchApp:
+    clearState: true
+- waitForAnimationToEnd
+- runFlow:
+    file: ../helpers/dismiss-dev-menu.yaml
+    when:
+      visible: "Continue"
+- waitForAnimationToEnd
+- assertVisible: "Se connecter"
+- tapOn:
+    id: "email-input"
+- inputText: "playwright-e2e@test.sakapuss.local"
+- tapOn:
+    id: "password-input"
+- inputText: "PlaywrightTest123!"
+- hideKeyboard
+- tapOn: "Se connecter"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+
+# Naviguer vers les rappels
+- tapOn: "🔔"
+- assertVisible: "Rappels"
+
+# Vérifier que TestVermifuge est visible
+- assertVisible: "TestVermifuge"
+
+# Taper sur la corbeille du premier rappel
+- tapOn: "🗑️"
+
+# Confirmer dans l'Alert natif Android
+- assertVisible: "Supprimer ce rappel"
+- tapOn: "Supprimer"
+
+# Le rappel doit avoir disparu
+- assertNotVisible: "TestVermifuge"
+- assertVisible: "Rappels"

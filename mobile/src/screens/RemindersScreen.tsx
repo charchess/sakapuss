@@ -123,7 +123,10 @@ export function RemindersScreen() {
                 try { await dataService.missReminder(id); loadReminders(); } catch (err) { console.warn('[Reminders] missed error:', err); }
               }}
               onDelete={async (id) => {
-                try { await dataService.deleteReminder(id); loadReminders(); } catch (err) { console.warn('[Reminders] delete error:', err); }
+                try { await dataService.deleteReminder(id); loadReminders(); } catch (err: unknown) {
+                  const msg = (err as { message?: string })?.message ?? JSON.stringify(err);
+                  setError(`Erreur suppression: ${msg}`);
+                }
               }}
             />
           )}

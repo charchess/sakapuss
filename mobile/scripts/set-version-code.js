@@ -16,3 +16,11 @@ const versionCode = parseInt(`${yy}${MM}${dd}${HH}`, 10);
 appJson.expo.android.versionCode = versionCode;
 fs.writeFileSync(appJsonPath, JSON.stringify(appJson, null, 2) + '\n');
 console.log(`versionCode → ${versionCode}`);
+
+// Also patch android/app/build.gradle versionName
+const version = appJson.expo.version;
+const buildGradlePath = path.join(__dirname, '..', 'android', 'app', 'build.gradle');
+let gradle = fs.readFileSync(buildGradlePath, 'utf8');
+gradle = gradle.replace(/versionName\s+"[^"]+"/, `versionName "${version}"`);
+fs.writeFileSync(buildGradlePath, gradle);
+console.log(`versionName → ${version}`);
