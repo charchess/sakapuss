@@ -161,12 +161,12 @@ export const dataService = {
   },
 
   async missReminder(id: string): Promise<void> {
-    if (await isGuest()) return;
+    if (await isGuest()) { await localDb.missReminder(id); return; }
     await api.missReminder(id);
   },
 
   async deleteReminder(id: string): Promise<void> {
-    if (await isGuest()) return;
+    if (await isGuest()) { await localDb.deleteReminder(id); return; }
     await api.deleteReminder(id);
   },
 };

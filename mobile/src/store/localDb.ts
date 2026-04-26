@@ -227,6 +227,23 @@ export const localDb = {
     return updated.find((r) => r.id === id) as Reminder;
   },
 
+  async deleteReminder(id: string): Promise<void> {
+    const all = await read<Reminder>(K.reminders);
+    await write(K.reminders, all.filter((r) => r.id !== id));
+  },
+
+  async missReminder(id: string): Promise<void> {
+    const all = await read<Reminder>(K.reminders);
+    const updated = all.map((r) => {
+      if (r.id !== id) return r;
+      const due = new Date(r.next_due_date);
+      const freqDays = (r as Reminder & { frequency_days?: number }).frequency_days ?? 1;
+      due.setDate(due.getDate() + freqDays);
+      return { ...r, next_due_date: due.toISOString().split('T')[0] };
+    });
+    await write(K.reminders, updated);
+  },
+
   async clear(): Promise<void> {
     const keys = await AsyncStorage.getAllKeys();
     const local = keys.filter((k) => k.startsWith('local:'));
