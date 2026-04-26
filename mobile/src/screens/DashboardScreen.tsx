@@ -16,6 +16,7 @@ import { Colors, Radius, Spacing, Shadow, Typography } from '../constants/theme'
 import { AuthStore, User } from '../store/auth';
 import { Pet, PetEvent, FoodBag, Resource, Bowl } from '../api/client';
 import { dataService } from '../store/dataService';
+import { OnboardingState, ModuleConfig } from '../store/onboardingState';
 import { flushQueue } from '../api/sync';
 import { PetAvatar } from '../components/PetAvatar';
 import { QuickLogTile } from '../components/QuickLogTile';
@@ -28,14 +29,15 @@ interface QuickAction {
   label: string;
   color: string;
   type: string;
-  requires?: 'litter' | 'bowls';
+  requiresResource?: 'litter' | 'bowls';
+  requiresModule?: keyof ModuleConfig;
 }
 
 const ALL_QUICK_ACTIONS: QuickAction[] = [
-  { key: 'litter', icon: '🚽', label: 'Litière', color: Colors.success, type: 'litter_clean', requires: 'litter' },
-  { key: 'food', icon: '🥣', label: 'Gamelle', color: Colors.accent, type: 'food_serve', requires: 'bowls' },
+  { key: 'litter', icon: '🚽', label: 'Litière', color: Colors.success, type: 'litter_clean', requiresResource: 'litter', requiresModule: 'litter' },
+  { key: 'food', icon: '🥣', label: 'Gamelle', color: Colors.accent, type: 'food_serve', requiresResource: 'bowls', requiresModule: 'bowls' },
   { key: 'weight', icon: '⚖️', label: 'Pesée', color: Colors.primary, type: 'weight' },
-  { key: 'medicine', icon: '💊', label: 'Médic.', color: Colors.error, type: 'health_note' },
+  { key: 'medicine', icon: '💊', label: 'Médic.', color: Colors.error, type: 'health_note', requiresModule: 'health' },
   { key: 'observation', icon: '👁️', label: 'Obs.', color: Colors.info, type: 'behavior' },
   { key: 'event', icon: '📅', label: 'Évén.', color: Colors.secondary, type: 'custom' },
 ];
@@ -55,12 +57,14 @@ export function DashboardScreen({ navigation }: Props) {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isGuest, setIsGuest] = useState(false);
+  const [modules, setModules] = useState<ModuleConfig>({ health: true, litter: true, bowls: true, food: false });
 
   const selectedPet = pets.find((p) => p.id === selectedPetId) ?? null;
 
   const visibleActions = ALL_QUICK_ACTIONS.filter((a) => {
-    if (a.requires === 'litter') return litterResources.length > 0;
-    if (a.requires === 'bowls') return bowls.length > 0;
+    if (a.requiresModule && !modules[a.requiresModule]) return false;
+    if (a.requiresResource === 'litter') return litterResources.length > 0;
+    if (a.requiresResource === 'bowls') return bowls.length > 0;
     return true;
   });
 
@@ -79,6 +83,9 @@ export function DashboardScreen({ navigation }: Props) {
       const firstPetId = fetchedPets[0]?.id ?? null;
       const targetId = selectedPetId ?? firstPetId;
       setSelectedPetId(targetId);
+
+      const mods = await OnboardingState.getModules();
+      setModules(mods);
 
       const [events, reminders, openedBags, foodProducts, resources, fetchedBowls] = await Promise.all([
         targetId
