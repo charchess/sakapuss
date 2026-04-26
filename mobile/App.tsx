@@ -38,7 +38,14 @@ export default function App() {
     const ready = await AuthStore.isAuthenticated();
     if (!ready) { setAppState('auth'); return; }
     const pets = await dataService.getPets();
-    setAppState(pets.length === 0 ? 'onboarding' : 'app');
+    if (pets.length === 0) {
+      // Guest with no pets → show auth first (let them create an account or confirm guest)
+      const isGuest = await AuthStore.isGuestMode();
+      if (isGuest) { setAppState('auth'); return; }
+      setAppState('onboarding');
+      return;
+    }
+    setAppState('app');
   }, []);
 
   useEffect(() => {

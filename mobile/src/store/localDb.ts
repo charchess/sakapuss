@@ -222,7 +222,15 @@ export const localDb = {
 
   async completeReminder(id: string): Promise<Reminder> {
     const all = await read<Reminder>(K.reminders);
-    const updated = all.map((r) => r.id === id ? { ...r, status: 'completed' as const } : r);
+    const updated = all.map((r) => {
+      if (r.id !== id) return r;
+      if (r.frequency_days) {
+        const due = new Date(r.next_due_date);
+        due.setDate(due.getDate() + r.frequency_days);
+        return { ...r, next_due_date: due.toISOString().split('T')[0], status: 'upcoming' as const };
+      }
+      return { ...r, status: 'completed' as const };
+    });
     await write(K.reminders, updated);
     return updated.find((r) => r.id === id) as Reminder;
   },

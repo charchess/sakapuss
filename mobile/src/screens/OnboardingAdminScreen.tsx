@@ -608,9 +608,11 @@ export function OnboardingAdminScreen({ navigation, route }: Props) {
         <TouchableOpacity style={[styles.saveBtn, loading && styles.saveBtnDisabled]} onPress={handleSave} disabled={loading} activeOpacity={0.8} testID="onboarding-actions-save">
           {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>{isLastStep ? 'Terminer la configuration' : 'Enregistrer et suivant'}</Text>}
         </TouchableOpacity>
-        <TouchableOpacity style={styles.skipBtn} onPress={advance} activeOpacity={0.7} testID="onboarding-actions-skip">
-          <Text style={styles.skipBtnText}>{isLastStep ? 'Passer et aller au tableau de bord' : 'Passer cette étape'}</Text>
-        </TouchableOpacity>
+        {currentStep !== 'pets' && currentStep !== 'modules' && (
+          <TouchableOpacity style={styles.skipBtn} onPress={advance} activeOpacity={0.7} testID="onboarding-actions-skip">
+            <Text style={styles.skipBtnText}>{isLastStep ? 'Passer et aller au tableau de bord' : 'Passer cette étape'}</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </KeyboardAvoidingView>
   );
