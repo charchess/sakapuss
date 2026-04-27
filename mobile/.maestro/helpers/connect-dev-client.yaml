@@ -1,0 +1,7 @@
+appId: com.sakapuss.mobile
+---
+# After clearState, the Expo dev client loses its stored Metro URL.
+# Re-open via deep link so it reconnects automatically (10.0.2.2 = host from emulator).
+- openLink: "com.sakapuss.mobile://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8081"
+- waitForAnimationToEnd
+- waitForAnimationToEnd

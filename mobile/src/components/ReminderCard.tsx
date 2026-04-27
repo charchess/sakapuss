@@ -99,7 +99,7 @@ export function ReminderCard({ reminder, onComplete, onPostpone, onMissed, onDel
             <Text style={[styles.badgeText, { color }]}>{urgencyLabel(urgency)}</Text>
           </View>
           {onDelete && (
-            <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete} activeOpacity={0.7} testID={`reminder-delete-${reminder.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()}`}>
               <Text style={styles.deleteBtnText}>🗑️</Text>
             </TouchableOpacity>
           )}
@@ -114,6 +114,7 @@ export function ReminderCard({ reminder, onComplete, onPostpone, onMissed, onDel
               style={[styles.actionBtn, styles.actionBtnDone]}
               onPress={() => onComplete(reminder.id)}
               activeOpacity={0.8}
+              testID={`reminder-complete-${reminder.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()}`}
             >
               <Text style={[styles.actionBtnText, { color: Colors.success }]}>✅ Fait</Text>
             </TouchableOpacity>
@@ -123,6 +124,7 @@ export function ReminderCard({ reminder, onComplete, onPostpone, onMissed, onDel
               style={[styles.actionBtn, styles.actionBtnPostpone, showPostpone && styles.actionBtnActive]}
               onPress={() => setShowPostpone((v) => !v)}
               activeOpacity={0.8}
+              testID="reminder-action-postpone"
             >
               <Text style={[styles.actionBtnText, { color: Colors.primary }]}>⏭️ Reporter</Text>
             </TouchableOpacity>
@@ -132,6 +134,7 @@ export function ReminderCard({ reminder, onComplete, onPostpone, onMissed, onDel
               style={[styles.actionBtn, styles.actionBtnMissed]}
               onPress={() => onMissed(reminder.id)}
               activeOpacity={0.8}
+              testID="reminder-action-missed"
             >
               <Text style={[styles.actionBtnText, { color: Colors.error }]}>❌ Manqué</Text>
             </TouchableOpacity>

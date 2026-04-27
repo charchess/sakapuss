@@ -15,7 +15,7 @@ export const dataService = {
     return api.getPets();
   },
 
-  async createPet(data: { name: string; species: string; birth_date: string; breed?: string }): Promise<Pet> {
+  async createPet(data: { name: string; species: string; birth_date?: string; breed?: string }): Promise<Pet> {
     if (await isGuest()) return localDb.createPet(data);
     return api.createPet(data);
   },

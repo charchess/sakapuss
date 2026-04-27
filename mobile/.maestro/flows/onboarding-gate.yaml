@@ -1,0 +1,79 @@
+appId: com.sakapuss.mobile
+---
+# Onboarding gate: app reset → auth screen first → wizard obligatoire → dashboard
+
+- launchApp:
+    clearState: true
+- runFlow:
+    file: ../helpers/connect-dev-client.yaml
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+- runFlow:
+    file: ../helpers/dismiss-dev-menu.yaml
+    when:
+      visible: "Continue"
+- waitForAnimationToEnd
+
+# Auth screen doit apparaître en premier (pas l'onboarding directement)
+- assertVisible: "Se connecter"
+- assertVisible: "Continuer sans compte"
+- assertNotVisible: "Vos animaux"
+- assertNotVisible: "Que se passe-t-il aujourd'hui ?"
+
+# Choisir "sans compte" → gate détecte 0 animaux → wizard obligatoire
+- tapOn:
+    id: "guest-btn"
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+
+# Étape 1 obligatoire — pas de bouton "Passer"
+- assertVisible: "Vos animaux"
+- assertNotVisible: "Passer cette étape"
+- assertNotVisible: "Que se passe-t-il aujourd'hui ?"
+
+# Remplir le premier animal: species d'abord, puis nom + Enter (submit via clavier)
+- tapOn:
+    id: "onboarding-species-chat"
+- waitForAnimationToEnd
+- tapOn:
+    id: "onboarding-pet-name"
+- inputText: "GateTestPet"
+- pressKey: Enter
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+
+# Étape 2 — modules (bouton "Passer" disponible)
+- assertVisible: "Ce que vous voulez suivre"
+- tapOn:
+    id: "onboarding-actions-skip"
+
+# Étapes optionnelles — skip jusqu'à la fin
+- waitForAnimationToEnd
+- tapOn:
+    id: "onboarding-actions-skip"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "onboarding-actions-skip"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "onboarding-actions-skip"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "onboarding-actions-skip"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "onboarding-actions-skip"
+    optional: true
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+
+# Dashboard accessible seulement après avoir terminé le wizard
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+- assertVisible: "GateTestPet"
+- assertNotVisible: "Se connecter"

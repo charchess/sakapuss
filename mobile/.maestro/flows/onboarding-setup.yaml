@@ -5,6 +5,8 @@ appId: com.sakapuss.mobile
 
 - launchApp:
     clearState: true
+- runFlow:
+    file: ../helpers/connect-dev-client.yaml
 - waitForAnimationToEnd
 - waitForAnimationToEnd
 - runFlow:
@@ -47,15 +49,20 @@ appId: com.sakapuss.mobile
 - tapOn: "Ajouter"
 
 # === ÉTAPE 1 : Vos animaux ===
+- waitForAnimationToEnd
 - assertVisible: "Vos animaux"
-- assertVisible: "Étape 1 sur 5"
-# Passer : l'animal vient d'être créé dans AddPetScreen
+# Enregistrer (pas de "Passer" sur cette étape)
+- assertNotVisible: "Passer cette étape"
 - tapOn:
-    id: "onboarding-actions-skip"
+    id: "onboarding-actions-save"
 
-# === ÉTAPE 2 : Rappels santé ===
+# === ÉTAPE 2 : Modules ===
+- assertVisible: "Ce que vous voulez suivre"
+- tapOn:
+    id: "onboarding-actions-save"
+
+# === ÉTAPE 3 : Rappels santé ===
 - assertVisible: "Rappels santé"
-- assertVisible: "Étape 2 sur 5"
 - assertVisible:
     id: "onboarding-health-deworming"
 - assertVisible:
@@ -67,9 +74,8 @@ appId: com.sakapuss.mobile
 - tapOn:
     id: "onboarding-actions-skip"
 
-# === ÉTAPE 3 : Poids initial ===
+# === ÉTAPE 4 : Poids initial ===
 - assertVisible: "Poids initial"
-- assertVisible: "Étape 3 sur 5"
 - tapOn:
     id: "onboarding-weight-entry"
 - inputText: "4200"
@@ -77,9 +83,13 @@ appId: com.sakapuss.mobile
 - tapOn:
     id: "onboarding-actions-save"
 
-# === ÉTAPE 4 : Gamelles ===
+# === ÉTAPE 5 : Litières (si activées) ===
+- tapOn:
+    id: "onboarding-actions-skip"
+    optional: true
+
+# === ÉTAPE 6 : Gamelles ===
 - assertVisible: "Gamelles"
-- assertVisible: "Étape 4 sur 5"
 - tapOn:
     id: "onboarding-food-entry"
 - eraseText: 10
@@ -88,14 +98,7 @@ appId: com.sakapuss.mobile
 - tapOn:
     id: "onboarding-actions-save"
 
-# === ÉTAPE 5 : Stocks & produits ===
-- assertVisible: "Stocks & produits"
-- assertVisible: "Étape 5 sur 5"
-# Passer : optionnel
-- tapOn:
-    id: "onboarding-actions-skip"
-
-# → Dashboard sans erreur
+# → Dashboard (food désactivé par défaut → gamelles est la dernière étape)
 - assertVisible: "Que se passe-t-il aujourd'hui ?"
 - assertNotVisible: "Erreur"
 - assertNotVisible: "Impossible"

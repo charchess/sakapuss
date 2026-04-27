@@ -498,6 +498,7 @@ export function QuickLogScreen({ navigation, route }: Props) {
       <View style={styles.field}>
         <Text style={styles.fieldLabel}>Médicament / Produit</Text>
         <TextInput
+          testID="medicine-name-input"
           style={styles.input}
           placeholder="ex: Frontline, Milbemax, Advocate..."
           placeholderTextColor={Colors.textMuted}
@@ -560,6 +561,7 @@ export function QuickLogScreen({ navigation, route }: Props) {
       <View style={[styles.field, styles.reminderRow]}>
         <Text style={styles.fieldLabel}>Créer un rappel</Text>
         <Switch
+          testID="reminder-create-switch"
           value={createReminder}
           onValueChange={(v) => {
             setCreateReminder(v);

@@ -2,6 +2,8 @@ appId: com.sakapuss.mobile
 ---
 - launchApp:
     clearState: true
+- runFlow:
+    file: ../helpers/connect-dev-client.yaml
 # Dismiss Expo dev menu if it appears on launch (menu can appear 2-3s after launch)
 - waitForAnimationToEnd
 - waitForAnimationToEnd
@@ -53,16 +55,34 @@ appId: com.sakapuss.mobile
     direction: DOWN
 - tapOn: "Ajouter"
 
-# Wizard d'onboarding → passer les 3 étapes
-- assertVisible: "Rappels santé"
+# Wizard d'onboarding — pets (save obligatoire) + modules (save obligatoire) + optionnels
+- waitForAnimationToEnd
+- assertVisible: "Vos animaux"
+- assertNotVisible: "Passer cette étape"
+# Existing pets visible, no draft to fill — just save
+- tapOn:
+    id: "onboarding-actions-save"
+- waitForAnimationToEnd
+- assertVisible: "Ce que vous voulez suivre"
+- tapOn:
+    id: "onboarding-actions-save"
+- waitForAnimationToEnd
 - tapOn:
     id: "onboarding-actions-skip"
-- assertVisible: "Poids initial"
+    optional: true
+- waitForAnimationToEnd
 - tapOn:
     id: "onboarding-actions-skip"
-- assertVisible: "Configuration alimentation"
+    optional: true
+- waitForAnimationToEnd
 - tapOn:
     id: "onboarding-actions-skip"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "onboarding-actions-skip"
+    optional: true
+- waitForAnimationToEnd
 
 # Retour au dashboard sans erreur
 - assertVisible: "Que se passe-t-il aujourd'hui ?"
