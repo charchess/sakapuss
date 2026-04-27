@@ -1,6 +1,6 @@
 appId: com.sakapuss.mobile
 ---
-# Test: créer un rappel via QuickLog puis le supprimer
+# Test: compléter un rappel récurrent → le suivant apparaît automatiquement (date avancée)
 
 - launchApp:
     clearState: true
@@ -28,9 +28,11 @@ appId: com.sakapuss.mobile
 - tapOn:
     id: "quick-action-medicine"
 - assertVisible: "Médic."
+
+# Saisir le nom du médicament (pas de mot-clé auto-détecté)
 - tapOn:
     id: "medicine-name-input"
-- inputText: "MedDeleteTest"
+- inputText: "MedRecurrentTest"
 - hideKeyboard
 
 # Activer le switch rappel manuellement
@@ -41,6 +43,8 @@ appId: com.sakapuss.mobile
 - tapOn:
     id: "reminder-create-switch"
 - waitForAnimationToEnd
+
+# Soumettre
 - tapOn:
     id: "quicklog-submit-btn"
 - assertVisible: "Que se passe-t-il aujourd'hui ?"
@@ -49,18 +53,27 @@ appId: com.sakapuss.mobile
 - tapOn: "🔔"
 - assertVisible: "Rappels"
 
-# Défiler jusqu'au rappel MedDeleteTest (30j → avant les Vermifuge Jul)
+# Défiler jusqu'au rappel MedRecurrentTest (30j → avant les Vermifuge Jul)
 - scrollUntilVisible:
     element:
-      id: "reminder-delete-meddeletetest"
+      id: "reminder-complete-medrecurrenttest"
     direction: DOWN
-- tapOn:
-    id: "reminder-delete-meddeletetest"
 
-# Confirmer dans l'Alert natif Android
+# Compléter le rappel via le bouton "✅ Fait"
+- tapOn:
+    id: "reminder-complete-medrecurrenttest"
+- waitForAnimationToEnd
+
+# Le rappel doit RESTER visible (récurrent → date avancée, pas supprimé)
+- scrollUntilVisible:
+    element:
+      id: "reminder-delete-medrecurrenttest"
+    direction: DOWN
+- assertVisible: "MedRecurrentTest"
+- assertVisible: "Rappels"
+
+# Nettoyage : supprimer le rappel de test
+- tapOn:
+    id: "reminder-delete-medrecurrenttest"
 - assertVisible: "Supprimer ce rappel"
 - tapOn: "Supprimer"
-
-# Le rappel doit avoir disparu
-- assertNotVisible: "MedDeleteTest"
-- assertVisible: "Rappels"

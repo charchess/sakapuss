@@ -234,7 +234,8 @@ export function OnboardingAdminScreen({ navigation, route }: Props) {
     setLoading(true);
     try {
       if (currentStep === 'pets') {
-        const valid = petDrafts.filter((d) => d.name.trim() && d.species.trim() && d.birth_date.trim());
+        const valid = petDrafts.filter((d) => d.name.trim() && d.species.trim());
+        console.log('[OnbSave] valid count:', valid.length, 'existing:', existingPets.length);
         if (existingPets.length === 0 && valid.length === 0) {
           setError('Ajoutez au moins un animal pour continuer.');
           setLoading(false);
@@ -242,9 +243,10 @@ export function OnboardingAdminScreen({ navigation, route }: Props) {
         }
         const created = await Promise.all(
           valid.map((d) =>
-            dataService.createPet({ name: d.name.trim(), species: d.species.trim(), birth_date: d.birth_date, breed: d.breed.trim() || undefined })
+            dataService.createPet({ name: d.name.trim(), species: d.species.trim(), ...(d.birth_date.trim() && { birth_date: d.birth_date.trim() }), ...(d.breed.trim() && { breed: d.breed.trim() }) })
           )
         );
+        console.log('[OnbSave] created:', JSON.stringify(created));
         setAllPets([...existingPets, ...created]);
         await OnboardingState.markDone('pets');
 
@@ -387,10 +389,10 @@ export function OnboardingAdminScreen({ navigation, route }: Props) {
                     <TouchableOpacity onPress={() => removePetDraft(draft.key)}><Text style={styles.removeBtn}>✕</Text></TouchableOpacity>
                   )}
                 </View>
-                <TextInput style={styles.input} placeholder="Nom" placeholderTextColor={Colors.textMuted} value={draft.name} onChangeText={(v) => updatePetDraft(draft.key, { name: v })} />
+                <TextInput style={styles.input} placeholder="Nom" placeholderTextColor={Colors.textMuted} value={draft.name} onChangeText={(v) => updatePetDraft(draft.key, { name: v })} returnKeyType="done" onSubmitEditing={handleSave} testID="onboarding-pet-name" />
                 <View style={[styles.pillRow, { marginTop: Spacing.sm }]}>
                   {SPECIES_OPTIONS.map((sp) => (
-                    <TouchableOpacity key={sp} style={[styles.pill, draft.species === sp && styles.pillActive]} onPress={() => updatePetDraft(draft.key, { species: sp })}>
+                    <TouchableOpacity key={sp} style={[styles.pill, draft.species === sp && styles.pillActive]} onPress={() => updatePetDraft(draft.key, { species: sp })} testID={`onboarding-species-${sp.toLowerCase()}`}>
                       <Text style={[styles.pillText, draft.species === sp && styles.pillTextActive]}>{sp}</Text>
                     </TouchableOpacity>
                   ))}
@@ -600,7 +602,7 @@ export function OnboardingAdminScreen({ navigation, route }: Props) {
           </View>
         )}
 
-        {error && <View style={styles.errorBox}><Text style={styles.errorText}>{error}</Text></View>}
+        {error && <View style={styles.errorBox} testID="onboarding-error-box"><Text style={styles.errorText}>{error}</Text></View>}
       </ScrollView>
 
       {/* Footer */}
@@ -608,7 +610,7 @@ export function OnboardingAdminScreen({ navigation, route }: Props) {
         <TouchableOpacity style={[styles.saveBtn, loading && styles.saveBtnDisabled]} onPress={handleSave} disabled={loading} activeOpacity={0.8} testID="onboarding-actions-save">
           {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>{isLastStep ? 'Terminer la configuration' : 'Enregistrer et suivant'}</Text>}
         </TouchableOpacity>
-        {currentStep !== 'pets' && currentStep !== 'modules' && (
+        {currentStep !== 'pets' && (
           <TouchableOpacity style={styles.skipBtn} onPress={advance} activeOpacity={0.7} testID="onboarding-actions-skip">
             <Text style={styles.skipBtnText}>{isLastStep ? 'Passer et aller au tableau de bord' : 'Passer cette étape'}</Text>
           </TouchableOpacity>
@@ -731,7 +733,7 @@ const styles = StyleSheet.create({
   errorText: { fontSize: 13, color: Colors.error },
 
   footer: { paddingHorizontal: Spacing.xl, paddingBottom: 28, paddingTop: Spacing.sm, backgroundColor: Colors.background, borderTopWidth: 1, borderTopColor: Colors.border, gap: Spacing.sm },
-  saveBtn: { backgroundColor: Colors.primary, borderRadius: Radius.md, paddingVertical: 16, alignItems: 'center', ...Shadow.card },
+  saveBtn: { backgroundColor: Colors.primary, borderRadius: Radius.md, paddingVertical: 16, alignItems: 'center' },
   saveBtnDisabled: { opacity: 0.6 },
   saveBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
   skipBtn: { alignItems: 'center', paddingVertical: 10 },

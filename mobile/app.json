@@ -15,7 +15,7 @@
       },
       "package": "com.sakapuss.mobile",
       "usesCleartextTraffic": true,
-      "versionCode": 26042623
+      "versionCode": 26042701
     },
     "ios": {
       "supportsTablet": false,

@@ -4,6 +4,8 @@ appId: com.sakapuss.mobile
 
 - launchApp:
     clearState: true
+- runFlow:
+    file: ../helpers/connect-dev-client.yaml
 # Dismiss Expo dev menu if it appears on launch (menu can appear 2-3s after launch)
 - waitForAnimationToEnd
 - waitForAnimationToEnd

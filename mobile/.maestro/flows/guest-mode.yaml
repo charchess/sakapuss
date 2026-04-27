@@ -1,64 +1,80 @@
 appId: com.sakapuss.mobile
 ---
-# Mode local (sans compte): toutes les fonctionnalités disponibles
+# Mode local (sans compte): auth → onboarding gate → dashboard → fonctionnalités locales
 
 - launchApp:
     clearState: true
+- runFlow:
+    file: ../helpers/connect-dev-client.yaml
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+- runFlow:
+    file: ../helpers/dismiss-dev-menu.yaml
+    when:
+      visible: "Continue"
+- waitForAnimationToEnd
 - assertVisible: "Se connecter"
 
-# Continuer sans compte
+# Continuer sans compte → onboarding gate (0 animaux en local)
 - tapOn:
     id: "guest-btn"
-- assertVisible: "Que se passe-t-il aujourd'hui ?"
+- waitForAnimationToEnd
+- waitForAnimationToEnd
 - waitForAnimationToEnd
 
-# Dashboard en mode local: bannière "Données locales" visible
-- assertVisible:
-    id: "guest-banner"
-- assertVisible:
-    id: "guest-banner-text"
-
-# Ajouter un animal en mode local (doit fonctionner)
+# === ÉTAPE 1 : Animaux (obligatoire, pas de "Passer") ===
+- assertVisible: "Vos animaux"
+- assertNotVisible: "Passer cette étape"
+# Species d'abord, puis nom + Enter (submit via clavier)
 - tapOn:
-    id: "add-pet-btn"
-- assertVisible: "Nouvel animal"
-- assertNotVisible: "Créez un compte"
-
+    id: "onboarding-species-chat"
+- waitForAnimationToEnd
 - tapOn:
-    id: "pet-name-input"
+    id: "onboarding-pet-name"
 - inputText: "Felix"
-- hideKeyboard
-- tapOn:
-    id: "species-pill-chat"
-- scrollUntilVisible:
-    element:
-      id: "pet-birthdate-input"
-    direction: DOWN
-- tapOn:
-    id: "pet-birthdate-input"
-- tapOn: "OK"
-- scrollUntilVisible:
-    element:
-      text: "Ajouter"
-    direction: DOWN
-- tapOn: "Ajouter"
+- pressKey: Enter
+- waitForAnimationToEnd
+- waitForAnimationToEnd
 
-# Wizard d'onboarding → passer les 3 étapes (mode local)
-- assertVisible: "Rappels santé"
-- tapOn:
-    id: "onboarding-actions-skip"
-- assertVisible: "Poids initial"
-- tapOn:
-    id: "onboarding-actions-skip"
-- assertVisible: "Configuration alimentation"
+# === ÉTAPE 2 : Modules (bouton "Passer" disponible) ===
+- assertVisible: "Ce que vous voulez suivre"
 - tapOn:
     id: "onboarding-actions-skip"
 
-# Retour au dashboard, animal créé localement
+# === Étapes optionnelles : passer ===
+- waitForAnimationToEnd
+- tapOn:
+    id: "onboarding-actions-skip"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "onboarding-actions-skip"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "onboarding-actions-skip"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "onboarding-actions-skip"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "onboarding-actions-skip"
+    optional: true
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+
+# Dashboard: animal "Felix" visible
 - assertVisible: "Que se passe-t-il aujourd'hui ?"
 - assertVisible: "Felix"
 
-# Quick Log poids sur l'animal créé localement
+# Bannière mode guest visible
+- assertVisible:
+    id: "guest-banner"
+
+# Quick Log poids
 - tapOn:
     id: "quick-action-weight"
 - assertVisible: "Pesée"
@@ -95,13 +111,12 @@ appId: com.sakapuss.mobile
     id: "quicklog-submit-btn"
 - assertVisible: "Que se passe-t-il aujourd'hui ?"
 
-# Settings: bouton "Quitter le mode invité" visible
+# Settings: bouton "Quitter le mode invité"
 - tapOn: "⚙️"
 - assertVisible: "Mode invité"
+- scroll
 - assertVisible: "Quitter le mode invité"
 - assertNotVisible: "Se déconnecter"
-
-# Quitter le mode local
 - tapOn: "Quitter le mode invité"
 - assertVisible: "Retourner à l'écran de connexion ?"
 - tapOn: "Quitter"
