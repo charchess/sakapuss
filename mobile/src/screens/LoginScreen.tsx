@@ -8,6 +8,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  TouchableWithoutFeedback,
+  Keyboard,
   ActivityIndicator,
   Alert,
 } from 'react-native';
@@ -150,8 +152,9 @@ export function LoginScreen({ onLoginSuccess }: Props) {
   return (
     <KeyboardAvoidingView
       style={styles.root}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <StatusBar style="dark" backgroundColor={Colors.background} />
       <ScrollView
         contentContainerStyle={styles.scroll}
@@ -255,6 +258,7 @@ export function LoginScreen({ onLoginSuccess }: Props) {
           <Text style={styles.guestText}>Continuer sans compte</Text>
         </TouchableOpacity>
       </ScrollView>
+      </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
 }

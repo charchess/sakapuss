@@ -112,6 +112,45 @@ export interface Reminder {
   frequency_days?: number;
   next_due_date: string;
   status: string;
+  comment?: string;
+}
+
+export interface Treatment {
+  id: string;
+  pet_id: string;
+  pet_name?: string;
+  name: string;
+  product?: string;
+  doses_per_day: number;
+  start_date: string;
+  total_days: number;
+  total_doses: number;
+  moment_morning?: string;
+  moment_noon?: string;
+  moment_evening?: string;
+  status: 'active' | 'completed' | 'extended';
+  created_at: string;
+}
+
+export interface TreatmentDose {
+  id: string;
+  treatment_id: string;
+  treatment_name: string;
+  pet_id: string;
+  pet_name?: string;
+  moment: 'morning' | 'noon' | 'evening';
+  scheduled_at: string;
+  day_number: number;
+  dose_number: number;
+  total_doses: number;
+  total_days: number;
+  status: 'pending' | 'done' | 'missed';
+  validated_at?: string;
+  comment?: string;
+}
+
+export interface DoseCompleteResponse extends TreatmentDose {
+  is_last_dose: boolean;
 }
 
 export interface Resource {
@@ -212,8 +251,8 @@ export const api = {
     return apiClient.get<Reminder[]>(Endpoints.reminders);
   },
 
-  completeReminder(reminderId: string): Promise<Reminder> {
-    return apiClient.post<Reminder>(`/reminders/${reminderId}/complete`, {});
+  completeReminder(reminderId: string, comment?: string): Promise<Reminder> {
+    return apiClient.post<Reminder>(`/reminders/${reminderId}/complete`, { comment: comment ?? null });
   },
 
   postponeReminder(reminderId: string, delayDays: number): Promise<Reminder> {
@@ -224,8 +263,32 @@ export const api = {
     return apiClient.post<Reminder>(`/pets/${petId}/reminders`, { type: 'health', ...data });
   },
 
-  missReminder(reminderId: string): Promise<Reminder> {
-    return apiClient.post<Reminder>(`/reminders/${reminderId}/miss`, {});
+  missReminder(reminderId: string, comment?: string): Promise<Reminder> {
+    return apiClient.post<Reminder>(`/reminders/${reminderId}/miss`, { comment: comment ?? null });
+  },
+
+  createTreatment(petId: string, data: {
+    name: string; product?: string; doses_per_day: number;
+    start_date: string; total_days: number;
+    moment_morning?: string; moment_noon?: string; moment_evening?: string;
+  }): Promise<Treatment> {
+    return apiClient.post<Treatment>(`/pets/${petId}/treatments`, data);
+  },
+
+  getPendingDoses(): Promise<TreatmentDose[]> {
+    return apiClient.get<TreatmentDose[]>('/treatments/pending-doses');
+  },
+
+  completeDose(doseId: string, comment?: string): Promise<DoseCompleteResponse> {
+    return apiClient.post<DoseCompleteResponse>(`/treatment-doses/${doseId}/complete`, { comment: comment ?? null });
+  },
+
+  missDose(doseId: string, comment?: string): Promise<DoseCompleteResponse> {
+    return apiClient.post<DoseCompleteResponse>(`/treatment-doses/${doseId}/miss`, { comment: comment ?? null });
+  },
+
+  extendTreatment(treatmentId: string, extraDays: number): Promise<Treatment> {
+    return apiClient.post<Treatment>(`/treatments/${treatmentId}/extend?extra_days=${extraDays}`, {});
   },
 
   deleteReminder(reminderId: string): Promise<void> {

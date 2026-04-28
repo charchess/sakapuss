@@ -107,6 +107,13 @@ export function QuickLogScreen({ navigation, route }: Props) {
   const [detectedFreq, setDetectedFreq] = useState<number | null>(null);
   const [freqPresetLabel, setFreqPresetLabel] = useState<string | null>(null);
   const [customFreqText, setCustomFreqText] = useState('');
+  // Treatment (finite dose course)
+  const [treatmentType, setTreatmentType] = useState<'recurring' | 'treatment'>('recurring');
+  const [dosesPerDay, setDosesPerDay] = useState<1 | 2 | 3>(1);
+  const [treatmentDays, setTreatmentDays] = useState('');
+  const [momentMorning, setMomentMorning] = useState('08:00');
+  const [momentNoon, setMomentNoon] = useState('13:00');
+  const [momentEvening, setMomentEvening] = useState('20:00');
 
   // Behavior / custom fields
   const [note, setNote] = useState('');
@@ -223,12 +230,28 @@ export function QuickLogScreen({ navigation, route }: Props) {
       if (petId) {
         await dataService.logEvent(petId, type, buildPayload());
         if (type === 'health_note' && createReminder && petId) {
-          const freq = reminderFreq ?? detectedFreq ?? 30;
-          await dataService.createReminder(petId, {
-            name: product.trim(),
-            frequency_days: freq,
-            type: 'health',
-          });
+          if (treatmentType === 'treatment') {
+            const days = parseInt(treatmentDays, 10);
+            if (days > 0) {
+              const startDate = formatDate(healthDate);
+              await dataService.createTreatment(petId, {
+                name: product.trim(),
+                doses_per_day: dosesPerDay,
+                start_date: startDate,
+                total_days: days,
+                moment_morning: dosesPerDay >= 1 ? momentMorning : undefined,
+                moment_noon: dosesPerDay >= 3 ? momentNoon : undefined,
+                moment_evening: dosesPerDay >= 2 ? momentEvening : undefined,
+              });
+            }
+          } else {
+            const freq = reminderFreq ?? detectedFreq ?? 30;
+            await dataService.createReminder(petId, {
+              name: product.trim(),
+              frequency_days: freq,
+              type: 'health',
+            });
+          }
         }
       } else if (type === 'litter_clean' || type === 'food_serve') {
         // resource-level events don't require a pet
@@ -576,37 +599,137 @@ export function QuickLogScreen({ navigation, route }: Props) {
         />
       </View>
       {createReminder && (
-        <View style={styles.field}>
-          <Text style={styles.fieldLabel}>Fréquence du rappel</Text>
-          <View style={styles.pillRow}>
-            {FREQ_PRESETS.map((p) => (
-              <TouchableOpacity
-                key={p.label}
-                style={[styles.pill, freqPresetLabel === p.label && styles.pillActive]}
-                onPress={() => selectFreqPreset(p.label, p.days)}
-                activeOpacity={0.7}
-              >
-                <Text style={[styles.pillText, freqPresetLabel === p.label && styles.pillTextActive]}>{p.label}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-          {freqPresetLabel === 'Perso' && (
-            <View style={styles.customFreqRow}>
-              <TextInput
-                style={[styles.input, styles.customFreqInput]}
-                placeholder="ex: 21"
-                placeholderTextColor={Colors.textMuted}
-                keyboardType="decimal-pad"
-                value={customFreqText}
-                onChangeText={(t) => { setCustomFreqText(t); setReminderFreq(parseFloat(t) || null); }}
-              />
-              <Text style={styles.customFreqUnit}>jours</Text>
+        <>
+          {/* Type selector */}
+          <View style={styles.field}>
+            <View style={styles.pillRow}>
+              {(['recurring', 'treatment'] as const).map((t) => (
+                <TouchableOpacity
+                  key={t}
+                  style={[styles.pill, treatmentType === t && styles.pillActive]}
+                  onPress={() => setTreatmentType(t)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.pillText, treatmentType === t && styles.pillTextActive]}>
+                    {t === 'recurring' ? '🔁 Récurrent' : '💊 Traitement'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </View>
+          </View>
+
+          {treatmentType === 'recurring' ? (
+            <View style={styles.field}>
+              <Text style={styles.fieldLabel}>Fréquence du rappel</Text>
+              <View style={styles.pillRow}>
+                {FREQ_PRESETS.map((p) => (
+                  <TouchableOpacity
+                    key={p.label}
+                    style={[styles.pill, freqPresetLabel === p.label && styles.pillActive]}
+                    onPress={() => selectFreqPreset(p.label, p.days)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[styles.pillText, freqPresetLabel === p.label && styles.pillTextActive]}>{p.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              {freqPresetLabel === 'Perso' && (
+                <View style={styles.customFreqRow}>
+                  <TextInput
+                    style={[styles.input, styles.customFreqInput]}
+                    placeholder="ex: 21"
+                    placeholderTextColor={Colors.textMuted}
+                    keyboardType="decimal-pad"
+                    value={customFreqText}
+                    onChangeText={(t) => { setCustomFreqText(t); setReminderFreq(parseFloat(t) || null); }}
+                  />
+                  <Text style={styles.customFreqUnit}>jours</Text>
+                </View>
+              )}
+              {reminderFreq !== null && freqPresetLabel !== 'Perso' && (
+                <Text style={styles.medHint}>→ Prochain rappel {freqLabel(reminderFreq)} après la prise</Text>
+              )}
+            </View>
+          ) : (
+            <>
+              <View style={styles.field}>
+                <Text style={styles.fieldLabel}>Prises par jour</Text>
+                <View style={styles.pillRow}>
+                  {([1, 2, 3] as const).map((n) => (
+                    <TouchableOpacity
+                      key={n}
+                      style={[styles.pill, dosesPerDay === n && styles.pillActive]}
+                      onPress={() => setDosesPerDay(n)}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[styles.pillText, dosesPerDay === n && styles.pillTextActive]}>
+                        {n === 1 ? '1×/j' : n === 2 ? '2×/j' : '3×/j'}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+              <View style={styles.field}>
+                <Text style={styles.fieldLabel}>Durée (jours)</Text>
+                <View style={styles.customFreqRow}>
+                  <TextInput
+                    style={[styles.input, styles.customFreqInput]}
+                    placeholder="ex: 14"
+                    placeholderTextColor={Colors.textMuted}
+                    keyboardType="number-pad"
+                    value={treatmentDays}
+                    onChangeText={setTreatmentDays}
+                  />
+                  <Text style={styles.customFreqUnit}>jours</Text>
+                </View>
+                {treatmentDays && parseInt(treatmentDays, 10) > 0 && (
+                  <Text style={styles.medHint}>
+                    → {parseInt(treatmentDays, 10) * dosesPerDay} doses au total
+                  </Text>
+                )}
+              </View>
+              <View style={styles.field}>
+                <Text style={styles.fieldLabel}>Horaires</Text>
+                <View style={styles.momentRow}>
+                  <View style={styles.momentItem}>
+                    <Text style={styles.momentLabel}>🌅 Matin</Text>
+                    <TextInput
+                      style={styles.momentInput}
+                      value={momentMorning}
+                      onChangeText={setMomentMorning}
+                      placeholder="08:00"
+                      placeholderTextColor={Colors.textMuted}
+                    />
+                  </View>
+                  {dosesPerDay >= 3 && (
+                    <View style={styles.momentItem}>
+                      <Text style={styles.momentLabel}>☀️ Midi</Text>
+                      <TextInput
+                        style={styles.momentInput}
+                        value={momentNoon}
+                        onChangeText={setMomentNoon}
+                        placeholder="13:00"
+                        placeholderTextColor={Colors.textMuted}
+                      />
+                    </View>
+                  )}
+                  {dosesPerDay >= 2 && (
+                    <View style={styles.momentItem}>
+                      <Text style={styles.momentLabel}>🌙 Soir</Text>
+                      <TextInput
+                        style={styles.momentInput}
+                        value={momentEvening}
+                        onChangeText={setMomentEvening}
+                        placeholder="20:00"
+                        placeholderTextColor={Colors.textMuted}
+                      />
+                    </View>
+                  )}
+                </View>
+              </View>
+            </>
           )}
-          {reminderFreq !== null && freqPresetLabel !== 'Perso' && (
-            <Text style={styles.medHint}>→ Prochain rappel {freqLabel(reminderFreq)} après la prise</Text>
-          )}
-        </View>
+        </>
       )}
     </>
   );
@@ -853,6 +976,10 @@ const styles = StyleSheet.create({
   customFreqRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: Spacing.sm },
   customFreqInput: { width: 100 },
   customFreqUnit: { fontSize: 14, color: Colors.textSecondary },
+  momentRow: { flexDirection: 'row' as const, gap: 8 },
+  momentItem: { flex: 1 },
+  momentLabel: { fontSize: 12, fontWeight: '600' as const, color: Colors.textSecondary, marginBottom: 4 },
+  momentInput: { borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.sm, padding: 8, fontSize: 13, color: Colors.textPrimary, textAlign: 'center' as const },
   errorBox: {
     backgroundColor: 'rgba(225,112,85,0.1)',
     borderRadius: 12,

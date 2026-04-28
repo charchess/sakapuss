@@ -53,6 +53,10 @@ class PostponeRequest(BaseModel):
     delay_days: int
 
 
+class CompleteRequest(BaseModel):
+    comment: str | None = None
+
+
 def compute_status(r: Reminder) -> str:
     today = date.today()
     due = r.next_due_date
@@ -147,13 +151,16 @@ def get_reminder(reminder_id: str, db: DbSession, current_user: User | None = De
 
 
 @router.post("/reminders/{reminder_id}/complete")
-def complete_reminder(reminder_id: str, db: DbSession, current_user: User = Depends(get_current_user)):
+def complete_reminder(
+    reminder_id: str, payload: CompleteRequest, db: DbSession, current_user: User = Depends(get_current_user)
+):
     r = db.query(Reminder).filter(Reminder.id == reminder_id).first()
     if not r:
         raise HTTPException(status_code=404, detail="Reminder not found")
 
     today = datetime.now(UTC)
     r.last_done_date = today
+    r.comment = payload.comment
 
     if r.frequency_days:
         r.next_due_date = today + timedelta(days=r.frequency_days)
@@ -166,7 +173,9 @@ def complete_reminder(reminder_id: str, db: DbSession, current_user: User = Depe
 
 
 @router.post("/reminders/{reminder_id}/miss")
-def miss_reminder(reminder_id: str, db: DbSession, current_user: User = Depends(get_current_user)):
+def miss_reminder(
+    reminder_id: str, payload: CompleteRequest, db: DbSession, current_user: User = Depends(get_current_user)
+):
     from backend.app.modules.health.models import Event as PetEvent
 
     r = db.query(Reminder).filter(Reminder.id == reminder_id).first()
@@ -181,9 +190,10 @@ def miss_reminder(reminder_id: str, db: DbSession, current_user: User = Depends(
         pet_id=r.pet_id,
         type="missed_reminder",
         occurred_at=datetime.now(UTC),
-        payload={"reminder_id": r.id, "reminder_name": r.name, "due_date": str(due)},
+        payload={"reminder_id": r.id, "reminder_name": r.name, "due_date": str(due), "comment": payload.comment},
     )
     db.add(missed_event)
+    r.comment = payload.comment
 
     if r.frequency_days:
         due_dt = datetime.combine(due, datetime.min.time())
