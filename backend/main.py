@@ -21,6 +21,7 @@ from backend.app.api.pets import router as pets_router
 from backend.app.api.reminders import router as reminders_router
 from backend.app.api.resources import router as resources_router
 from backend.app.api.tags import router as tags_router
+from backend.app.api.treatments import router as treatments_router
 from backend.app.api.vet import router as vet_router
 from backend.app.core.config import settings
 from backend.app.core.mqtt import mqtt_bridge
@@ -48,6 +49,7 @@ app.include_router(auth_router)
 app.include_router(pets_router)
 app.include_router(events_router)
 app.include_router(reminders_router)
+app.include_router(treatments_router)
 app.include_router(commands_router)
 app.include_router(tags_router)
 app.include_router(food_router)

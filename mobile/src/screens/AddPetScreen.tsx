@@ -7,6 +7,8 @@ import {
   StyleSheet,
   ScrollView,
   KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
   Platform,
   ActivityIndicator,
 } from 'react-native';
@@ -66,8 +68,9 @@ export function AddPetScreen({ navigation }: Props) {
   return (
     <KeyboardAvoidingView
       style={styles.root}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <StatusBar style="dark" backgroundColor={Colors.background} />
       <ScrollView
         contentContainerStyle={styles.scroll}
@@ -183,6 +186,7 @@ export function AddPetScreen({ navigation }: Props) {
           <Text style={styles.cancelText}>Annuler</Text>
         </TouchableOpacity>
       </ScrollView>
+      </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
 }

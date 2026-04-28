@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Colors, Radius, Shadow, Spacing } from '../constants/theme';
 import { Reminder } from '../api/client';
 
 interface Props {
   reminder: Reminder;
-  onComplete?: (reminderId: string) => void;
+  onComplete?: (reminderId: string, comment?: string) => void;
   onPostpone?: (reminderId: string, days: number) => void;
-  onMissed?: (reminderId: string) => void;
+  onMissed?: (reminderId: string, comment?: string) => void;
   onDelete?: (reminderId: string) => void;
 }
 
@@ -69,9 +69,22 @@ function reminderTypeIcon(type: string): string {
 
 export function ReminderCard({ reminder, onComplete, onPostpone, onMissed, onDelete }: Props) {
   const [showPostpone, setShowPostpone] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'complete' | 'miss' | null>(null);
+  const [comment, setComment] = useState('');
   const urgency = getUrgency(reminder.next_due_date);
   const color = urgencyColor(urgency);
-  const isFrequent = reminder.frequency_days != null && reminder.frequency_days <= 7;
+
+  const handleConfirm = () => {
+    if (pendingAction === 'complete') onComplete?.(reminder.id, comment || undefined);
+    else if (pendingAction === 'miss') onMissed?.(reminder.id, comment || undefined);
+    setPendingAction(null);
+    setComment('');
+  };
+
+  const handleCancelAction = () => {
+    setPendingAction(null);
+    setComment('');
+  };
 
   const handleDelete = () => {
     Alert.alert(
@@ -106,13 +119,35 @@ export function ReminderCard({ reminder, onComplete, onPostpone, onMissed, onDel
         </View>
       </View>
 
+      {/* Inline comment + confirm after action tap */}
+      {pendingAction && (
+        <View style={styles.commentBox}>
+          <TextInput
+            style={styles.commentInput}
+            placeholder="Ajouter une note (optionnel)"
+            placeholderTextColor={Colors.textMuted}
+            value={comment}
+            onChangeText={setComment}
+            autoFocus
+          />
+          <View style={styles.confirmRow}>
+            <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm} activeOpacity={0.8}>
+              <Text style={styles.confirmText}>Confirmer</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cancelBtn} onPress={handleCancelAction} activeOpacity={0.8}>
+              <Text style={styles.cancelText}>Annuler</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
       {/* Action buttons */}
-      {(onComplete || onPostpone || onMissed) && (
+      {!pendingAction && (onComplete || onPostpone || onMissed) && (
         <View style={styles.actions}>
           {onComplete && (
             <TouchableOpacity
               style={[styles.actionBtn, styles.actionBtnDone]}
-              onPress={() => onComplete(reminder.id)}
+              onPress={() => setPendingAction('complete')}
               activeOpacity={0.8}
               testID={`reminder-complete-${reminder.name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()}`}
             >
@@ -129,10 +164,10 @@ export function ReminderCard({ reminder, onComplete, onPostpone, onMissed, onDel
               <Text style={[styles.actionBtnText, { color: Colors.primary }]}>⏭️ Reporter</Text>
             </TouchableOpacity>
           )}
-          {onMissed && isFrequent && (
+          {onMissed && (
             <TouchableOpacity
               style={[styles.actionBtn, styles.actionBtnMissed]}
-              onPress={() => onMissed(reminder.id)}
+              onPress={() => setPendingAction('miss')}
               activeOpacity={0.8}
               testID="reminder-action-missed"
             >
@@ -283,5 +318,52 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: Colors.primary,
+  },
+  commentBox: {
+    marginTop: Spacing.sm,
+    padding: Spacing.sm,
+    backgroundColor: Colors.background,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  commentInput: {
+    fontSize: 13,
+    color: Colors.textPrimary,
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+    marginBottom: 8,
+  },
+  confirmRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  confirmBtn: {
+    flex: 1,
+    paddingVertical: 8,
+    backgroundColor: Colors.primary,
+    borderRadius: Radius.full,
+    alignItems: 'center',
+  },
+  confirmText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  cancelBtn: {
+    flex: 1,
+    paddingVertical: 8,
+    backgroundColor: Colors.background,
+    borderRadius: Radius.full,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    alignItems: 'center',
+  },
+  cancelText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: Colors.textSecondary,
   },
 });

@@ -6,42 +6,56 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  Alert,
   RefreshControl,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { Colors, Spacing, Typography } from '../constants/theme';
-import { Reminder } from '../api/client';
+import { Reminder, TreatmentDose } from '../api/client';
 import { dataService } from '../store/dataService';
 import { ReminderCard } from '../components/ReminderCard';
+import { TreatmentDoseCard } from '../components/TreatmentDoseCard';
 
-function getReminderUrgencySort(r: Reminder): number {
+type ListItem =
+  | { kind: 'reminder'; data: Reminder; sortKey: number }
+  | { kind: 'dose'; data: TreatmentDose; sortKey: number };
+
+function reminderSortKey(r: Reminder): number {
   const due = new Date(r.next_due_date);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   due.setHours(0, 0, 0, 0);
-  if (due < today) return 0; // overdue first
-  if (due.getTime() === today.getTime()) return 1; // today second
-  return 2; // upcoming last
+  const urgency = due < today ? 0 : due.getTime() === today.getTime() ? 1 : 2;
+  return urgency * 1e13 + due.getTime();
+}
+
+function doseSortKey(d: TreatmentDose): number {
+  const t = new Date(d.scheduled_at).getTime();
+  const isOverdue = t < Date.now();
+  return (isOverdue ? 0 : 1) * 1e13 + t;
 }
 
 export function RemindersScreen() {
-  const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [items, setItems] = useState<ListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadReminders = useCallback(async () => {
+  const load = useCallback(async () => {
     setError(null);
     try {
-      const data = await dataService.getPendingReminders();
-      const sorted = [...data].sort((a, b) => {
-        const ua = getReminderUrgencySort(a);
-        const ub = getReminderUrgencySort(b);
-        if (ua !== ub) return ua - ub;
-        return new Date(a.next_due_date).getTime() - new Date(b.next_due_date).getTime();
-      });
-      setReminders(sorted);
+      const [reminders, doses] = await Promise.all([
+        dataService.getPendingReminders(),
+        dataService.getPendingDoses(),
+      ]);
+
+      const all: ListItem[] = [
+        ...reminders.map((r): ListItem => ({ kind: 'reminder', data: r, sortKey: reminderSortKey(r) })),
+        ...doses.map((d): ListItem => ({ kind: 'dose', data: d, sortKey: doseSortKey(d) })),
+      ];
+      all.sort((a, b) => a.sortKey - b.sortKey);
+      setItems(all);
     } catch (err) {
       console.warn('[Reminders] load error:', err);
       setError('Impossible de charger les données. Vérifiez votre connexion.');
@@ -51,19 +65,92 @@ export function RemindersScreen() {
     }
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      loadReminders();
-    }, [loadReminders])
-  );
+  useFocusEffect(useCallback(() => { load(); }, [load]));
 
-  const overdueCount = reminders.filter((r) => {
-    const due = new Date(r.next_due_date);
-    due.setHours(0, 0, 0, 0);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return due < today;
+  const overdueCount = items.filter((item) => {
+    if (item.kind === 'reminder') {
+      const due = new Date(item.data.next_due_date);
+      due.setHours(0, 0, 0, 0);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return due < today;
+    }
+    return new Date(item.data.scheduled_at) < new Date();
   }).length;
+
+  const handleDoseComplete = async (doseId: string, comment?: string) => {
+    try {
+      const result = await dataService.completeDose(doseId, comment);
+      if (result.is_last_dose) {
+        Alert.alert(
+          'Traitement terminé 🎉',
+          `Toutes les doses de "${result.treatment_name}" ont été administrées. Voulez-vous prolonger ?`,
+          [
+            { text: 'Terminer', style: 'cancel', onPress: load },
+            {
+              text: 'Prolonger...',
+              onPress: () => {
+                Alert.prompt(
+                  'Prolonger le traitement',
+                  'Combien de jours supplémentaires ?',
+                  async (days) => {
+                    const n = parseInt(days ?? '', 10);
+                    if (n > 0) {
+                      await dataService.extendTreatment(result.treatment_id, n);
+                    }
+                    load();
+                  },
+                  'plain-text',
+                  '7',
+                  'numeric',
+                );
+              },
+            },
+          ]
+        );
+      } else {
+        load();
+      }
+    } catch (err) {
+      console.warn('[Reminders] dose complete error:', err);
+    }
+  };
+
+  const handleDoseMissed = async (doseId: string, comment?: string) => {
+    try {
+      const result = await dataService.missDose(doseId, comment);
+      if (result.is_last_dose) {
+        Alert.alert(
+          'Traitement terminé',
+          `Dernière dose de "${result.treatment_name}" enregistrée comme ratée. Prolonger ?`,
+          [
+            { text: 'Terminer', style: 'cancel', onPress: load },
+            {
+              text: 'Prolonger...',
+              onPress: () => {
+                Alert.prompt(
+                  'Prolonger le traitement',
+                  'Combien de jours supplémentaires ?',
+                  async (days) => {
+                    const n = parseInt(days ?? '', 10);
+                    if (n > 0) await dataService.extendTreatment(result.treatment_id, n);
+                    load();
+                  },
+                  'plain-text',
+                  '7',
+                  'numeric',
+                );
+              },
+            },
+          ]
+        );
+      } else {
+        load();
+      }
+    } catch (err) {
+      console.warn('[Reminders] dose missed error:', err);
+    }
+  };
 
   if (loading) {
     return (
@@ -80,7 +167,7 @@ export function RemindersScreen() {
       {error && (
         <View style={styles.errorBox} testID="error-box">
           <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity onPress={() => { setError(null); loadReminders(); }} style={styles.retryBtn} testID="retry-btn">
+          <TouchableOpacity onPress={() => { setError(null); load(); }} style={styles.retryBtn} testID="retry-btn">
             <Text style={styles.retryText}>Réessayer</Text>
           </TouchableOpacity>
         </View>
@@ -90,62 +177,70 @@ export function RemindersScreen() {
         <Text style={styles.title}>Rappels</Text>
         {overdueCount > 0 && (
           <View style={styles.overdueBadge}>
-            <Text style={styles.overdueBadgeText}>
-              {overdueCount} en retard
-            </Text>
+            <Text style={styles.overdueBadgeText}>{overdueCount} en retard</Text>
           </View>
         )}
       </View>
 
-      {reminders.length === 0 ? (
+      {items.length === 0 ? (
         <View style={styles.emptyState}>
           <Text style={styles.emptyIcon}>✅</Text>
           <Text style={styles.emptyTitle}>Tout est à jour !</Text>
-          <Text style={styles.emptyText}>
-            Aucun rappel en attente pour vos animaux.
-          </Text>
+          <Text style={styles.emptyText}>Aucun rappel en attente pour vos animaux.</Text>
         </View>
       ) : (
         <FlatList
           testID="reminder-list"
-          data={reminders}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <ReminderCard
-              reminder={item}
-              onComplete={async (id) => {
-                try { await dataService.completeReminder(id); loadReminders(); } catch (err) { console.warn('[Reminders] complete error:', err); }
-              }}
-              onPostpone={async (id, days) => {
-                try { await dataService.postponeReminder(id, days); loadReminders(); } catch (err) { console.warn('[Reminders] postpone error:', err); }
-              }}
-              onMissed={async (id) => {
-                try { await dataService.missReminder(id); loadReminders(); } catch (err) { console.warn('[Reminders] missed error:', err); }
-              }}
-              onDelete={async (id) => {
-                try { await dataService.deleteReminder(id); loadReminders(); } catch (err: unknown) {
-                  const msg = (err as { message?: string })?.message ?? JSON.stringify(err);
-                  setError(`Erreur suppression: ${msg}`);
-                }
-              }}
-            />
-          )}
+          data={items}
+          keyExtractor={(item) => `${item.kind}-${item.kind === 'reminder' ? item.data.id : item.data.id}`}
+          renderItem={({ item }) => {
+            if (item.kind === 'reminder') {
+              return (
+                <ReminderCard
+                  reminder={item.data}
+                  onComplete={async (id, comment) => {
+                    try { await dataService.completeReminder(id, comment); load(); }
+                    catch (err) { console.warn('[Reminders] complete error:', err); }
+                  }}
+                  onPostpone={async (id, days) => {
+                    try { await dataService.postponeReminder(id, days); load(); }
+                    catch (err) { console.warn('[Reminders] postpone error:', err); }
+                  }}
+                  onMissed={async (id, comment) => {
+                    try { await dataService.missReminder(id, comment); load(); }
+                    catch (err) { console.warn('[Reminders] missed error:', err); }
+                  }}
+                  onDelete={async (id) => {
+                    try { await dataService.deleteReminder(id); load(); }
+                    catch (err: unknown) {
+                      const msg = (err as { message?: string })?.message ?? JSON.stringify(err);
+                      setError(`Erreur suppression: ${msg}`);
+                    }
+                  }}
+                />
+              );
+            }
+            return (
+              <TreatmentDoseCard
+                dose={item.data}
+                onComplete={handleDoseComplete}
+                onMissed={handleDoseMissed}
+              />
+            );
+          }}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
-              onRefresh={() => {
-                setRefreshing(true);
-                loadReminders();
-              }}
+              onRefresh={() => { setRefreshing(true); load(); }}
               tintColor={Colors.primary}
             />
           }
           ListHeaderComponent={
-            reminders.length > 0 ? (
+            items.length > 0 ? (
               <Text style={styles.countLabel}>
-                {reminders.length} rappel{reminders.length > 1 ? 's' : ''} en attente
+                {items.length} élément{items.length > 1 ? 's' : ''} en attente
               </Text>
             ) : null
           }

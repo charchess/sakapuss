@@ -129,9 +129,9 @@ export const dataService = {
     return api.getPendingReminders();
   },
 
-  async completeReminder(id: string): Promise<Reminder> {
+  async completeReminder(id: string, comment?: string): Promise<Reminder> {
     if (await isGuest()) return localDb.completeReminder(id);
-    return api.completeReminder(id);
+    return api.completeReminder(id, comment);
   },
 
   async postponeReminder(id: string, delayDays: number): Promise<Reminder> {
@@ -160,13 +160,39 @@ export const dataService = {
     await api.createReminder(petId, data);
   },
 
-  async missReminder(id: string): Promise<void> {
+  async missReminder(id: string, comment?: string): Promise<void> {
     if (await isGuest()) { await localDb.missReminder(id); return; }
-    await api.missReminder(id);
+    await api.missReminder(id, comment);
   },
 
   async deleteReminder(id: string): Promise<void> {
     if (await isGuest()) { await localDb.deleteReminder(id); return; }
     await api.deleteReminder(id);
+  },
+
+  // ─── Treatments (finite dose courses) ─────────────────────────────
+  async createTreatment(petId: string, data: {
+    name: string; product?: string; doses_per_day: number;
+    start_date: string; total_days: number;
+    moment_morning?: string; moment_noon?: string; moment_evening?: string;
+  }): Promise<void> {
+    await api.createTreatment(petId, data);
+  },
+
+  async getPendingDoses(): Promise<import('../api/client').TreatmentDose[]> {
+    if (await isGuest()) return [];
+    return api.getPendingDoses();
+  },
+
+  async completeDose(doseId: string, comment?: string): Promise<import('../api/client').DoseCompleteResponse> {
+    return api.completeDose(doseId, comment);
+  },
+
+  async missDose(doseId: string, comment?: string): Promise<import('../api/client').DoseCompleteResponse> {
+    return api.missDose(doseId, comment);
+  },
+
+  async extendTreatment(treatmentId: string, extraDays: number): Promise<void> {
+    await api.extendTreatment(treatmentId, extraDays);
   },
 };
