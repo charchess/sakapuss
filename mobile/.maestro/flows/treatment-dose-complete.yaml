@@ -1,0 +1,132 @@
+appId: com.sakapuss.mobile
+---
+# Test: créer un traitement 1 dose à 00:00 (toujours passé) → vérifier dans Rappels → valider
+
+- launchApp:
+    clearState: true
+- runFlow:
+    file: ../helpers/connect-dev-client.yaml
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+- runFlow:
+    file: ../helpers/dismiss-dev-menu.yaml
+    when:
+      visible: "Continue"
+- waitForAnimationToEnd
+- assertVisible: "Se connecter"
+- tapOn:
+    id: "email-input"
+- inputText: "playwright-e2e@test.sakapuss.local"
+- tapOn:
+    id: "password-input"
+- inputText: "PlaywrightTest123!"
+- hideKeyboard
+- tapOn: "Se connecter"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+
+# === Créer le traitement via QuickLog médicament ===
+- tapOn:
+    id: "quick-action-medicine"
+- assertVisible: "Médic."
+
+# Nom du médicament
+- tapOn:
+    id: "medicine-name-input"
+- inputText: "DoseE2ETest"
+- hideKeyboard
+
+# Activer le switch rappel
+- scrollUntilVisible:
+    element:
+      id: "reminder-create-switch"
+    direction: DOWN
+- tapOn:
+    id: "reminder-create-switch"
+- waitForAnimationToEnd
+
+# Choisir type "Traitement"
+- scrollUntilVisible:
+    element:
+      id: "treatment-type-treatment"
+    direction: DOWN
+- tapOn:
+    id: "treatment-type-treatment"
+- waitForAnimationToEnd
+
+# Durée : 1 jour
+- scrollUntilVisible:
+    element:
+      id: "treatment-days-input"
+    direction: DOWN
+- tapOn:
+    id: "treatment-days-input"
+- eraseText: 10
+- inputText: "1"
+- hideKeyboard
+
+# Horaire matin → 00:00 (toujours dans le passé)
+- scrollUntilVisible:
+    element:
+      id: "moment-morning-input"
+    direction: DOWN
+- tapOn:
+    id: "moment-morning-input"
+- eraseText: 10
+- inputText: "00:00"
+- hideKeyboard
+
+# Soumettre
+- tapOn:
+    id: "quicklog-submit-btn"
+- assertVisible: "Que se passe-t-il aujourd'hui ?"
+
+# === Naviguer vers les Rappels ===
+- tapOn: "🔔"
+- assertVisible: "Rappels"
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+
+# Revenir en haut de la liste (la dose est en retard donc tout en haut)
+- scrollUntilVisible:
+    element:
+      text: "Rappels"
+    direction: UP
+    timeout: 5000
+
+# La dose doit apparaître (scheduled_at 00:00 ≤ now, overdue → tête de liste)
+- extendedWaitUntil:
+    visible: "DoseE2ETest"
+    timeout: 15000
+- assertVisible: "DoseE2ETest"
+- scrollUntilVisible:
+    element:
+      id: "dose-complete-dosee2etest"
+    direction: DOWN
+    timeout: 30000
+
+# Taper Fait → zone de commentaire apparaît
+- tapOn:
+    id: "dose-complete-dosee2etest"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "dose-comment-input"
+
+# Saisir un commentaire
+- tapOn:
+    id: "dose-comment-input"
+- inputText: "Test Maestro OK"
+- hideKeyboard
+
+# Confirmer
+- tapOn:
+    id: "dose-confirm-btn"
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+
+# Alerte fin de traitement doit apparaître — on tape TERMINER directement
+- extendedWaitUntil:
+    visible: "TERMINER"
+    timeout: 8000
+- tapOn: "TERMINER"
+- waitForAnimationToEnd
+- assertVisible: "Rappels"

@@ -610,6 +610,7 @@ export function QuickLogScreen({ navigation, route }: Props) {
               {(['recurring', 'treatment'] as const).map((t) => (
                 <TouchableOpacity
                   key={t}
+                  testID={`treatment-type-${t}`}
                   style={[styles.pill, treatmentType === t && styles.pillActive]}
                   onPress={() => setTreatmentType(t)}
                   activeOpacity={0.7}
@@ -677,6 +678,7 @@ export function QuickLogScreen({ navigation, route }: Props) {
                 <Text style={styles.fieldLabel}>Durée (jours)</Text>
                 <View style={styles.customFreqRow}>
                   <TextInput
+                    testID="treatment-days-input"
                     style={[styles.input, styles.customFreqInput]}
                     placeholder="ex: 14"
                     placeholderTextColor={Colors.textMuted}
@@ -698,6 +700,7 @@ export function QuickLogScreen({ navigation, route }: Props) {
                   <View style={styles.momentItem}>
                     <Text style={styles.momentLabel}>🌅 Matin</Text>
                     <TextInput
+                      testID="moment-morning-input"
                       style={styles.momentInput}
                       value={momentMorning}
                       onChangeText={setMomentMorning}

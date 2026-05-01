@@ -154,8 +154,8 @@ export function LoginScreen({ onLoginSuccess }: Props) {
       style={styles.root}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <StatusBar style="dark" backgroundColor={Colors.background} />
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <ScrollView
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
