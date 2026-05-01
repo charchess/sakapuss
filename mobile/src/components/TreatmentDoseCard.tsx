@@ -86,6 +86,7 @@ export function TreatmentDoseCard({ dose, onComplete, onMissed }: Props) {
       {pendingAction ? (
         <View style={styles.commentBox}>
           <TextInput
+            testID="dose-comment-input"
             style={styles.commentInput}
             placeholder="Ajouter une note (optionnel)"
             placeholderTextColor={Colors.textMuted}
@@ -94,7 +95,7 @@ export function TreatmentDoseCard({ dose, onComplete, onMissed }: Props) {
             autoFocus
           />
           <View style={styles.confirmRow}>
-            <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm} activeOpacity={0.8}>
+            <TouchableOpacity testID="dose-confirm-btn" style={styles.confirmBtn} onPress={handleConfirm} activeOpacity={0.8}>
               <Text style={styles.confirmText}>Confirmer</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.cancelBtn} onPress={handleCancel} activeOpacity={0.8}>
@@ -106,6 +107,7 @@ export function TreatmentDoseCard({ dose, onComplete, onMissed }: Props) {
         <View style={styles.actions}>
           {onComplete && (
             <TouchableOpacity
+              testID={`dose-complete-${dose.treatment_name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()}`}
               style={[styles.actionBtn, styles.doneBtn]}
               onPress={() => setPendingAction('complete')}
               activeOpacity={0.8}
@@ -115,6 +117,7 @@ export function TreatmentDoseCard({ dose, onComplete, onMissed }: Props) {
           )}
           {onMissed && (
             <TouchableOpacity
+              testID={`dose-missed-${dose.treatment_name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase()}`}
               style={[styles.actionBtn, styles.missBtn]}
               onPress={() => setPendingAction('miss')}
               activeOpacity={0.8}

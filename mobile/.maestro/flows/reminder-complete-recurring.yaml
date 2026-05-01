@@ -59,9 +59,18 @@ appId: com.sakapuss.mobile
       id: "reminder-complete-medrecurrenttest"
     direction: DOWN
 
-# Compléter le rappel via le bouton "✅ Fait"
+# Compléter le rappel via le bouton "✅ Fait" (two-step: tap → comment box → confirmer)
 - tapOn:
     id: "reminder-complete-medrecurrenttest"
+- waitForAnimationToEnd
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "reminder-confirm-btn"
+    direction: DOWN
+    timeout: 10000
+- tapOn:
+    id: "reminder-confirm-btn"
 - waitForAnimationToEnd
 
 # Le rappel doit RESTER visible (récurrent → date avancée, pas supprimé)

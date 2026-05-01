@@ -123,6 +123,7 @@ export function ReminderCard({ reminder, onComplete, onPostpone, onMissed, onDel
       {pendingAction && (
         <View style={styles.commentBox}>
           <TextInput
+            testID="reminder-comment-input"
             style={styles.commentInput}
             placeholder="Ajouter une note (optionnel)"
             placeholderTextColor={Colors.textMuted}
@@ -131,7 +132,7 @@ export function ReminderCard({ reminder, onComplete, onPostpone, onMissed, onDel
             autoFocus
           />
           <View style={styles.confirmRow}>
-            <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm} activeOpacity={0.8}>
+            <TouchableOpacity testID="reminder-confirm-btn" style={styles.confirmBtn} onPress={handleConfirm} activeOpacity={0.8}>
               <Text style={styles.confirmText}>Confirmer</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.cancelBtn} onPress={handleCancelAction} activeOpacity={0.8}>
