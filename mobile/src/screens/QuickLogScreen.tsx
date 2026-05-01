@@ -194,6 +194,10 @@ export function QuickLogScreen({ navigation, route }: Props) {
       case 'health_note':
         if (!petId) return 'Aucun animal sélectionné.';
         if (!product.trim()) return 'Veuillez saisir le nom du médicament.';
+        if (createReminder && treatmentType === 'treatment') {
+          const days = parseInt(treatmentDays, 10);
+          if (!treatmentDays.trim() || isNaN(days) || days < 1) return 'Veuillez saisir la durée du traitement (en jours).';
+        }
         break;
       case 'behavior':
         if (!petId) return 'Aucun animal sélectionné.';

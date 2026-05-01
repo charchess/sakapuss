@@ -7,6 +7,8 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
+  ToastAndroid,
+  Platform,
   RefreshControl,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -199,8 +201,14 @@ export function RemindersScreen() {
                 <ReminderCard
                   reminder={item.data}
                   onComplete={async (id, comment) => {
-                    try { await dataService.completeReminder(id, comment); load(); }
-                    catch (err) { console.warn('[Reminders] complete error:', err); }
+                    try {
+                      const updated = await dataService.completeReminder(id, comment);
+                      const msg = updated.frequency_days
+                        ? `Prochain rappel dans ${updated.frequency_days >= 365 ? '1 an' : updated.frequency_days >= 90 ? `${Math.round(updated.frequency_days / 30)} mois` : updated.frequency_days >= 30 ? '1 mois' : `${updated.frequency_days}j`}`
+                        : 'Rappel validé';
+                      if (Platform.OS === 'android') ToastAndroid.show(msg, ToastAndroid.SHORT);
+                      load();
+                    } catch (err) { console.warn('[Reminders] complete error:', err); }
                   }}
                   onPostpone={async (id, days) => {
                     try { await dataService.postponeReminder(id, days); load(); }
